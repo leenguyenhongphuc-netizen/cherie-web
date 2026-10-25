@@ -335,6 +335,9 @@ footer.foot{border-top:1px solid var(--line);background:var(--raised);margin-top
 .fbrand .word{font-size:24px;margin:0}
 .ftag{margin:0;font-family:var(--serif);font-size:19px;line-height:1.35;color:var(--ink);max-width:28ch;text-wrap:balance}
 .fzalo{display:inline-flex;align-items:center;gap:8px;text-decoration:none}.fzalo svg{width:17px;height:17px}
+.fsoc{display:flex;gap:10px}
+.fsoc a{width:42px;height:42px;border-radius:var(--pill);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);transition:border-color .2s var(--ease),color .2s var(--ease)}
+.fsoc a:hover{border-color:var(--accent);color:var(--accent)}.fsoc svg{width:19px;height:19px}
 .fcols{display:grid;grid-template-columns:1fr 1fr;gap:20px;border-top:1px solid var(--line);padding-top:24px}
 .fcol{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:14px;color:var(--muted)}
 .fcol h4{margin:0 0 8px;font:600 11px/1.4 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
