@@ -59,7 +59,8 @@ h2{font-size:14px;font-weight:600;margin:0}
 .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
 .custom{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .custom label{display:flex;flex-direction:column;font-size:11.5px;color:var(--muted);gap:2px;min-width:0}
-.custom input{border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:var(--surface);min-width:0;width:100%}
+.custom input{border:1px solid var(--line);border-radius:8px;padding:7px 8px;background:var(--surface);min-width:0;width:100%;max-width:100%;box-sizing:border-box;display:block;-webkit-appearance:none;appearance:none;min-height:38px;color:var(--ink);font:inherit;font-size:14px}
+.custom input::-webkit-date-and-time-value{text-align:left}
 .prow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .seg button{border:0;background:none;padding:5px 10px;font-size:12.5px}
@@ -120,8 +121,20 @@ h2{font-size:14px;font-weight:600;margin:0}
 .hb b{font-weight:600;font-size:12.5px;min-width:4.5em;text-align:right}
 /* P&L có thanh tỷ lệ */
 .pl{display:flex;flex-direction:column}
+.ht{display:flex;flex-direction:column}
+.hs{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.hs .hn{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--sunk);color:var(--muted)}
+.hs.on .hn{background:var(--pos);color:var(--bg)}
+.hs .hb{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left}
+.hs .hb b{font-size:14.5px;text-align:left;display:block;width:auto;margin:0}
+.hs .hv{flex:none;font-size:16px;font-weight:700;color:var(--muted);text-align:right}
+.hs.on .hv{color:var(--pos)}
+.hd{padding-top:10px}
+.hd .hr{display:grid;grid-template-columns:1fr auto 3.2em;gap:10px;padding:6px 0;font-size:13.5px;border-bottom:1px solid var(--line)}
+.hd .hr b{text-align:right}.hd .hr small{text-align:right;color:var(--muted)}
 .pl .ln{display:grid;grid-template-columns:1fr 6.5em 3.6em;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
 .pl .ln b{text-align:right;font-weight:600}
+.pl .ln .nm b{text-align:left}
 .pl .ln small{text-align:right;color:var(--muted)}
 .pl .ln.tot{font-weight:600;border-bottom:0;border-top:2px solid var(--ink)}
 .pl .ln .nm{display:flex;flex-direction:column;gap:3px;min-width:0}
@@ -218,11 +231,12 @@ function toast(m){const t=document.createElement("div");t.className="toast";t.se
 function syncChip(s){const el=document.getElementById("sync");if(!el)return;const m={live:["live","Đồng bộ trực tiếp với Quầy, Stylist, Website"],connecting:["","Đang kết nối kho chung…"],local:["warn","Chỉ trên máy này"],empty:["warn","Kho chung chưa có dữ liệu"],readonly:["warn","Chỉ xem"],full:["warn","Kho chung đã đầy"],error:["warn","Mất kết nối, đang thử lại"]}[s]||["",s];el.className="syncchip "+m[0];el.textContent=m[1]}
 
 /* ---------------- kỳ báo cáo ---------------- */
-const PRE=[["7d","7 ngày"],["30d","30 ngày"],["m","Tháng này"],["pm","Tháng trước"],["q","4 tháng"],["y","Từ đầu năm"],["c","Tùy chọn"]];
+const PRE=[["hn","Hôm nay"],["hq","Hôm qua"],["7d","7 ngày"],["30d","30 ngày"],["m","Tháng này"],["pm","Tháng trước"],["q","4 tháng"],["y","Từ đầu năm"],["c","Tùy chọn"]];
 let per={k:"m",from:"",to:"",g:"auto"};
 try{const s=JSON.parse(localStorage.getItem("cherie-admin-per")||"null");if(s&&s.k)per=s}catch(e){}
 function savePer(){try{localStorage.setItem("cherie-admin-per",JSON.stringify(per))}catch(e){}}
 function range(){const t=TODAY;
+  if(per.k==="hn")return[t,t];if(per.k==="hq"){const y=addD(t,-1);return[y,y]}
   if(per.k==="7d")return[addD(t,-6),t];if(per.k==="30d")return[addD(t,-29),t];
   if(per.k==="m")return[t.slice(0,8)+"01",t];
   if(per.k==="pm"){const d=D(t.slice(0,8)+"01");d.setDate(0);return[ymd(d).slice(0,8)+"01",ymd(d)]}
@@ -365,9 +379,15 @@ function series(a,b,g){const ks=buckets(a,b,g);const idx={};ks.forEach((k,i)=>id
   eachOpexDay(a,b,(d,v)=>{const i=idx[bucketKey(d,g)];if(i!=null)c[i]+=v});
   return{ks,r,c,n,e:r.map((v,i)=>v-c[i])}}
 
-function hanhTrinh(s){const dk=duKien(),tt=tamTinh(),R=s.R;const row=(t,n,v,sub,c)=>`<div class="ln"><span class="nm"><b>${t}</b> · ${n} đơn<br><span class="note">${sub}</span></span><b style="color:${c}">${tr(v)}</b></div>`;
-  return card("c0","Hành trình doanh thu","Một đơn đi qua 3 bước. Chỉ bước 3 được tính vào doanh thu và P&amp;L.",`<div class="pl">${row("1. Đã đặt, chưa giao",dk.length,sumRev(dk).tong,"Dự kiến theo giá thuê, Gói Yên tâm và phí đến tận nơi","var(--muted)")}${row("2. Đang thuê, chưa trả",tt.length,sumRev(tt).tong,"Tạm tính, chốt khi khách trả và kiểm đồ","var(--muted)")}${row("3. Đã trả trong kỳ",s.n,s.dt,"Ghi nhận doanh thu","var(--pos)")}
-    <div class="ln tot"><span class="nm">Trong đó (bước 3)</span><b></b><small></small></div>${[["Tiền thuê",R.thue],["Gói Yên tâm",R.yt],["Phí đến tận nơi",R.giao],["Phí trả trễ",R.tre],["Phí hư hỏng (khách đền)",R.hu]].map(([n,v])=>`<div class="ln"><span class="nm">${n}</span><b>${tr(v)}</b><small>${s.dt?pct(v/s.dt):"–"}</small></div>`).join("")}${R.giam?`<div class="ln"><span class="nm note">Đã giảm cho khách theo khuyến mãi (đã trừ trong tiền thuê)</span><b style="color:var(--muted)">−${tr(R.giam)}</b><small></small></div>`:""}</div>`,"")}
+function hanhTrinh(s){const dk=duKien(),tt=tamTinh(),R=s.R;
+  const step=(i,t,n,v,sub,on)=>`<div class="hs${on?" on":""}"><span class="hn">${i}</span><span class="hb"><b>${t}</b><span class="note">${n} đơn · ${sub}</span></span><b class="hv">${tr(v)}</b></div>`;
+  const parts=[["Tiền thuê",R.thue],["Gói Yên tâm",R.yt],["Phí đến tận nơi",R.giao],["Phí trả trễ",R.tre],["Phí hư hỏng (khách đền)",R.hu]];
+  return card("c0","Hành trình doanh thu","Đơn đi qua 3 bước. Chỉ bước 3 (khách đã trả đồ) mới tính là doanh thu.",`<div class="ht">
+    ${step(1,"Đã đặt, chưa giao",dk.length,sumRev(dk).tong,"dự kiến",false)}
+    ${step(2,"Đang thuê, chưa trả",tt.length,sumRev(tt).tong,"tạm tính, chốt khi trả đồ",false)}
+    ${step(3,"Đã trả trong kỳ",s.n,s.dt,"doanh thu ghi nhận",true)}
+    ${s.dt?`<div class="hd"><div class="note" style="font-weight:600;margin-bottom:4px">Doanh thu bước 3 gồm</div>${parts.filter(([,v])=>v).map(([n,v])=>`<div class="hr"><span>${n}</span><b>${tr(v)}</b><small>${pct(v/s.dt)}</small></div>`).join("")}${R.giam?`<div class="hr"><span class="note">Đã giảm theo khuyến mãi</span><b style="color:var(--muted)">−${tr(R.giam)}</b><small></small></div>`:""}</div>`:`<p class="note" style="margin:6px 0 0">Chưa có đơn nào trả đồ trong kỳ này, nên doanh thu ghi nhận bằng 0.</p>`}
+  </div>`,"")}
 function vanHanh(a,b){const os=orders(a,b),now=new Date();const D2=x=>new Date(x);
   const dung=os.filter(d=>!(d.traTT&&(D2(d.traTT)-D2(d.tra))>36e5)).length;
   const coAnh=os.filter(d=>{const ls=lines(d);return ls.length&&ls.every(c=>CD.ttDu&&CD.ttDu(d.id,"giao",c.sp)&&CD.ttDu(d.id,"nhan",c.sp))}).length;
