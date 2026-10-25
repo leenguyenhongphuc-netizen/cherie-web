@@ -635,7 +635,7 @@ function ndRow(N){const q=N.qa?`<span class="score ${N.qa.diem>=9?"ok":"no"}">${
   const th=(N.asset||[]).find(a=>a.poster||a.loai==="anh")||(()=>{const u=(N.mau||[]).map(anhMau).find(L=>L.length);return u?{url:u[0]}:null})();
   return `<button class="row" type="button" data-nd="${N.id}"><span class="stripe ${st}"></span>${th?`<img class="ndth" src="${esc(th.poster||th.url)}" alt="" loading="lazy">`:""}<span class="main"><span class="t">${esc(N.chuDe)}</span><span class="s">${cachLam(N)} · ${(N.asset||[]).length?`${(N.asset||[]).length} file dựng · `:""}${esc(N.kenh)} · quay ${dm(N.ngay)}${N.dang?` · đăng ${dm(N.dang)}`:""}</span></span><span class="r">${q}<br><span class="note">${esc(running[N.id]?"Agent đang chạy":N.tt)}</span></span></button>`}
 function renderND(){
-  const all=db.noidung||[];const cnt=s=>all.filter(n=>(running[n.id]?"Agent đang chạy":n.tt)===s).length;
+  const all=(db.noidung||[]).filter(n=>n.tt!=="Đã bỏ");const cnt=s=>all.filter(n=>(running[n.id]?"Agent đang chạy":n.tt)===s).length;
   const tabs=["Tất cả","Chờ duyệt cuối","Chờ sản xuất","Cần sửa","Đã duyệt","Đã đăng"];
   const list=all.filter(n=>ndFilter==="Tất cả"||(ndFilter==="Cần sửa"?n.tt.startsWith("Cần sửa"):n.tt===ndFilter)).sort((a,b)=>a.ngay<b.ngay?-1:1);
   const waiting=all.filter(n=>n.tt==="Chờ sản xuất");
@@ -749,6 +749,13 @@ function openPlan(id){nextSheet=()=>openPlan(id);const P=byId("kehoach",id);if(!
     const A=root.querySelector("#actions");root.querySelectorAll("[data-pi]").forEach(b=>b.onclick=()=>{P.items[+b.dataset.pi].cachLam=b.dataset.v;save();openPlan(id)});if(running[P.id])return;
     if(P.tt==="Chờ chủ duyệt"){A.innerHTML=`<button class="btn primary" type="button" id="pOk">Duyệt kế hoạch, chuyển sang sản xuất</button><label class="f">Phản hồi để agent lập lại<textarea id="fb" placeholder="Ví dụ: thêm 2 bài Instagram, bớt video ngoài trời, tập trung khách đi cưới"></textarea></label><button class="btn" type="button" id="pRedo">Gửi phản hồi, lập lại</button>`;
       A.querySelector("#pOk").onclick=()=>{P.tt="Đã duyệt";P.duyetLuc=nowIso();
+        /* duyệt lại kế hoạch đã sửa: mục bị bỏ thì đánh dấu Đã bỏ, mục đổi nội dung thì cập nhật và cho sản xuất lại (trừ bài đã duyệt hoặc đã đăng) */
+        const ids=(P.items||[]).map(x=>x.id);
+        (db.noidung||[]).filter(n=>n.kh===P.id).forEach(n=>{const x=(P.items||[]).find(i=>i.id===n.item);const khoa=n.tt==="Đã duyệt"||n.tt==="Đã đăng";
+          if(!x){if(!khoa&&n.tt!=="Đã bỏ"){n.tt="Đã bỏ";(n.lichSu=n.lichSu||[]).push([nowIso(),"Chủ tiệm","Bỏ vì kế hoạch "+P.id+" đã sửa"])}return}
+          const doi=n.chuDe!==x.chuDe||n.ngay!==x.ngay||n.kenh!==x.kenh||JSON.stringify(n.mau||[])!==JSON.stringify(x.mau||[]);
+          if(doi&&!khoa){Object.assign(n,{chuDe:x.chuDe,ngay:x.ngay,kenh:x.kenh,dinhDang:x.dinhDang,angle:x.angle,mau:x.mau||[],cachLam:cachLam(x),tt:"Chờ sản xuất",vong:0});delete n.ban;delete n.qa;n.chuaDat=false;(n.lichSu=n.lichSu||[]).push([nowIso(),"Chủ tiệm","Cập nhật theo kế hoạch "+P.id+" đã sửa"])}
+          else if(!khoa&&n.cachLam!==cachLam(x))n.cachLam=cachLam(x)});
         (P.items||[]).forEach(x=>{if((db.noidung||[]).some(n=>n.kh===P.id&&n.item===x.id))return;db.noidung.push({id:nextId("noidung","ND"),kh:P.id,item:x.id,ngay:x.ngay,dang:"",kenh:x.kenh,dinhDang:x.dinhDang,chuDe:x.chuDe,angle:x.angle,mau:x.mau||[],cachLam:cachLam(x),tt:"Chờ sản xuất",vong:0,phanHoi:"",lichSu:[[nowIso(),"Chủ tiệm","Duyệt kế hoạch "+P.id]]})});
         save();render();openPlan(id);toast("Đã tạo các mục nội dung chờ sản xuất")};
       A.querySelector("#pRedo").onclick=()=>{const v=A.querySelector("#fb").value.trim();if(!v){A.querySelector("#fb").focus();return}P.phanHoi=v;P.tt="Cần làm lại";save();render();openPlan(id);if(sampleFn)agentPlan(P)}}
