@@ -540,8 +540,8 @@ function openPost(id){const b=(db.blog||[]).find(x=>x.id===id);const el=$("#post
   el.innerHTML=`<header class="mag-hero${cover?"":" noimg"}">${cover?`<img src="${esc(cover)}" alt="" fetchpriority="high">`:""}${back}<div class="in gut"><p class="k">${esc(b.chuDe||"Blog")} · Chérie Journal</p><h1>${esc(b.tieuDe)}</h1>${b.tomTat?`<p class="deck">${esc(b.tomTat)}</p>`:""}<p class="meta"><span>${ngayVN(b.tg)}</span>${b.phut?`<span>${b.phut} phút đọc</span>`:""}</p></div></header>
    <div class="mag-body">${html}${look}
     <div class="mag-end"><a class="btn solid" href="#bst" data-go="home" style="align-self:flex-start">Xem đầm còn trống</a>
-     ${body&&(body.nguon||[]).length?`<div class="src"><p style="font-weight:600;color:var(--ink);margin-bottom:4px">Nguồn tham khảo</p>${body.nguon.filter(n=>/^https:\/\//.test(n.url||"")).map(n=>`<p><a href="${esc(n.url)}" target="_blank" rel="noopener nofollow">${esc(n.ten||n.url)}</a></p>`).join("")}</div>`:""}
-     ${b.ai||(body&&body.ai)?`<p class="ai">Bài do trợ lý AI của Chérie tổng hợp từ các nguồn trên. Ảnh là các mẫu đầm có tại Chérie.</p>`:""}</div>
+     ${body&&(body.nguon||[]).length?`<p class="src"><span>Nguồn:</span> ${[...new Set(body.nguon.map(n=>String(n.ten||"").split(/[:|–—]/)[0].trim()).filter(Boolean))].map(esc).join(" · ")}</p>`:""}
+</div>
     ${rel.length?`<div class="more-read"><h3>Đọc tiếp</h3><div class="posts">${rel.map(postCard).join("")}</div></div>`:""}
    </div>`;
   el.querySelectorAll("[data-psp]").forEach(x=>x.onclick=()=>{stack=[];go(()=>openSP(x.dataset.psp),true)});bindPosts(el);
