@@ -627,6 +627,16 @@ function reelPlayer(root,N){const sp=reelSpec(N);const wrap=root.querySelector("
 }
 /* Cách làm từng nội dung: "AI dựng" (agent dựng hình, video từ ảnh mẫu đầm) hoặc "Tự quay" (team quay dựng, agent dựng storyboard để duyệt) */
 function cachLam(x){return x.cachLam||"AI dựng"}
+function vidHtml(N){const V=N.video;if(!V||!/^https:\/\//.test(V.url||""))return "";
+  const q=V.qa||{};
+  return `<section><h2>Video agent đã dựng</h2>
+   <video src="${esc(V.url)}" controls playsinline preload="metadata" style="width:100%;max-width:420px;aspect-ratio:9/16;border-radius:24px;background:#141414;display:block"></video>
+   ${q.diem!=null?`<p class="note" style="margin-top:10px">Agent kiểm duyệt chấm <b>${esc(q.diem)}/10</b>${V.vong?` sau ${esc(V.vong)} vòng sửa`:""}.${q.ghiChu?" "+esc(q.ghiChu):""}</p>`:""}
+   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+    <a class="btn primary" href="${esc(V.url)}" target="_blank" rel="noopener">Mở bản không nhạc (TikTok, Reels)</a>
+    ${/^https:\/\//.test(V.urlNhac||"")?`<a class="btn ghost" href="${esc(V.urlNhac)}" target="_blank" rel="noopener">Mở bản có nhạc (Facebook, Zalo)</a>`:""}
+   </div>
+   <p class="note" style="margin-top:8px">Trên iPhone: mở video, bấm nút chia sẻ, chọn Lưu video. Đăng TikTok, Reels bằng bản không nhạc và chọn nhạc trong thư viện của app.</p></section>`}
 function assetHtml(N){const A=N.asset||[];if(!A.length)return "";
   return `<section><h2>Bản dựng để duyệt · ${A.length} file</h2><div class="assets">${A.map((a,i)=>a.loai==="video"?`<figure class="as v"><video src="${esc(a.url)}" ${a.poster?`poster="${esc(a.poster)}"`:""} controls playsinline preload="metadata"></video><figcaption>${esc(a.ten||"Video")}</figcaption></figure>`:`<figure class="as"><a href="${esc(a.url)}" target="_blank" rel="noopener"><img src="${esc(a.url)}" alt="${esc(a.ten||"Ảnh "+(i+1))}" loading="lazy"></a><figcaption>${esc(a.ten||"Ảnh "+(i+1))}</figcaption></figure>`).join("")}</div>
    ${N.moda?`<p class="note" style="margin-top:8px">Muốn chỉnh tay chữ, ảnh, nhịp video: <a class="link" href="${esc(N.moda)}" target="_blank" rel="noopener">mở bản dựng trong Moda</a>.${N.anhHang?" Ảnh dùng trong bản dựng là ảnh của hãng.":""}</p>`:""}</section>`}
@@ -684,7 +694,7 @@ function openND(id){nextSheet=()=>openND(id);const N=(db.noidung||[]).find(x=>x.
   sheet(N.chuDe,`<div class="flow" aria-label="Tiến trình">${steps.map((s,i)=>`<span class="${i<cur?"done":i===cur?"on":""}">${s}</span>`).join("")}</div>
    ${agentBox(N.id)}
    <div class="box" style="display:flex;flex-direction:column;gap:8px"><span class="note"><b>Cách làm</b> · AI dựng: agent làm luôn hình, video từ ảnh mẫu đầm để bạn duyệt. Tự quay: team quay dựng, agent dựng storyboard bằng hình để bạn duyệt trước.</span><div class="seg2">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-cl="${v}" aria-pressed="${cachLam(N)===v}">${v}</button>`).join("")}</div></div>
-   ${N.ban?`<section><h2>${cachLam(N)==="AI dựng"?"Bản dựng để duyệt":"Storyboard để duyệt trước khi quay"}</h2><div id="reel"></div></section>`:`<div class="banner info">Agent đang viết kịch bản. Có kịch bản là video xem trước hiện ngay ở đây.</div>`}
+   ${vidHtml(N)}${N.ban&&!(N.video&&N.video.url)?`<section><h2>${cachLam(N)==="AI dựng"?"Bản dựng để duyệt":"Storyboard để duyệt trước khi quay"}</h2><div id="reel"></div></section>`:`<div class="banner info">Agent đang viết kịch bản. Có kịch bản là video xem trước hiện ngay ở đây.</div>`}
    ${assetHtml(N)}
    <dl class="kv box"><dt>Kênh</dt><dd>${esc(N.kenh)} · ${esc(N.dinhDang)}</dd><dt>Góc nội dung</dt><dd>${esc(N.angle||"")}</dd><dt>Quay</dt><dd>${dm(N.ngay)}</dd>${N.dang?`<dt>Đăng dự kiến</dt><dd>${dm(N.dang)}</dd>`:""}<dt>Mẫu đầm</dt><dd>${(N.mau||[]).map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", ")||"Không"}</dd>${N.link?`<dt>Đã đăng</dt><dd>${esc(N.link)}</dd>`:""}</dl>
    ${N.phanHoi?`<div class="banner info">Góp ý của bạn: ${esc(N.phanHoi)}</div>`:""}
