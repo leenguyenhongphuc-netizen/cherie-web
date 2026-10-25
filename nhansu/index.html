@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#141414">
+<script>window.CHERIE={"page": "home", "pub": false, "url": "https://cherie.io.vn", "api": "https://script.google.com/macros/s/AKfycbyI0pvs2DQoaf9p-YjwV3jFQDoVk8mZMM0LuexwGTkJDEPBpleOTD-CEMQd-B4qSDOS/exec", "paths": {"home": "/nhansu/", "quay": "/quay/", "admin": "/admin/", "marketing": "/marketing/", "stylist": "/stylist/"}}</script>
+</head><body>
+<title>Chérie · Nhân sự</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Be+Vietnam+Pro:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#F6F1EA;--surface:#FBF8F3;--ink:#141414;--muted:#6B635A;--line:#E2D6C6;--accent:#7A5F3A;--hair:#C8A97E;--action:#8E1B2E;--action-ink:#F6F1EA}
+@media (prefers-color-scheme:dark){:root{--bg:#141414;--surface:#1E1C1A;--ink:#F6F1EA;--muted:#A39A8E;--line:#34302B;--accent:#C8A97E;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Be Vietnam Pro",system-ui,sans-serif;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:760px;margin:0 auto;padding-block:32px 64px;display:flex;flex-direction:column;gap:28px}
+.mark{font-family:"Playfair Display",Georgia,serif;font-size:24px;letter-spacing:.32em}
+h1{font-family:"Playfair Display",Georgia,serif;font-weight:500;font-size:clamp(26px,7vw,36px);line-height:1.15;margin:10px 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:0}
+h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:620px){.grid{grid-template-columns:1fr 1fr}}
+a.card{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;min-width:0}
+a.card:hover{border-color:var(--hair)}
+.card .n{font-family:"Playfair Display",Georgia,serif;font-size:21px}.card .d{color:var(--muted);font-size:14px}
+.card.web{background:var(--ink);color:var(--bg);border-color:var(--ink)}.card.web .d{color:color-mix(in srgb,var(--bg) 70%,transparent)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px}
+.row:first-child{border-top:0;padding-top:0}.row .t{min-width:0}.row .s{color:var(--muted);font-size:13px}
+input{font:inherit;font-size:16px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);width:110px}
+button{font:inherit;font-weight:600;padding:10px 16px;border:1px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer}
+button.p{background:var(--action);border-color:var(--action);color:var(--action-ink)}button[disabled]{opacity:.55}
+.pill{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}.pill.ok{color:#2E6B4B;border-color:#2E6B4B}
+.note{font-size:13px;color:var(--muted);margin:0}
+.copy{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.copy code{font-size:12.5px;word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;flex:1 1 220px;min-width:0}
+</style>
+<main>
+  <header><div class="mark">CHÉRIE</div><h1 id="hi">Trang nhân sự</h1><p class="sub" id="who"></p></header>
+  <section><h2>Ứng dụng của bạn</h2><div class="grid" id="apps"></div></section>
+  <section id="adm" hidden>
+    <h2>Chủ tiệm</h2>
+    <div class="box"><b>Mã PIN nhân sự</b><p class="note">Thêm nhân sự trong Admin → Nhập liệu → Nhân sự (chọn vai trò Quầy, Marketing, Stylist hoặc Admin), rồi tạo PIN ở đây. Ai chưa có PIN thì chưa đăng nhập được.</p><div id="pins"></div></div>
+    <div class="box"><b>Ảnh mẫu</b><p class="note">Tải ảnh của các mẫu đã duyệt từ trang thương hiệu về Google Drive của tiệm để website hiển thị. Chạy lại mỗi khi duyệt mẫu mới.</p><div><button class="p" id="imp">Tải ảnh mẫu về Drive</button></div><p class="note" id="impS"></p></div>
+    <div class="box"><b>Link website cho khách</b><div class="copy"><code id="wurl"></code><button id="wcp">Chép</button></div><p class="note">Gửi link này cho khách, gắn vào bio Instagram, TikTok, Zalo OA.</p></div>
+  </section>
+  <section><div class="box"><div class="row"><span class="t" id="me2"></span><button id="out">Đăng xuất</button></div></div></section>
+</main>
+<script src="/gasdb.js?v=8f3cd76d"></script><script src="/shared.js?v=d58a5ff4"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script>
+(function(){
+"use strict";
+var C=window.CHERIE||{},G=window.GASDB,$=function(q){return document.querySelector(q)};
+var APPS={quay:["Quầy","Bán tại tiệm, đơn online, nhận trả, hoàn cọc, cử stylist"],marketing:["Marketing","Khách online, tư vấn, tạo đơn online, kế hoạch và nội dung"],stylist:["Stylist","Chuyến giao và thử, quét đồ, biên bản"],admin:["Admin","Nhập hàng, chi phí, doanh thu, P&L, nhân sự"]};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+G.start().then(function(){return G.call("me")}).then(function(r){
+  var me=r.me;$("#hi").textContent="Chào "+me.ten;$("#who").textContent="Vai trò: "+me.vaiTro;$("#me2").textContent=me.ten+" · "+me.vaiTro;
+  $("#apps").innerHTML='<a class="card web" href="'+esc(C.url)+'" target="_top"><span class="n">Website Chérie</span><span class="d">Trang khách xem và đặt lịch</span></a>'+
+    r.pages.filter(function(p){return APPS[p]}).map(function(p){return '<a class="card" href="'+esc(C.paths?C.paths[p]:C.url+'?p='+p)+'" target="_top"><span class="n">'+APPS[p][0]+'</span><span class="d">'+APPS[p][1]+'</span></a>'}).join("");
+  if(me.vaiTro==="Admin"){$("#adm").hidden=false;$("#wurl").textContent=C.url;pins()}
+}).catch(function(){});
+$("#out").onclick=function(){G.logout()};
+$("#wcp").onclick=function(){try{navigator.clipboard.writeText(C.url).then(function(){$("#wcp").textContent="Đã chép"})}catch(e){}};
+function pins(){G.call("pinStatus").then(function(r){
+  $("#pins").innerHTML=r.staff.filter(function(s){return !s.nghi}).map(function(s){return '<div class="row"><span class="t">'+esc(s.ten)+' <span class="s">· '+esc(s.vaiTro||"")+'</span> <span class="pill '+(s.pin?"ok":"")+'">'+(s.pin?"đã có PIN":"chưa có PIN")+'</span></span><span><input type="password" inputmode="numeric" placeholder="PIN mới" data-pin="'+esc(s.id)+'"> <button data-set="'+esc(s.id)+'">Lưu</button></span></div>'}).join("")||'<p class="note">Chưa có nhân sự nào.</p>';
+  document.querySelectorAll("[data-set]").forEach(function(b){b.onclick=function(){var id=b.dataset.set,v=document.querySelector('[data-pin="'+id+'"]').value;
+    if(!/^\d{4,8}$/.test(v)){b.textContent="PIN 4–8 số";return}b.disabled=true;G.call("setPin",{nv:id,pin:v}).then(function(){pins()},function(e){b.disabled=false;b.textContent=e.message})}})})}
+$("#imp").onclick=function(){var b=this,s=$("#impS"),tong=0;b.disabled=true;
+  (function run(){s.textContent="Đang tải… đã xong "+tong+" ảnh";G.call("importAnh").then(function(r){tong+=r.done;if(r.left>0&&r.done>0)return run();
+    s.textContent="Xong "+tong+" ảnh."+(r.fails&&r.fails.length?" "+r.fails.length+" ảnh không tải được, kiểm tra link ở mẫu tương ứng.":"");b.disabled=false},function(e){s.textContent=e.message;b.disabled=false})})()};
+})();
+</script>
+</body></html>

@@ -1,3 +1,8 @@
 User-agent: *
+Disallow: /nhansu/
+Disallow: /quay/
+Disallow: /admin/
+Disallow: /marketing/
+Disallow: /stylist/
 Allow: /
 Sitemap: https://cherie.io.vn/sitemap.xml

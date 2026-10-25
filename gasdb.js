@@ -19,6 +19,11 @@ function call(fn,args){return new Promise(function(ok,no){var done=false,tm=setT
       s.onerror=function(){s.remove();fetch(u,{redirect:"follow"}).then(function(r){return r.json()}).then(fin,function(){if(done)return;done=true;clearTimeout(tm);var x=new Error("Mạng chậm, nàng thử lại nhé.");x.code="unavailable";no(x)})};
       s.src=u+"&cb="+cb;document.head.appendChild(s)};
     jsonp();return}
+  if((!window.google||!google.script||!google.script.run)&&C.api){
+    /* app nội bộ ở tên miền riêng: gửi POST thân JSON (text/plain để không cần hỏi trước), nhận JSON */
+    fetch(C.api,{method:"POST",redirect:"follow",body:JSON.stringify(Object.assign({fn:fn,token:token,page:C.page},args||{}))}).then(function(r){return r.json()}).then(function(r){
+      if(done)return;done=true;clearTimeout(tm);if(r&&r.err){var e=new Error(r.err);e.code=r.code||"error";if(e.code==="revoked")onRevoked();no(e)}else ok(r)},
+      function(){if(done)return;done=true;clearTimeout(tm);var x=new Error("Không kết nối được máy chủ Google. Kiểm tra mạng rồi thử lại.");x.code="unavailable";no(x)});return}
   if(!window.google||!google.script||!google.script.run){var x=new Error("offline");x.code="unavailable";return no(x)}
   google.script.run.withSuccessHandler(function(r){if(done)return;done=true;clearTimeout(tm);if(r&&r.err){var e=new Error(r.err);e.code=r.code||"error";if(e.code==="revoked")onRevoked();no(e)}else ok(r)})
     .withFailureHandler(function(e){if(done)return;done=true;clearTimeout(tm);var x=new Error(String(e&&e.message||e));x.code="unavailable";no(x)})
@@ -92,6 +97,6 @@ window.GASDB={call:call,me:function(){return me},logout:logout,start:start,
     /* ảnh tự chụp: tải lên Drive qua máy chủ, nén nhẹ hơn để gửi nhanh */
     if(!C.pub){var n=CD.nenAnh;CD.nenAnh=function(f,max,q){return n(f,max||1400,q||0.82)}}}};
 /* nút nhỏ góc dưới: tài khoản và đăng xuất, chỉ ở trang nhân sự */
-if(!C.pub&&C.page!=="home")document.addEventListener("DOMContentLoaded",function(){var a=document.createElement("a");a.href=C.url+"?p=home";a.target="_top";a.textContent="☰";a.title="Trang nhân sự";
+if(!C.pub&&C.page!=="home")document.addEventListener("DOMContentLoaded",function(){var a=document.createElement("a");a.href=C.paths?C.paths.home:C.url+"?p=home";a.target="_top";a.textContent="☰";a.title="Trang nhân sự";
   a.style.cssText="position:fixed;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:9999;width:38px;height:38px;border-radius:50%;background:#141414;color:#F6F1EA;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:16px;opacity:.75";document.body.appendChild(a)});
 })();
