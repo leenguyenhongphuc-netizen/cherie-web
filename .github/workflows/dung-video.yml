@@ -55,7 +55,7 @@ jobs:
         run: |
           git config user.name "Chérie Video Bot"
           git config user.email "hello@cherie.io.vn"
-          git add media/reel tools/reel/jobs
+          git add media/reel
           git diff --cached --quiet && exit 0
           git commit -q -m "Video tự dựng: $(ls media/reel/*.json -t | head -5 | xargs -n1 basename | tr '\n' ' ')"
           for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
