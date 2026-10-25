@@ -1,0 +1,62 @@
+# Dựng video Chérie trên máy của GitHub.
+# Agent theo lịch chỉ cần đẩy tools/reel/jobs/<id>.json (props) lên main.
+# Workflow này dựng, nén, lưu vào media/reel/ rồi xoá file job.
+name: Dựng video
+on:
+  push:
+    branches: [main]
+    paths: ["tools/reel/jobs/*.json"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: dung-video
+  cancel-in-progress: false
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/reel/package-lock.json
+      - name: Cài ffmpeg và font
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji >/dev/null
+      - name: Cài thư viện
+        working-directory: tools/reel
+        run: npm ci --no-audit --no-fund
+      - name: Dựng các job
+        working-directory: tools/reel
+        run: |
+          set -u
+          shopt -s nullglob
+          mkdir -p ../../media/reel
+          for f in jobs/*.json; do
+            id=$(basename "$f" .json)
+            echo "::group::$id"
+            if timeout 1500 bash render.sh "$f" "$id" > "out-$id.txt" 2>&1; then
+              for v in khong-nhac co-nhac; do
+                a="-an"; [ "$v" = co-nhac ] && a="-c:a aac -b:a 160k"
+                ffmpeg -v error -y -i "out/$id-$v.mp4" -c:v libx264 -crf 26 -preset slow -movflags +faststart $a "../../media/reel/$id-$v.mp4"
+              done
+              cp "out/$id-khung.jpg" "../../media/reel/$id-khung.jpg"
+              echo "{\"id\":\"$id\",\"ok\":true,\"luc\":\"$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%dT%H:%M)\"}" > "../../media/reel/$id.json"
+            else
+              tail -40 "out-$id.txt"
+              tail -c 3000 "out-$id.txt" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.stringify({id:process.argv[1],ok:false,loi:s.slice(-1500)})))" "$id" > "../../media/reel/$id.json"
+            fi
+            git rm -q "$f"
+            echo "::endgroup::"
+          done
+      - name: Lưu video lên main
+        run: |
+          git config user.name "Chérie Video Bot"
+          git config user.email "hello@cherie.io.vn"
+          git add media/reel tools/reel/jobs
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Video tự dựng: $(ls media/reel/*.json -t | head -5 | xargs -n1 basename | tr '\n' ' ')"
+          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
+          exit 1
