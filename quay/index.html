@@ -457,7 +457,7 @@ function renderCal(){
 }
 
 /* ---------- Kho đồ ---------- */
-function anhDs(s){const L=[];(CD.anhCua?CD.anhCua(s.id,false):[]).slice(0,3).forEach(a=>{if(a.th)L.push(a.th);if(a.src)L.push(a.src)});if(s.anhBrand)L.push(s.anhBrand);return [...new Set(L)]}
+function anhDs(s){const L=[];(CD.anhCua?CD.anhCua(s.id,false):[]).slice(0,3).forEach(a=>{if(a.th)L.push(a.th);if(a.src)L.push(a.src)});[].concat(s.anhBrand||[]).forEach(u=>{if(typeof u==="string"&&/^https?:/.test(u))L.push(u)});return [...new Set(L)]}
 function anhSp(s){return anhDs(s)[0]||""}
 function renderKho(){
   const sts=["Tất cả","Sẵn sàng","Đang thuê","Đang mang đi","Chờ kiểm tra","Đang giặt","Sửa"];
