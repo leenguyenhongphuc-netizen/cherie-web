@@ -1,7 +1,7 @@
 /* Chérie: dữ liệu dùng chung cho app Quầy và app Stylist */
 (function(){
 "use strict";
-const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb","cauhinh","km"];
+const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb","cauhinh","km","loi"];
 const STORE=(window.CHERIE&&window.CHERIE.pub)?"cherie-pub-v1":"cherie-prod-v1";/* website công khai dùng bộ nhớ riêng, không lẫn với app nhân sự *//* bản chính thức: không dùng chung bộ nhớ với bản demo */
 function seed(){return gen(base())}
 function base(){return {
@@ -527,7 +527,7 @@ window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
   db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
-  init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(state);connect();return db},
+  init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},
   reset(){/* bản chính thức: tắt nạp lại dữ liệu mẫu để không ghi đè dữ liệu thật */},
   status(){return state},

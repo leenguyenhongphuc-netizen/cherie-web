@@ -228,7 +228,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=e5d5cd3b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=97015c43"></script><script src="/shared.js?v=c4f74353"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -457,13 +457,14 @@ function renderCal(){
 }
 
 /* ---------- Kho đồ ---------- */
-function anhSp(s){const a=(CD.anhCua?CD.anhCua(s.id,false):[])[0];return (a&&(a.th||a.src))||s.anhBrand||""}
+function anhDs(s){const L=[];(CD.anhCua?CD.anhCua(s.id,false):[]).slice(0,3).forEach(a=>{if(a.th)L.push(a.th);if(a.src)L.push(a.src)});if(s.anhBrand)L.push(s.anhBrand);return [...new Set(L)]}
+function anhSp(s){return anhDs(s)[0]||""}
 function renderKho(){
   const sts=["Tất cả","Sẵn sàng","Đang thuê","Đang mang đi","Chờ kiểm tra","Đang giặt","Sửa"];
   const list=db.sp.filter(s=>khoFilter==="Tất cả"||s.tt===khoFilter);
   view.innerHTML=`<div><h1>Kho đồ</h1><p class="sub">${db.sp.length} món · ${db.sp.filter(s=>s.tt==="Sẵn sàng").length} sẵn sàng</p></div>
   <div class="chips" role="group" aria-label="Lọc theo tình trạng">${sts.map(s=>`<button class="chip" type="button" aria-pressed="${s===khoFilter}" data-f="${s}">${s} ${s==="Tất cả"?"":"· "+db.sp.filter(x=>x.tt===s).length}</button>`).join("")}</div>
-  <div class="grid">${list.map(s=>`<button class="item" type="button" data-sp="${s.id}"><span class="swatch" style="background:${SWATCH[s.mau]||"#888"}">${(u=>u?`<img src="${esc(u)}" alt="" loading="lazy" decoding="async">`:"")(anhSp(s))}<span class="code">${s.id}</span></span><span class="body"><span class="nm">${esc(s.ten)}</span><span class="meta">${esc(s.mo)} · size ${s.size}</span><span class="pills">${spPill(s)}<span class="pill line">${k(s.gia)}</span></span></span></button>`).join("")||'<div class="empty">Không có món nào ở trạng thái này.</div>'}</div>`;
+  <div class="grid">${list.map(s=>`<button class="item" type="button" data-sp="${s.id}"><span class="swatch" style="background:${SWATCH[s.mau]||"#888"}">${(L=>L.length?`<img src="${esc(L[0])}" data-fb="${esc(L.slice(1).join("|"))}" alt="${esc(s.id)}" loading="lazy" decoding="async">`:"")(anhDs(s))}<span class="code">${s.id}</span></span><span class="body"><span class="nm">${esc(s.ten)}</span><span class="meta">${esc(s.mo)} · size ${s.size}</span><span class="pills">${spPill(s)}<span class="pill line">${k(s.gia)}</span></span></span></button>`).join("")||'<div class="empty">Không có món nào ở trạng thái này.</div>'}</div>`;
   view.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{khoFilter=b.dataset.f;renderKho()});
   bindRows(view);
 }

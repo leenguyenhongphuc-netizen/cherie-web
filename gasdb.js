@@ -28,6 +28,17 @@ function call(fn,args){return new Promise(function(ok,no){var done=false,tm=setT
   google.script.run.withSuccessHandler(function(r){if(done)return;done=true;clearTimeout(tm);if(r&&r.err){var e=new Error(r.err);e.code=r.code||"error";if(e.code==="revoked")onRevoked();no(e)}else ok(r)})
     .withFailureHandler(function(e){if(done)return;done=true;clearTimeout(tm);var x=new Error(String(e&&e.message||e));x.code="unavailable";no(x)})
     .api(Object.assign({fn:fn,token:token,page:C.page},args||{}))})}
+/* ---------- tự báo lỗi về máy chủ để agent kiểm tra định kỳ và báo chủ tiệm ---------- */
+var daBao={},soBao=0;
+function baoLoi(loai,ct,url){try{ct=String(ct||"").replace(/data:[^ )"']{40,}/g,"data:…").slice(0,300);var k=loai+"|"+ct;if(daBao[k]||soBao>=15||!C.api)return;daBao[k]=1;soBao++;
+  call("baoLoi",{trang:C.page||"",loai:loai,ct:ct,url:String(url||"").slice(0,300)}).catch(function(){})}catch(e){}}
+window.addEventListener("error",function(ev){var t=ev.target;
+  if(t&&t.tagName==="IMG"){var src=t.currentSrc||t.src||"";if(!src||/^data:/.test(src))return;
+    /* ảnh hỏng: thử ảnh dự phòng, hết thì ẩn để hiện nền màu thay vì dấu ? */
+    var fb=(t.getAttribute("data-fb")||"").split("|").filter(Boolean);if(fb.length){t.setAttribute("data-fb",fb.slice(1).join("|"));t.src=fb[0];baoLoi("Ảnh hỏng, đã dùng ảnh dự phòng",(t.alt||"")+" "+src,src);return}
+    if(!C.pub)t.style.visibility="hidden";baoLoi("Ảnh hỏng",(t.alt||"")+" "+src,src);return}
+  if(ev.message)baoLoi("Lỗi JS",ev.message+" @ "+String(ev.filename||"").replace(/\?.*$/,"").split("/").pop()+":"+(ev.lineno||""))},true);
+window.addEventListener("unhandledrejection",function(ev){var r=ev.reason;var m=r&&(r.message||String(r));if(!m||/quá 40 giây|Mạng chậm|Không kết nối được|hết hạn/.test(m))return;baoLoi("Lỗi JS (promise)",m)});
 function saveAuth(t,m){token=t||"";me=m||null;try{if(token){localStorage.setItem(KEY,token);localStorage.setItem(ME,JSON.stringify(me))}else{localStorage.removeItem(KEY);localStorage.removeItem(ME)}}catch(e){}
   if(me&&me.ten){try{if(me.vaiTro==="Stylist"||!localStorage.getItem("cherie-stylist-ten"))localStorage.setItem("cherie-stylist-ten",me.ten)}catch(e){}}}
 function logout(){saveAuth("",null);try{localStorage.removeItem("cherie-home")}catch(e){}location.reload()}
@@ -70,7 +81,7 @@ function flush(){flushT=0;var q=queue;queue=[];if(!q.length)return;
   var fn=C.pub?"pubPut":"put";
   call(fn,{ops:ops}).then(function(r){var rows=(r&&r.rows)||[];rows.forEach(function(x){store[x.c]=store[x.c]||{};if(x.d==null)delete store[x.c][x.id];else store[x.c][x.id]=x.d});
       q.forEach(function(x){x.ok()});setTimeout(function(){var ts={};rows.forEach(function(x){ts[x.c]=1});Object.keys(ts).forEach(emit)},60)},
-    function(e){q.forEach(function(x){x.no(e)})})}
+    function(e){if(!(e&&(e.code==="not_granted"||e.code==="revoked")))baoLoi("Lưu không được",(e&&e.message||"")+" · bảng "+ops.map(function(o){return o.c}).filter(function(v,i,a){return a.indexOf(v)===i}).join(","));q.forEach(function(x){x.no(e)})})}
 var chiXem=false,baoT=0;
 function baoChiXem(){if(baoT)return;var n=document.createElement("div");n.setAttribute("role","alert");n.textContent="Bạn chỉ có quyền xem trang này. Thay đổi không được lưu, trang sẽ tải lại.";
   n.style.cssText="position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:10000;background:#7A1E3A;color:#fff;padding:12px 14px;border-radius:10px;font:600 14px/1.4 system-ui";document.body.appendChild(n);baoT=setTimeout(function(){location.reload()},1800)}
@@ -89,17 +100,18 @@ function poll(){if(C.pub||!loaded||document.hidden)return;call("since",{t:lastT}
 var ready=null;
 function start(){
   if(ready)return ready;
+  var t0=Date.now(),cham=setTimeout(function(){baoLoi("Tải dữ liệu chậm","Quá 25 giây chưa tải xong dữ liệu trang "+C.page)},25000);
   ready=(C.pub?call("pubLoad"):(token?call("me"):Promise.reject({code:"revoked"})).catch(function(){return gate().then(function(m){return{me:m}})}).then(function(x){
       if(x&&x.me)me=x.me;return call("load",{page:C.page})}))
-    .then(function(r){if(r&&r.me)me=r.me;cheDo();applyRows(r.rows);lastT=r.t||0;loaded=true;Object.keys(subs).forEach(emit);
+    .then(function(r){clearTimeout(cham);if(Date.now()-t0>12000)baoLoi("Tải dữ liệu chậm","Mất "+Math.round((Date.now()-t0)/1000)+" giây để tải trang "+C.page);if(r&&r.me)me=r.me;cheDo();applyRows(r.rows);lastT=r.t||0;loaded=true;Object.keys(subs).forEach(emit);
       if(!C.pub){setInterval(poll,15000);document.addEventListener("visibilitychange",function(){if(!document.hidden)poll()})}
       return remote},
-    function(e){if(e&&e.code==="not_granted")denied(e.message);return remote});
+    function(e){clearTimeout(cham);if(e&&e.code==="not_granted")denied(e.message);else if(!(e&&e.code==="revoked"))baoLoi("Không tải được dữ liệu",(e&&e.message)||String(e));return remote});
   return ready}
 window.claude={use:function(n){return n==="db"?start():Promise.resolve(null)}};
 /* trang nhân sự: chỉ cần biết mình là ai và được mở app nào, không tải cả kho dữ liệu */
 function who(){var moi=false;return (token?call("me"):Promise.reject({code:"revoked"})).catch(function(){moi=true;return gate().then(function(){return call("me")})}).then(function(r){r.moi=moi;return r})}
-window.GASDB={call:call,who:who,me:function(){return me},logout:logout,start:start,
+window.GASDB={call:call,who:who,baoLoi:baoLoi,me:function(){return me},logout:logout,start:start,
   afterShared:function(){var CD=window.CherieData;if(!CD)return;
     /* website: giá trị đã tính sẵn ở máy chủ, không gửi giá nhập ra ngoài */
     if(C.pub){var g=CD.giaTri;CD.giaTri=function(s){return s&&s.giaTri!=null?+s.giaTri:g(s)}}

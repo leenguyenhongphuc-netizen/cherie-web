@@ -194,7 +194,7 @@ header .homebtn{text-decoration:none;color:var(--ink)}
   <button type="button" data-tab="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Nhập liệu</button>
 </nav>
 
-<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=e5d5cd3b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=97015c43"></script><script src="/shared.js?v=c4f74353"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -483,12 +483,12 @@ const PC=["Sang trọng","Quyến rũ","Thanh lịch","Cá tính"];
 let fd={};
 function nextSo(g){let m=0;db.sp.forEach(s=>{const x=s.id.split("-");if(x[1]===g)m=Math.max(m,+x[2]||0)});return String(m+1).padStart(3,"0")}
 function renderNL(){
-  const nln=(db.nhap||[]).filter(x=>x.tt==="Chờ duyệt").length,nyc=db.yc.filter(y=>y.tt==="Mới").length,ndg=(db.review||[]).filter(r=>r.tt==="Chờ duyệt").length;
+  const nloi=(db.loi||[]).filter(x=>x.tt!=="Đã sửa"&&x.tt!=="Bỏ qua").length,nln=(db.nhap||[]).filter(x=>x.tt==="Chờ duyệt").length,nyc=db.yc.filter(y=>y.tt==="Mới").length,ndg=(db.review||[]).filter(r=>r.tt==="Chờ duyệt").length;
   view.innerHTML=`<div><h1>Nhập liệu</h1><p class="sub">Nhập ở đây thay cho gõ tay vào Google Sheets. Quầy và báo cáo cập nhật ngay.</p></div>
-  <div class="seg" role="group" aria-label="Loại nhập liệu" style="align-self:flex-start">${[["ln",`Nhập từ link${nln?` (${nln})`:""}`],["sp","Món trong kho"],["anh","Ảnh lookbook"],["dg",`Đánh giá${ndg?` (${ndg})`:""}`],["km","Khuyến mãi"],["ns","Nhân sự"],["pq","Phân quyền"],["yc",`Yêu cầu web${nyc?` (${nyc})`:""}`]].map(([k,n])=>`<button type="button" data-nl="${k}" aria-pressed="${nl===k}">${n}</button>`).join("")}</div>
+  <div class="seg" role="group" aria-label="Loại nhập liệu" style="align-self:flex-start">${[["ln",`Nhập từ link${nln?` (${nln})`:""}`],["sp","Món trong kho"],["anh","Ảnh lookbook"],["dg",`Đánh giá${ndg?` (${ndg})`:""}`],["km","Khuyến mãi"],["loi",`Lỗi hệ thống${nloi?` (${nloi})`:""}`],["ns","Nhân sự"],["pq","Phân quyền"],["yc",`Yêu cầu web${nyc?` (${nyc})`:""}`]].map(([k,n])=>`<button type="button" data-nl="${k}" aria-pressed="${nl===k}">${n}</button>`).join("")}</div>
   <div id="nlb"></div>`;
   view.querySelectorAll("[data-nl]").forEach(b=>b.onclick=()=>{nl=b.dataset.nl;renderNL()});
-  ({km:nlKM,ns:nlNS,pq:nlPQ,ln:nlLN,anh:nlAnh,cp:nlCP,sp:nlSP,dg:nlDG,yc:nlYC})[nl](document.getElementById("nlb"));
+  ({loi:nlLoi,km:nlKM,ns:nlNS,pq:nlPQ,ln:nlLN,anh:nlAnh,cp:nlCP,sp:nlSP,dg:nlDG,yc:nlYC})[nl](document.getElementById("nlb"));
 }
 /* ---------------- Chi phí: nhập như nói, tự phân loại ---------------- */
 const CP_DM=[
@@ -718,6 +718,13 @@ function nlNS(el){const ns=[...(db.nv||[])].sort((x,y)=>(!!x.nghi)-(!!y.nghi));c
     s.disabled=true;G.call("setPin",{nv:box.dataset.pbox,pin:v}).then(()=>{box.style.display="none";i.value="";s.disabled=false;pinOf[box.dataset.pbox]=true;showPin();toast("Đã lưu PIN")},x=>{s.disabled=false;i.value="";i.placeholder=x.message||"Lỗi, thử lại"})}});
   function showPin(){el.querySelectorAll("[data-pst]").forEach(sp=>{const id=sp.dataset.pst;if(id in pinOf)sp.innerHTML=pinOf[id]?'· <b style="color:var(--ok,#2e7d4f)">đã có PIN</b>':'· <b style="color:var(--bad,#b3261e)">chưa có PIN</b>';const pb=el.querySelector(`[data-pin="${id}"]`);if(pb&&id in pinOf)pb.textContent=pinOf[id]?"Đổi PIN":"Đặt PIN"})}
   if(G)G.call("pinStatus").then(r=>{(r.staff||[]).forEach(x=>pinOf[x.id]=!!x.pin);showPin()}).catch(()=>{});
+}
+/* Lỗi hệ thống: máy nhân viên và website tự báo (ảnh hỏng, lỗi JS, tải chậm, lưu không được). Agent kiểm tra định kỳ và gửi email tóm tắt. */
+function nlLoi(el){const L=[...(db.loi||[])].sort((a,b)=>(a.tt==="Đã sửa"||a.tt==="Bỏ qua")-(b.tt==="Đã sửa"||b.tt==="Bỏ qua")||(a.cuoi<b.cuoi?1:-1));
+  const TR={quay:"Quầy",stylist:"Stylist",marketing:"Marketing",admin:"Admin",web:"Website",home:"Trang nhân sự"};
+  el.innerHTML=`<section class="card"><h2>Lỗi hệ thống · ${L.filter(x=>x.tt!=="Đã sửa"&&x.tt!=="Bỏ qua").length} chưa xử lý</h2><p class="note">Mỗi khi nhân viên hoặc khách gặp lỗi (ảnh không hiện, nút bấm lỗi, tải chậm, lưu không được), app tự ghi lại ở đây, gộp các lần giống nhau. Agent kiểm tra định kỳ và gửi email tóm tắt cho chủ tiệm. Không ghi thông tin khách.</p>
+   <div class="list">${L.map(x=>`<div class="it"><span class="t">${esc(x.loai)} · ${esc(TR[x.trang]||x.trang||"")} <span class="pill ${x.tt==="Đã sửa"?"ok":x.tt==="Bỏ qua"?"":"new"}">${esc(x.tt||"Mới")}</span></span><span class="s">${esc(x.ct)}<br>${x.n||1} lần · gần nhất ${esc(String(x.cuoi||"").replace("T"," "))} · ${esc(x.ai||"")}</span><span class="r">${x.tt==="Đã sửa"||x.tt==="Bỏ qua"?"":`<button class="btn sm" type="button" data-loi="${x.id}" data-to="Đã sửa">Đã sửa</button><button class="btn sm" type="button" data-loi="${x.id}" data-to="Bỏ qua">Bỏ qua</button>`}</span></div>`).join("")||'<p class="empty">Chưa ghi nhận lỗi nào.</p>'}</div></section>`;
+  el.querySelectorAll("[data-loi]").forEach(b=>b.onclick=()=>{const x=db.loi.find(y=>y.id===b.dataset.loi);x.tt=b.dataset.to;CD.save();renderNL()});
 }
 /* Khuyến mãi: chủ tiệm tạo chương trình, Quầy, stylist và CS online chỉ chọn được chương trình đang chạy cho kênh của mình */
 let kmSua=null;
