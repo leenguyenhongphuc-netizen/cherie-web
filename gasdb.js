@@ -12,8 +12,13 @@ function call(fn,args){return new Promise(function(ok,no){var done=false,tm=setT
   if((!window.google||!google.script||!google.script.run)&&C.api&&C.pub){
     /* website ở tên miền riêng: gọi cổng JSON công khai của Apps Script */
     var u=C.api+"?api="+encodeURIComponent(fn)+"&q="+encodeURIComponent(JSON.stringify(args||{}));
-    fetch(u,{redirect:"follow"}).then(function(r){return r.json()}).then(function(r){if(done)return;done=true;clearTimeout(tm);if(r&&r.err){var e=new Error(r.err);e.code=r.code||"error";no(e)}else ok(r)},
-      function(e){if(done)return;done=true;clearTimeout(tm);var x=new Error("Mạng chậm, nàng thử lại nhé.");x.code="unavailable";no(x)});return}
+    var fin=function(r){if(done)return;done=true;clearTimeout(tm);if(r&&r.err){var e=new Error(r.err);e.code=r.code||"error";no(e)}else ok(r)};
+    /* gọi kiểu JSONP (thẻ script) để không vướng chặn tên miền chéo; lỗi thì thử fetch */
+    var jsonp=function(){var cb="__cherie"+Date.now().toString(36)+Math.floor(Math.random()*1e6),s=document.createElement("script");
+      window[cb]=function(r){try{delete window[cb]}catch(x){window[cb]=void 0}s.remove();fin(r)};
+      s.onerror=function(){s.remove();fetch(u,{redirect:"follow"}).then(function(r){return r.json()}).then(fin,function(){if(done)return;done=true;clearTimeout(tm);var x=new Error("Mạng chậm, nàng thử lại nhé.");x.code="unavailable";no(x)})};
+      s.src=u+"&cb="+cb;document.head.appendChild(s)};
+    jsonp();return}
   if(!window.google||!google.script||!google.script.run){var x=new Error("offline");x.code="unavailable";return no(x)}
   google.script.run.withSuccessHandler(function(r){if(done)return;done=true;clearTimeout(tm);if(r&&r.err){var e=new Error(r.err);e.code=r.code||"error";if(e.code==="revoked")onRevoked();no(e)}else ok(r)})
     .withFailureHandler(function(e){if(done)return;done=true;clearTimeout(tm);var x=new Error(String(e&&e.message||e));x.code="unavailable";no(x)})
