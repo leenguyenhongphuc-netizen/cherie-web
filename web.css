@@ -336,10 +336,10 @@ footer.foot{border-top:1px solid var(--line);margin-top:16px}
 .fsoc{display:flex;gap:6px}
 .fsoc a{width:34px;height:34px;border-radius:var(--pill);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink)}
 .fsoc a:hover{border-color:var(--accent);color:var(--accent)}.fsoc svg{width:16px;height:16px}
-.flinks{display:flex;flex-wrap:wrap;gap:2px 18px}
+.flinks{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 18px}
 .flinks a,.flinks button{background:none;border:0;padding:4px 0;color:var(--ink);font:inherit;font-size:13.5px;text-decoration:none;cursor:pointer}
 .flinks a:hover,.flinks button:hover{color:var(--accent)}
-.fbot{margin:0;font-size:12px;color:var(--muted)}
+.fbot{margin:0;font-size:12px;color:var(--muted);text-align:center;text-wrap:balance}
 
 /* bottom bar */
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:25;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px);pointer-events:none}
