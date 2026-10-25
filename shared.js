@@ -1,7 +1,7 @@
 /* Chérie: dữ liệu dùng chung cho app Quầy và app Stylist */
 (function(){
 "use strict";
-const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner"];
+const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb"];
 const STORE=(window.CHERIE&&window.CHERIE.pub)?"cherie-pub-v1":"cherie-prod-v1";/* website công khai dùng bộ nhớ riêng, không lẫn với app nhân sự *//* bản chính thức: không dùng chung bộ nhớ với bản demo */
 function seed(){return gen(base())}
 function base(){return {
@@ -144,7 +144,7 @@ function gen(o){
 const db={};
 function setTables(src){TABLES.forEach(t=>{db[t]=Array.isArray(src[t])?src[t]:[]})}
 function loadLocal(){try{const s=localStorage.getItem(STORE);if(s){const o=JSON.parse(s);if(o&&o.v===1){setTables(o);return true}}}catch(e){}return false}
-function saveLocal(){try{const o={v:1};TABLES.forEach(t=>o[t]=(t==="anh"||t==="hd"||t==="cccd")?[]:db[t]);/* ảnh và CCCD không lưu trên máy *//* ảnh nặng, chỉ lưu trên máy chủ */localStorage.setItem(STORE,JSON.stringify(o))}catch(e){}}
+function saveLocal(){try{const o={v:1};TABLES.forEach(t=>o[t]=(t==="anh"||t==="hd"||t==="cccd"||t==="bb")?[]:db[t]);/* ảnh và CCCD không lưu trên máy *//* ảnh nặng, chỉ lưu trên máy chủ */localStorage.setItem(STORE,JSON.stringify(o))}catch(e){}}
 if(!loadLocal())setTables({});/* bản chính thức: bắt đầu trống, không sinh dữ liệu mẫu */
 
 function canon(v){if(Array.isArray(v))return"["+v.map(canon).join(",")+"]";if(v&&typeof v==="object")return"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}";return JSON.stringify(v===undefined?null:v)}
@@ -462,8 +462,56 @@ function xemHopDong(id){const h=(db.hd||[]).find(x=>x.id===id);if(!h)return;cons
   pn.querySelector("#cp").onclick=()=>{try{navigator.clipboard.writeText(tom).then(()=>{pn.querySelector("#cp").textContent="Đã chép"})}catch(e){}};
   pn.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>el.remove())}
 
+/* ---------- Ảnh tình trạng đầm lúc giao và lúc nhận lại ----------
+   Mỗi món chụp 4 góc. Ảnh gửi thẳng lên Drive riêng tư của tiệm (bảng bb), máy chỉ giữ tạm trong lúc gửi. */
+const TT_GOC=["Mặt trước","Mặt sau","Cận chất liệu","Tem mã, nhãn"];
+const ttCache={};
+function bbId(don,phase){return "BB-"+don+"-"+phase}
+function bbOf(don,phase){return (db.bb||[]).find(x=>x.id===bbId(don,phase))}
+function ttAnh(don,phase,sp){const b=bbOf(don,phase);return b&&b.mon&&b.mon[sp]?b.mon[sp]:{anh:[],them:[]}}
+function ttSo(don,phase,sp){const m=ttAnh(don,phase,sp);return TT_GOC.filter((_,i)=>m.anh&&m.anh[i]).length}
+function ttDu(don,phase,sp){return ttSo(don,phase,sp)===TT_GOC.length}
+function ttSrc(v){if(!v)return Promise.resolve("");if(/^(data:|https:)/.test(v))return Promise.resolve(v);if(!ttCache[v])ttCache[v]=anhRieng(v).then(x=>{if(!x)delete ttCache[v];return x});return ttCache[v]}
+function ttFill(root){root.querySelectorAll("img[data-tt]").forEach(im=>{ttSrc(im.dataset.tt).then(x=>{if(x){im.src=x;im.closest("[data-ttbox]")&&im.closest("[data-ttbox]").classList.add("ok")}})})}
+const TT_CSS=`.ttg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.tts{position:relative;aspect-ratio:3/4;border:1px dashed #C8A97E;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;line-height:1.25;color:#6B635A;padding:4px;cursor:pointer}
+.tts img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.tts input{position:absolute;inset:0;opacity:0;cursor:pointer}.tts .lb{position:absolute;left:0;right:0;bottom:0;background:rgba(20,20,20,.55);color:#fff;font-size:10px;padding:3px}.tts.has{border-style:solid;border-color:#2F6B4F}
+.ttit{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid #EFE7DB}.ttit b{font-size:15px}.ttit .st{font-size:12px;color:#6B635A}.ttcmp{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}.ttcmp>span{font-size:11px;color:#6B635A;writing-mode:horizontal-tb;width:52px}
+.ttbig{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center}.ttbig img{max-width:100%;max-height:100%}`;
+function ttCss(){if(!document.getElementById("tt-css")){const st=document.createElement("style");st.id="tt-css";st.textContent=TT_CSS;document.head.appendChild(st)}}
+function ttSlot(v,lb,attrs){return `<label class="tts ${v?"has":""}" data-ttbox>${v?`<img alt="${lb}" ${/^data:|^https:/.test(v)?`src="${v}"`:`data-tt="${v}"`}>`:`${lb}<br>+`}<span class="lb">${lb}</span>${attrs?`<input type="file" accept="image/*" capture="environment" ${attrs}>`:""}</label>`}
+function ttXem(src){ttCss();const el=document.createElement("div");el.className="ttbig";el.innerHTML=`<img src="${src}" alt="">`;el.onclick=()=>el.remove();document.body.appendChild(el)}
+/* Chụp ảnh tình trạng. o: {don, phase:"giao"|"nhan", items:[{id,ten}], tieuDe, nv, onDone} */
+function chupTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn");const close=()=>el.remove();let busy=0,loi="";
+  const doc=()=>{let b=bbOf(o.don,o.phase);if(!b){b={id:bbId(o.don,o.phase),don:o.don,phase:o.phase,mon:{},tao:new Date().toISOString().slice(0,16)};db.bb.push(b)}return b};
+  const draw=()=>{const du=o.items.every(x=>ttDu(o.don,o.phase,x.id));
+    pn.innerHTML=`<div class="hd"><h2>${o.tieuDe||(o.phase==="giao"?"Ảnh tình trạng lúc giao":"Ảnh tình trạng lúc nhận lại")}</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
+     <p class="note">Mỗi món chụp đủ 4 góc, đủ sáng, thấy rõ vết nếu có. Ảnh gửi thẳng lên Drive của tiệm, không lưu trong máy.${o.phase==="nhan"?" Món có vết bẩn hoặc hư, chụp thêm cận vết ở ô cuối.":""}</p>
+     ${o.items.map(x=>{const m=ttAnh(o.don,o.phase,x.id);return `<div class="ttit"><b>${hdEsc(x.ten)} <span class="st">· ${x.id} · ${ttSo(o.don,o.phase,x.id)}/4</span></b>
+       <div class="ttg">${TT_GOC.map((g,i)=>ttSlot((m.anh||[])[i],g,`data-sp="${x.id}" data-i="${i}"`)).join("")}</div>
+       ${o.phase==="nhan"?`<div class="ttg">${[0,1,2,3].map(j=>ttSlot((m.them||[])[j],"Cận vết "+(j+1),`data-sp="${x.id}" data-j="${j}"`)).join("")}</div>`:""}</div>`}).join("")}
+     <p class="note" role="status">${busy?`Đang gửi ${busy} ảnh lên Drive…`:loi?loi:"Ảnh đã lưu lên Drive."}</p>
+     <button class="btn primary" type="button" data-ok ${du?"":"disabled"} style="width:100%">${du?"Xong":"Chụp đủ 4 góc mỗi món"}</button>`;
+    ttFill(pn);
+    pn.querySelector("[data-x]").onclick=close;
+    pn.querySelector("[data-ok]").onclick=()=>{close();o.onDone&&o.onDone()};
+    pn.querySelectorAll("input[type=file]").forEach(inp=>inp.onchange=()=>{const f=inp.files&&inp.files[0];if(!f)return;busy++;draw();
+      nenAnh(f,1400,0.8).then(d=>{const b=doc(),sp=inp.dataset.sp;const m=b.mon[sp]=b.mon[sp]||{anh:[],them:[]};m.anh=m.anh||[];m.them=m.them||[];
+        if(inp.dataset.i!=null)m.anh[+inp.dataset.i]=d;else m.them[+inp.dataset.j]=d;m.luc=new Date().toISOString().slice(0,16);if(o.nv)m.nv=o.nv;
+        CherieData.save();return CherieData.flush()}).then(st=>{busy--;loi=st==="error"?"Mạng chập chờn, ảnh sẽ tự gửi lại khi có mạng. Đừng đóng trang.":"";draw()},e=>{busy--;loi="Chưa gửi được ảnh: "+(e&&e.message||e)+". Chụp lại ô đó.";draw()})})};
+  draw()}
+/* So ảnh lúc giao và lúc nhận lại của từng món. o: {don, items:[{id,ten,ghi}]} */
+function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn");
+  pn.innerHTML=`<div class="hd"><h2>So ảnh giao · nhận lại</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
+   ${o.items.map(x=>{const g=ttAnh(o.don,"giao",x.id),n=ttAnh(o.don,"nhan",x.id);return `<div class="ttit"><b>${hdEsc(x.ten)} <span class="st">· ${x.id}</span></b>${x.ghi?`<span class="st">${hdEsc(x.ghi)}</span>`:""}
+     <div class="ttcmp"><span>Lúc giao</span><div class="ttg">${TT_GOC.map((t,i)=>ttSlot((g.anh||[])[i],t)).join("")}</div>
+     <span>Lúc nhận</span><div class="ttg">${TT_GOC.map((t,i)=>ttSlot((n.anh||[])[i],t)).join("")}</div>
+     ${(n.them||[]).filter(Boolean).length?`<span>Cận vết</span><div class="ttg">${n.them.filter(Boolean).map((v,j)=>ttSlot(v,"Vết "+(j+1))).join("")}</div>`:""}</div></div>`}).join("")}
+   <p class="note">Chạm vào ảnh để xem lớn. Ô trống là góc chưa chụp.</p>`;
+  ttFill(pn);pn.querySelector("[data-x]").onclick=()=>el.remove();
+  pn.querySelectorAll(".tts img").forEach(im=>im.onclick=e=>{e.preventDefault();if(im.src)ttXem(im.src)})}
+
 window.CherieData={
-  lapHopDong,xemHopDong,anhRieng,
+  lapHopDong,xemHopDong,anhRieng,chupTinhTrang,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
   init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(state);connect();return db},
   save(){saveLocal();push()},

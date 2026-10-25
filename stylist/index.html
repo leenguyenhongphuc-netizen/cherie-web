@@ -232,7 +232,7 @@ label.row.off{cursor:not-allowed}
   </div>
 </div>
 
-<script src="/gasdb.js?v=8f3cd76d"></script><script src="/shared.js?v=d58a5ff4"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=8f3cd76d"></script><script src="/shared.js?v=6ffc7390"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -485,17 +485,18 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
       foot:nextBtn(all,"Rời tiệm, đi giao","Quét đủ các món để đi"),
       bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Xuất kho",t.id,SHOP,"Đang mang đi");done[id]=db.clock});goNext(t)}});
   } else {
-    d.photo=d.photo||{};const photosOk=ids.every(i=>d.photo[i]);const ok=d.checkin&&photosOk&&d.cocOk&&!!don.hd;
+    const CDx=window.CherieData;const photosOk=ids.every(i=>CDx.ttDu(don.id,"giao",i));const ok=d.checkin&&photosOk&&d.cocOk&&!!don.hd;
     const why=!d.checkin?"Bấm đã đến nơi":!photosOk?"Chụp ảnh tình trạng từng món":!d.cocOk?"Xác nhận cọc với khách":"Khách chưa ký hợp đồng";
     out({body:`<section><h2>Bước 2 · Bàn giao</h2>${checkinBlock(t)}</section>
-      ${d.checkin?`<section><h2>${ids.length} món · ${new Set(lines(don).map(l=>l.mac)).size} người mặc</h2><div class="list">${lines(don).map(l=>{const s=byId("sp",l.sp);return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">Người mặc: ${esc(kh(l.mac).ten)} · <span class="mono">${s.id}</span></span></span><label class="check full"><input type="checkbox" data-photo="${s.id}" ${d.photo[s.id]?"checked":""}> Đã chụp 4 ảnh tình trạng lúc giao · mức L0 Như mới</label></div>`}).join("")}</div></section>
+      ${d.checkin?`<section><h2>${ids.length} món · ${new Set(lines(don).map(l=>l.mac)).size} người mặc</h2><div class="list">${lines(don).map(l=>{const s=byId("sp",l.sp);return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">Người mặc: ${esc(kh(l.mac).ten)} · <span class="mono">${s.id}</span></span></span><span class="r">${CDx.ttDu(don.id,"giao",s.id)?'<span class="pill good">4/4 ảnh</span>':`<span class="pill warn">${CDx.ttSo(don.id,"giao",s.id)}/4 ảnh</span>`}</span></div>`}).join("")}</div>
+      <button class="btn ${photosOk?"":"primary"} block" type="button" id="ttG" style="margin-top:8px">${photosOk?"Xem, chụp lại ảnh tình trạng":"Chụp 4 ảnh tình trạng mỗi món"}</button><p class="note">Ảnh lưu thẳng lên Drive của tiệm, làm bằng chứng tình trạng lúc giao.</p></section>
       <section><div class="box" style="display:flex;flex-direction:column;gap:8px"><dl class="kv"><dt>Cọc của đơn</dt><dd>${money(don.coc)} · ${esc(don.ttCoc.toLowerCase())}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd></dl>
       <label class="check"><input type="checkbox" id="cocOk" ${d.cocOk?"checked":""}> Đã nhắc khách giờ trả đồ và mức cọc đang giữ</label></div></section>
       <section>${hdBlock(don.hd,"hdG")}</section>`:""}`,
       foot:nextBtn(ok,"Hoàn tất giao đồ",why),
-      bind:()=>{bindCheckin(t);view.querySelectorAll("[data-photo]").forEach(cb=>cb.onchange=()=>{d.photo[cb.dataset.photo]=cb.checked;save();render()});
+      bind:()=>{bindCheckin(t);const tg=view.querySelector("#ttG");if(tg)tg.onclick=()=>CDx.chupTinhTrang({don:don.id,phase:"giao",nv:STYLIST,items:ids.map(i=>({id:i,ten:byId("sp",i).ten})),onDone:render});
         const co=view.querySelector("#cocOk");if(co)co.onchange=()=>{d.cocOk=co.checked;save();render()};
-        const hg=view.querySelector("#hdG");if(hg)hg.onclick=()=>{const k=kh(don.dat)||{};const CD=window.CherieData;CD.lapHopDong({don:don.id,kh:{id:don.dat,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(ids,i=>{const l=lines(don).find(x=>x.sp===i);return l?l.gia:0}),
+        const hg=view.querySelector("#hdG");if(hg)hg.onclick=()=>{const k=kh(don.dat)||{};const CD=window.CherieData;CD.lapHopDong({don:don.id,kh:{id:don.dat,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(ids,i=>{const l=lines(don).find(x=>x.sp===i);return l?(+l.ct.gia||0):0}),
           nhan:db.clock,tra:don.tra,luot:don.luot||CD.soLuot(db.clock,don.tra),phiGiao:don.phiGiao||0,yenTam:!!don.yenTam,coc:don.coc,hinhThuc:don.hinhThuc||"",nv:STYLIST,onDone:h=>{don.hd=h.id;d.sign=true;save();render();toast("Đã lưu hợp đồng "+h.id)}})};
         const hx=view.querySelector("#hdGX");if(hx)hx.onclick=()=>window.CherieData.xemHopDong(don.hd);
         const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{ids.forEach(i=>scan(i,"Giao khách",t.id,t.noi,"Đang thuê"));don.tt="Đang thuê";t.tt="Hoàn tất";t.step=TYPES.giao.steps.length;d.end=db.clock;save();render();toast(`Đã giao đơn ${don.id}`)}}});
@@ -513,22 +514,30 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
       ${d.checkin&&lateHours(t,don)?`<div class="banner warn">Trễ ${lateHours(t,don)} giờ so với hẹn. Phí trễ đề xuất ${money(lateFee(t,don))}.</div>`:""}</section>`,
       foot:nextBtn(!!d.checkin,"Bắt đầu nhận đồ","Bấm đã đến nơi"),bind:()=>{bindCheckin(t);goNext(t,()=>{d.in={};d.lv={};d.mota={}})}});
   } else if(step===1){
-    const done=d.in||(d.in={});d.lv=d.lv||{};d.mota=d.mota||{};const all=ids.every(i=>done[i]);
+    const done=d.in||(d.in={});d.lv=d.lv||{};d.mota=d.mota||{};const CDx=window.CherieData;
+    const anhOk=i=>CDx.ttDu(don.id,"nhan",i)&&((d.lv[i]||"L0")<="L1"||((CDx.bbOf(don.id,"nhan")||{mon:{}}).mon[i]||{them:[]}).them.some(Boolean));
+    const scanned=ids.every(i=>done[i]),all=scanned&&ids.every(anhOk);
+    const whyN=!scanned?"Quét đủ các món":"Chụp đủ ảnh lúc nhận (vết hư cần thêm ảnh cận vết)";
     out({body:`<section><h2>Bước 2 · Quét và kiểm từng món</h2>${scanBox(ids,done,"Quét món khách trả")}</section>
       ${Object.keys(done).length?`<section><h2>Tình trạng lúc nhận</h2><div class="list">${ids.filter(i=>done[i]).map(i=>{const s=byId("sp",i),lv=d.lv[i]||"L0";return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)}</span><span class="s">Phí đề xuất ${money(fee(lv,s))}</span></span>
         <label class="f full" for="lv-${i}">Mức tình trạng<select id="lv-${i}" data-lv="${i}">${LEVELS.map(L=>`<option value="${L[0]}" ${L[0]===lv?"selected":""}>${L[0]} · ${L[1]}${L[2]==null?" · đền theo giá trị đầm":L[2]?" · "+k(L[2]):""}${curDon&&curDon.yenTam&&L[0]>"L1"?" · có Gói Yên tâm":""}</option>`).join("")}</select></label>
-        ${lv!=="L0"&&lv!=="L1"?`<label class="f full" for="mt-${i}">Mô tả và vị trí hư hỏng<input id="mt-${i}" data-mt="${i}" type="text" value="${esc(d.mota[i]||"")}"></label>`:""}</div>`}).join("")}</div><p class="note">Phí là đề xuất; quầy và quản lý duyệt trước khi trừ cọc.</p></section>`:""}`,
-      foot:nextBtn(all,"Tiếp tục ký biên bản","Quét đủ các món"),
+        ${lv!=="L0"&&lv!=="L1"?`<label class="f full" for="mt-${i}">Mô tả và vị trí hư hỏng<input id="mt-${i}" data-mt="${i}" type="text" value="${esc(d.mota[i]||"")}"></label>`:""}
+        <span class="s full">Ảnh lúc nhận: ${CDx.ttSo(don.id,"nhan",i)}/4${anhOk(i)?" · đủ":lv>"L1"&&CDx.ttDu(don.id,"nhan",i)?" · thiếu ảnh cận vết":""}</span></div>`}).join("")}</div>
+        <div class="btns" style="margin-top:8px"><button class="btn primary" type="button" id="ttN">Chụp ảnh lúc nhận</button><button class="btn" type="button" id="ttS">So với ảnh lúc giao</button></div>
+        <p class="note">${curDon&&curDon.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách nhỏ được miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: tính phí theo mức tình trạng."} Phí là đề xuất; quầy duyệt khi kiểm đồ trước khi trừ cọc.</p></section>`:""}`,
+      foot:nextBtn(all,"Tiếp tục ký biên bản",whyN),
       bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Nhận trả",t.id,t.noi,"Chờ kiểm tra");done[id]=db.clock});
         view.querySelectorAll("[data-lv]").forEach(s=>s.onchange=()=>{d.lv[s.dataset.lv]=s.value;save();render()});
-        view.querySelectorAll("[data-mt]").forEach(s=>s.onchange=()=>{d.mota[s.dataset.mt]=s.value;save()});goNext(t)}});
+        view.querySelectorAll("[data-mt]").forEach(s=>s.onchange=()=>{d.mota[s.dataset.mt]=s.value;save()});
+        const tn=view.querySelector("#ttN");if(tn)tn.onclick=()=>CDx.chupTinhTrang({don:don.id,phase:"nhan",nv:STYLIST,items:ids.filter(i=>done[i]).map(i=>({id:i,ten:byId("sp",i).ten})),onDone:render});
+        const ts=view.querySelector("#ttS");if(ts)ts.onclick=()=>CDx.soAnhTinhTrang({don:don.id,items:ids.filter(i=>done[i]).map(i=>({id:i,ten:byId("sp",i).ten,ghi:(d.lv[i]||"L0")+(d.mota[i]?": "+d.mota[i]:"")}))});goNext(t)}});
   } else {
     const hu=ids.reduce((a,i)=>a+fee(d.lv[i]||"L0",byId("sp",i)),0),tre=lateFee(t,don),hoan=Math.max(0,don.coc-hu-tre);
     out({body:`<section><h2>Bước 3 · Ký và hoàn tất</h2><dl class="kv box"><dt>Cọc đang giữ</dt><dd>${money(don.coc)}</dd><dt>Phí hư hỏng đề xuất</dt><dd>${money(hu)}</dd><dt>Phí trễ</dt><dd>${money(tre)}</dd><dt><b>Hoàn dự kiến</b></dt><dd><b>${money(hoan)}</b></dd></dl>
       <p class="note">Quầy chuyển hoàn cọc sau khi kiểm đồ. Stylist không giữ tiền cọc.</p></section><section>${sigBox(d,"khách")}</section>`,
       foot:nextBtn(!!d.sign,"Hoàn tất nhận đồ","Khách chưa ký"),
       bind:()=>{bindSig(d);const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{don.tt="Đã trả";don.ttCoc="Chờ hoàn";don.traTT=d.checkin||db.clock;don.phi=tre;
-          lines(don).forEach(l=>{const lv=d.lv[l.sp]||"L0",bad=lv>"L1";l.ct.hu=bad;l.ct.moTa=bad?`${lv} ${LEVELS.find(x=>x[0]===lv)[1]}${d.mota[l.sp]?": "+d.mota[l.sp]:""}`:"";l.ct.phiHu=bad?fee(lv,byId("sp",l.sp)):0});
+          lines(don).forEach(l=>{const lv=d.lv[l.sp]||"L0",bad=lv>"L1";l.ct.hu=bad;l.ct.muc=lv;l.ct.moTa=bad?`${lv} ${LEVELS.find(x=>x[0]===lv)[1]}${d.mota[l.sp]?": "+d.mota[l.sp]:""}`:"";l.ct.phiHu=bad?fee(lv,byId("sp",l.sp)):0});
           don.note=(don.note?don.note+" · ":"")+`Stylist ${STYLIST} nhận lại lúc ${hm(don.traTT)}`;t.tt="Hoàn tất";t.step=TYPES.nhan.steps.length;tick(2);d.end=db.clock;d.fee={hu,tre,hoan};save();render();toast("Đã nhận đồ. Món chuyển sang Chờ kiểm tra")}}});
   }
 }
