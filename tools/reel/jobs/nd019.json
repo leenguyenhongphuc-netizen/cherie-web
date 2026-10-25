@@ -1,0 +1,66 @@
+{
+ "dresses": [
+  {
+   "a": "https://sixdo.vn/images/products/2026/original/CS_10-76.jpg",
+   "b": "https://sixdo.vn/images/products/2026/original/CS_10-74.jpg",
+   "bPos": "50% 20%",
+   "bScale": 1.15,
+   "ten": "Gris Perle",
+   "dong": "Đầm midi · Xám xếp nếp · Size S",
+   "phu": "Xếp nếp vặn xoắn, điểm một bông hoa.",
+   "gia": "320k",
+   "giaTri": "2,7 triệu",
+   "side": "right",
+   "labelBottom": 320
+  },
+  {
+   "a": "https://sixdo.vn/images/products/2026/original/white_9-63-1790752375.jpg",
+   "b": "https://sixdo.vn/images/products/2026/original/White_9-62.jpg",
+   "bPos": "50% 20%",
+   "bScale": 1.15,
+   "ten": "Blanc Tweed",
+   "dong": "Đầm xoè · Tweed trắng · Size M",
+   "phu": "Tweed trắng, thắt lưng mảnh, xoè vừa.",
+   "gia": "350k",
+   "giaTri": "2,9 triệu",
+   "labelBottom": 320
+  },
+  {
+   "a": "https://sixdo.vn/images/products/2026/original/vnq05465-copy-1777874881.jpg",
+   "b": "https://sixdo.vn/images/products/2026/original/VNQ05480%20copy.jpg",
+   "bPos": "50% 20%",
+   "bScale": 1.15,
+   "ten": "Abricot Fleuri",
+   "dong": "Đầm midi · Cam hoa nổi · Size L",
+   "phu": "Hoa nổi 3D, dáng suông, có size L.",
+   "gia": "370k",
+   "giaTri": "3,7 triệu",
+   "side": "right",
+   "labelBottom": 320
+  }
+ ],
+ "hookImg": "https://sixdo.vn/images/products/2026/original/cs_10-77-1791338907.jpg",
+ "hookPos": "50% 30%",
+ "hook1": "Tủ chật,\nvẫn không có gì?",
+ "hook2": "Lần này, thuê từ",
+ "hookBig": "320k.",
+ "serviceImg": "https://sixdo.vn/images/products/2026/original/White_9-61.jpg",
+ "serviceTitle": "Tụi mình lo phần còn lại.",
+ "service": [
+  [
+   "Thuê theo lượt ",
+   "24 giờ."
+  ],
+  [
+   "Cọc chuyển khoản, về lại trong 24 giờ. ",
+   "Không giữ căn cước."
+  ],
+  [
+   "Stylist mang đầm đến khách sạn hoặc nhà riêng, ",
+   "từ 120k."
+  ]
+ ],
+ "cta": "Nhắn \"Tủ đồ\" vào Zalo OA",
+ "ctaSub": "Tủ của nàng mở cửa 12/12.",
+ "nguon": "Ảnh lookbook: SIXDO"
+}
