@@ -176,6 +176,12 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
 nav.tabs{max-width:520px;grid-template-columns:repeat(4,1fr)}
 .sheet{max-width:520px}
 .seg2{display:flex;gap:6px;flex-wrap:wrap}
+.assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.as{margin:0;display:flex;flex-direction:column;gap:4px;min-width:0}
+.as img,.as video{width:100%;border-radius:12px;background:var(--line);display:block}
+.as img{aspect-ratio:4/5;object-fit:cover}.as.v{grid-column:1/-1}.as.v video{max-height:62vh;aspect-ratio:9/16;object-fit:contain;background:#000}
+.as figcaption{font-size:12px;color:var(--muted)}
+.ndth{width:44px;height:56px;object-fit:cover;border-radius:8px;flex:none}
 .score{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:24px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;background:var(--sunk);color:var(--ink)}
 .score.ok{background:var(--good-soft);color:var(--good)}
 .score.no{background:var(--warn-soft);color:var(--warn)}
@@ -233,8 +239,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   <div class="app">
     <header class="top gut">
       <div class="top-row"><span class="mark">CHÉRIE</span><span style="display:flex;align-items:center;gap:10px"><span class="branch">Marketing · CS online</span><a id="homeSlot" class="homebtn" href="/nhansu/" aria-label="Trang nhân sự, đổi app">☰</a></span></div>
-      <div class="demo"><span>Bản chính thức · <b id="todayLbl"></b></span></div>
-      <div class="demo sync"><span id="sync" class="syncchip" role="status">Đang tải…</span><span style="display:flex;gap:12px"><a class="link" href="/nhansu/">Tất cả app</a><a class="link" href="/quay/">Quầy</a><a class="link" href="/">Website</a></span></div>
+      <div class="demo sync"><span id="sync" class="syncchip" role="status">Đang tải…</span><b id="todayLbl"></b></div>
     </header>
     <main class="gut" id="view"></main>
     <nav class="tabs" aria-label="Điều hướng">
@@ -549,9 +554,15 @@ async function agentProduce(N,fb){
 
 /* ================= NỘI DUNG ================= */
 let ndFilter="Tất cả";
+/* Cách làm từng nội dung: "AI dựng" (agent dựng hình, video từ ảnh mẫu đầm) hoặc "Tự quay" (team quay dựng, agent dựng storyboard để duyệt) */
+function cachLam(x){return x.cachLam||"AI dựng"}
+function assetHtml(N){const A=N.asset||[];if(!A.length)return "";
+  return `<section><h2>Bản dựng để duyệt · ${A.length} file</h2><div class="assets">${A.map((a,i)=>a.loai==="video"?`<figure class="as v"><video src="${esc(a.url)}" ${a.poster?`poster="${esc(a.poster)}"`:""} controls playsinline preload="metadata"></video><figcaption>${esc(a.ten||"Video")}</figcaption></figure>`:`<figure class="as"><a href="${esc(a.url)}" target="_blank" rel="noopener"><img src="${esc(a.url)}" alt="${esc(a.ten||"Ảnh "+(i+1))}" loading="lazy"></a><figcaption>${esc(a.ten||"Ảnh "+(i+1))}</figcaption></figure>`).join("")}</div>
+   ${N.moda?`<p class="note" style="margin-top:8px">Muốn chỉnh tay chữ, ảnh, nhịp video: <a class="link" href="${esc(N.moda)}" target="_blank" rel="noopener">mở bản dựng trong Moda</a>.${N.anhHang?" Ảnh dùng trong bản dựng là ảnh của hãng.":""}</p>`:""}</section>`}
 function ndRow(N){const q=N.qa?`<span class="score ${N.qa.diem>=9?"ok":"no"}">${String(N.qa.diem).replace(".",",")}</span>`:"";
   const st=N.tt==="Chờ duyệt cuối"?"warn":N.tt==="Đã duyệt"||N.tt==="Đã đăng"?"good":N.tt.startsWith("Cần sửa")?"bad":"";
-  return `<button class="row" type="button" data-nd="${N.id}"><span class="stripe ${st}"></span><span class="main"><span class="t">${esc(N.chuDe)}</span><span class="s">${esc(N.kenh)} · quay ${dm(N.ngay)}${N.dang?` · đăng ${dm(N.dang)}`:""}</span></span><span class="r">${q}<br><span class="note">${esc(running[N.id]?"Agent đang chạy":N.tt)}</span></span></button>`}
+  const th=(N.asset||[]).find(a=>a.poster||a.loai==="anh");
+  return `<button class="row" type="button" data-nd="${N.id}"><span class="stripe ${st}"></span>${th?`<img class="ndth" src="${esc(th.poster||th.url)}" alt="" loading="lazy">`:""}<span class="main"><span class="t">${esc(N.chuDe)}</span><span class="s">${cachLam(N)} · ${(N.asset||[]).length?`${(N.asset||[]).length} file dựng · `:""}${esc(N.kenh)} · quay ${dm(N.ngay)}${N.dang?` · đăng ${dm(N.dang)}`:""}</span></span><span class="r">${q}<br><span class="note">${esc(running[N.id]?"Agent đang chạy":N.tt)}</span></span></button>`}
 function renderND(){
   const all=db.noidung||[];const cnt=s=>all.filter(n=>(running[n.id]?"Agent đang chạy":n.tt)===s).length;
   const tabs=["Tất cả","Chờ duyệt cuối","Chờ sản xuất","Cần sửa","Đã duyệt","Đã đăng"];
@@ -596,11 +607,13 @@ function openAnh(){nextSheet=()=>openAnh();const CD=window.CherieData;const sps=
   });
 }
 function openND(id){nextSheet=()=>openND(id);const N=(db.noidung||[]).find(x=>x.id===id);if(!N){closeSheet();return}
-  const steps=["Chờ sản xuất","Agent sản xuất","Agent kiểm duyệt","Chờ duyệt cuối","Đã duyệt","Đã đăng"];
-  const cur=running[N.id]?(running[N.id].includes("Kiểm duyệt")?2:1):N.tt==="Chờ sản xuất"?0:N.tt.startsWith("Cần sửa")?1:N.tt==="Chờ duyệt cuối"?3:N.tt==="Đã duyệt"?4:N.tt==="Đã đăng"?5:0;
+  const steps=["Chờ sản xuất","Agent viết","Agent dựng hình, video","Agent kiểm duyệt","Chờ duyệt cuối","Đã duyệt","Đã đăng"];
+  const cur=running[N.id]?(running[N.id].includes("Kiểm duyệt")?3:1):N.tt==="Chờ sản xuất"?0:N.tt.startsWith("Cần sửa")?1:N.tt==="Chờ dựng"?2:N.tt==="Agent đang chạy"?3:N.tt==="Chờ duyệt cuối"?4:N.tt==="Đã duyệt"?5:N.tt==="Đã đăng"?6:0;
   const B=N.ban,Q=N.qa;
   sheet(N.chuDe,`<div class="flow" aria-label="Tiến trình">${steps.map((s,i)=>`<span class="${i<cur?"done":i===cur?"on":""}">${s}</span>`).join("")}</div>
    ${agentBox(N.id)}
+   <div class="box" style="display:flex;flex-direction:column;gap:8px"><span class="note"><b>Cách làm</b> · AI dựng: agent làm luôn hình, video từ ảnh mẫu đầm để bạn duyệt. Tự quay: team quay dựng, agent dựng storyboard bằng hình để bạn duyệt trước.</span><div class="seg2">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-cl="${v}" aria-pressed="${cachLam(N)===v}">${v}</button>`).join("")}</div></div>
+   ${assetHtml(N)||(N.ban&&N.tt!=="Chờ sản xuất"?`<div class="banner warn">Chưa có hình, video để duyệt. Agent Sản xuất sẽ dựng ${cachLam(N)==="AI dựng"?"bản hoàn chỉnh":"storyboard bằng hình"} ở lượt chạy tới (mỗi giờ, phút 35).</div>`:"")}
    <dl class="kv box"><dt>Kênh</dt><dd>${esc(N.kenh)} · ${esc(N.dinhDang)}</dd><dt>Góc nội dung</dt><dd>${esc(N.angle||"")}</dd><dt>Quay</dt><dd>${dm(N.ngay)}</dd>${N.dang?`<dt>Đăng dự kiến</dt><dd>${dm(N.dang)}</dd>`:""}<dt>Mẫu đầm</dt><dd>${(N.mau||[]).map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", ")||"Không"}</dd>${N.link?`<dt>Đã đăng</dt><dd>${esc(N.link)}</dd>`:""}</dl>
    ${N.phanHoi?`<div class="banner info">Góp ý của bạn: ${esc(N.phanHoi)}</div>`:""}
    ${Q?`<section><h2>Kiểm duyệt <span class="score ${Q.diem>=9?"ok":"no"}">${String(Q.diem).replace(".",",")}/10</span></h2><div class="box"><div class="crit">${Q.tieuChi.map(c=>`<span>${esc(c[0])}</span><b>${c[1]}</b><span class="bar2"><i class="${c[1]<9?"low":""}" style="width:${c[1]*10}%"></i></span>${c[2]?`<span class="gc">${esc(c[2])}</span>`:""}`).join("")}</div>${(Q.canSua||[]).length?`<p class="note" style="margin-top:10px"><b>Cần sửa:</b> ${Q.canSua.map(esc).join(" · ")}</p>`:""}${N.chuaDat?`<div class="banner warn" style="margin-top:10px">Agent đã sửa 3 vòng nhưng chưa đạt 9/10. Bạn quyết định duyệt, góp ý hoặc làm lại.</div>`:""}</div></section>`:""}
@@ -609,7 +622,8 @@ function openND(id){nextSheet=()=>openND(id);const N=(db.noidung||[]).find(x=>x.
    ${B.quay||B.anh?`<section><h2>Brief quay và ảnh</h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:8px">${B.quay?`<span><b>Quay:</b> ${esc(B.quay)}</span>`:""}${B.anh?`<span><b>Prompt moodboard:</b> <span class="mono">${esc(B.anh)}</span></span>`:""}</div></section>`:""}`:`<div class="empty box">Chưa có bản sản xuất.</div>`}
    <section><h2>Lịch sử</h2><div class="box log">${(N.lichSu||[]).map(l=>`<div>${when(l[0])} · <b>${esc(l[1])}</b> · ${esc(l[2])}</div>`).join("")||"Chưa có."}</div></section>
    <div id="actions" style="display:flex;flex-direction:column;gap:10px"></div>`,root=>{
-    bind(root);const cp=root.querySelector("#cpCap");if(cp)cp.onclick=()=>copy(B.caption+(B.hashtag?"\n"+B.hashtag.map(h=>"#"+h).join(" "):""),root.querySelector("#cap"));
+    bind(root);root.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>{if(cachLam(N)===b.dataset.cl)return;N.cachLam=b.dataset.cl;N.asset=[];delete N.moda;(N.lichSu=N.lichSu||[]).push([nowIso(),"Chủ tiệm","Đổi cách làm: "+b.dataset.cl]);save();render();openND(id);toast(`Đã chọn ${b.dataset.cl}. Agent dựng lại hình, video ở lượt tới`)});
+    const cp=root.querySelector("#cpCap");if(cp)cp.onclick=()=>copy(B.caption+(B.hashtag?"\n"+B.hashtag.map(h=>"#"+h).join(" "):""),root.querySelector("#cap"));
     const A=root.querySelector("#actions");if(running[N.id])return;
     const log=(ai,viec)=>N.lichSu=[...(N.lichSu||[]),[nowIso(),ai,viec]];
     if(N.tt==="Chờ sản xuất"||N.tt.startsWith("Cần sửa")){A.innerHTML=sampleFn?`<button class="btn primary" type="button" id="aRun">${N.tt==="Chờ sản xuất"?"Cho agent sản xuất":"Cho agent sửa và chấm lại"}</button>`:agentNote();
@@ -658,12 +672,12 @@ function openPlan(id){nextSheet=()=>openPlan(id);const P=byId("kehoach",id);if(!
    ${P.phanHoi?`<div class="banner info">Phản hồi của bạn: ${esc(P.phanHoi)}</div>`:""}
    ${(P.mucTieu||[]).length?`<section><h2>Mục tiêu</h2><div class="box"><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px">${P.mucTieu.map(m=>`<li>${esc(m)}</li>`).join("")}</ol></div></section>`:""}
    ${R?`<section><h2>Agent Đánh giá <span class="score ${R.diem>=9?"ok":"no"}">${String(R.diem).replace(".",",")}/10</span></h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:6px">${R.nhanXet.map(x=>`<span>${esc(x)}</span>`).join("")}${(R.sua||[]).length?`<span class="note"><b>Đã sửa:</b> ${R.sua.map(esc).join(" · ")}</span>`:""}</div></section>`:""}
-   <section><h2>${(P.items||[]).length} hạng mục</h2><div class="list">${(P.items||[]).map(x=>`<div class="row"><span class="main"><span class="t">${dm(x.ngay)} · ${esc(x.chuDe)}</span><span class="s">${esc(x.kenh)} · ${esc(x.dinhDang)} · ${esc(x.angle||"")}${(x.mau||[]).length?" · "+x.mau.map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", "):""}</span></span></div>`).join("")||'<div class="empty">Agent chưa lập.</div>'}</div></section>
+   <section><h2>${(P.items||[]).length} hạng mục</h2>${P.tt==="Chờ chủ duyệt"?'<p class="note" style="margin:0 0 8px">Chọn từng mục: AI dựng (agent làm luôn hình, video) hay Tự quay (team quay dựng).</p>':""}<div class="list">${(P.items||[]).map((x,i)=>`<div class="row" style="flex-wrap:wrap"><span class="main"><span class="t">${dm(x.ngay)} · ${esc(x.chuDe)}</span><span class="s">${esc(x.kenh)} · ${esc(x.dinhDang)} · ${esc(x.angle||"")}${(x.mau||[]).length?" · "+x.mau.map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", "):""}</span></span>${P.tt==="Chờ chủ duyệt"?`<span class="seg2" style="width:100%">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-pi="${i}" data-v="${v}" aria-pressed="${cachLam(x)===v}">${v}</button>`).join("")}</span>`:`<span class="r"><span class="note">${cachLam(x)}</span></span>`}</div>`).join("")||'<div class="empty">Agent chưa lập.</div>'}</div></section>
    <div id="actions" style="display:flex;flex-direction:column;gap:10px"></div>`,root=>{
-    const A=root.querySelector("#actions");if(running[P.id])return;
+    const A=root.querySelector("#actions");root.querySelectorAll("[data-pi]").forEach(b=>b.onclick=()=>{P.items[+b.dataset.pi].cachLam=b.dataset.v;save();openPlan(id)});if(running[P.id])return;
     if(P.tt==="Chờ chủ duyệt"){A.innerHTML=`<button class="btn primary" type="button" id="pOk">Duyệt kế hoạch, chuyển sang sản xuất</button><label class="f">Phản hồi để agent lập lại<textarea id="fb" placeholder="Ví dụ: thêm 2 bài Instagram, bớt video ngoài trời, tập trung khách đi cưới"></textarea></label><button class="btn" type="button" id="pRedo">Gửi phản hồi, lập lại</button>`;
       A.querySelector("#pOk").onclick=()=>{P.tt="Đã duyệt";P.duyetLuc=nowIso();
-        (P.items||[]).forEach(x=>{if((db.noidung||[]).some(n=>n.kh===P.id&&n.item===x.id))return;db.noidung.push({id:nextId("noidung","ND"),kh:P.id,item:x.id,ngay:x.ngay,dang:"",kenh:x.kenh,dinhDang:x.dinhDang,chuDe:x.chuDe,angle:x.angle,mau:x.mau||[],tt:"Chờ sản xuất",vong:0,phanHoi:"",lichSu:[[nowIso(),"Chủ tiệm","Duyệt kế hoạch "+P.id]]})});
+        (P.items||[]).forEach(x=>{if((db.noidung||[]).some(n=>n.kh===P.id&&n.item===x.id))return;db.noidung.push({id:nextId("noidung","ND"),kh:P.id,item:x.id,ngay:x.ngay,dang:"",kenh:x.kenh,dinhDang:x.dinhDang,chuDe:x.chuDe,angle:x.angle,mau:x.mau||[],cachLam:cachLam(x),tt:"Chờ sản xuất",vong:0,phanHoi:"",lichSu:[[nowIso(),"Chủ tiệm","Duyệt kế hoạch "+P.id]]})});
         save();render();openPlan(id);toast("Đã tạo các mục nội dung chờ sản xuất")};
       A.querySelector("#pRedo").onclick=()=>{const v=A.querySelector("#fb").value.trim();if(!v){A.querySelector("#fb").focus();return}P.phanHoi=v;P.tt="Cần làm lại";save();render();openPlan(id);if(sampleFn)agentPlan(P)}}
     else if(P.tt==="Đang lập"||P.tt==="Cần làm lại"){A.innerHTML=sampleFn?`<button class="btn primary" type="button" id="pRun">Cho agent ${(P.items||[]).length?"lập lại":"lập kế hoạch"}</button>`:agentNote();const r=A.querySelector("#pRun");if(r)r.onclick=()=>agentPlan(P)}
