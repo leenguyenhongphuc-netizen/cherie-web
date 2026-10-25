@@ -194,7 +194,7 @@ header .homebtn{text-decoration:none;color:var(--ink)}
   <button type="button" data-tab="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Nhập liệu</button>
 </nav>
 
-<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=ee81eed8"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=e5d5cd3b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -247,10 +247,10 @@ function orders(a,b){return db.don.filter(d=>!d.demo&&d.tt==="Đã trả"&&ngayG
 function tamTinh(){return db.don.filter(d=>!d.demo&&d.tt==="Đang thuê")}
 function duKien(){return db.don.filter(d=>!d.demo&&d.tt==="Đã đặt")}
 function lines(d){return db.ct.filter(c=>c.don===d.id)}
-function rev(d){const ls=lines(d);const luot=+d.luot||(CD.soLuot?CD.soLuot(d.nhan,d.tra):1)||1;const thue=ls.reduce((x,c)=>x+(+c.gia||0),0)*luot;
+function rev(d){const ls=lines(d);const luot=+d.luot||(CD.soLuot?CD.soLuot(d.nhan,d.tra):1)||1;const goc=ls.reduce((x,c)=>x+(+c.gia||0),0)*luot,giam=Math.min(goc,+d.giam||0),thue=goc-giam;
   const yt=d.yenTam?ls.length*CD.YEN_TAM.phi:0,giao=+d.phiGiao||0,tre=+d.phi||0,hu=ls.reduce((x,c)=>x+(c.hu?(+c.phiHu||0):0),0);const ps=yt+giao+tre+hu;
-  return{thue,yt,giao,tre,hu,ps,tong:thue+ps,luot}}
-function sumRev(os){const t={thue:0,yt:0,giao:0,tre:0,hu:0,ps:0,tong:0};os.forEach(d=>{const r=rev(d);Object.keys(t).forEach(k=>t[k]+=r[k])});return t}
+  return{thue,yt,giao,tre,hu,ps,tong:thue+ps,luot,giam}}
+function sumRev(os){const t={thue:0,yt:0,giao:0,tre:0,hu:0,ps:0,tong:0,giam:0};os.forEach(d=>{const r=rev(d);Object.keys(t).forEach(k=>t[k]+=r[k])});return t}
 function costs(a,b){return db.chiphi.filter(c=>c.ngay>=a&&c.ngay<=b)}
 /* chi phí: một lần (phân bổ đều trong tháng phát sinh) hoặc định kỳ (tháng, quý, năm, tuần, ngày) quy ra mỗi tháng rồi chia đều theo ngày */
 const laNhap=c=>c.nhom==="Nhập hàng";
@@ -367,7 +367,7 @@ function series(a,b,g){const ks=buckets(a,b,g);const idx={};ks.forEach((k,i)=>id
 
 function hanhTrinh(s){const dk=duKien(),tt=tamTinh(),R=s.R;const row=(t,n,v,sub,c)=>`<div class="ln"><span class="nm"><b>${t}</b> · ${n} đơn<br><span class="note">${sub}</span></span><b style="color:${c}">${tr(v)}</b></div>`;
   return card("c0","Hành trình doanh thu","Một đơn đi qua 3 bước. Chỉ bước 3 được tính vào doanh thu và P&amp;L.",`<div class="pl">${row("1. Đã đặt, chưa giao",dk.length,sumRev(dk).tong,"Dự kiến theo giá thuê, Gói Yên tâm và phí đến tận nơi","var(--muted)")}${row("2. Đang thuê, chưa trả",tt.length,sumRev(tt).tong,"Tạm tính, chốt khi khách trả và kiểm đồ","var(--muted)")}${row("3. Đã trả trong kỳ",s.n,s.dt,"Ghi nhận doanh thu","var(--pos)")}
-    <div class="ln tot"><span class="nm">Trong đó (bước 3)</span><b></b><small></small></div>${[["Tiền thuê",R.thue],["Gói Yên tâm",R.yt],["Phí đến tận nơi",R.giao],["Phí trả trễ",R.tre],["Phí hư hỏng (khách đền)",R.hu]].map(([n,v])=>`<div class="ln"><span class="nm">${n}</span><b>${tr(v)}</b><small>${s.dt?pct(v/s.dt):"–"}</small></div>`).join("")}</div>`,"")}
+    <div class="ln tot"><span class="nm">Trong đó (bước 3)</span><b></b><small></small></div>${[["Tiền thuê",R.thue],["Gói Yên tâm",R.yt],["Phí đến tận nơi",R.giao],["Phí trả trễ",R.tre],["Phí hư hỏng (khách đền)",R.hu]].map(([n,v])=>`<div class="ln"><span class="nm">${n}</span><b>${tr(v)}</b><small>${s.dt?pct(v/s.dt):"–"}</small></div>`).join("")}${R.giam?`<div class="ln"><span class="nm note">Đã giảm cho khách theo khuyến mãi (đã trừ trong tiền thuê)</span><b style="color:var(--muted)">−${tr(R.giam)}</b><small></small></div>`:""}</div>`,"")}
 function vanHanh(a,b){const os=orders(a,b),now=new Date();const D2=x=>new Date(x);
   const dung=os.filter(d=>!(d.traTT&&(D2(d.traTT)-D2(d.tra))>36e5)).length;
   const coAnh=os.filter(d=>{const ls=lines(d);return ls.length&&ls.every(c=>CD.ttDu&&CD.ttDu(d.id,"giao",c.sp)&&CD.ttDu(d.id,"nhan",c.sp))}).length;
@@ -485,10 +485,10 @@ function nextSo(g){let m=0;db.sp.forEach(s=>{const x=s.id.split("-");if(x[1]===g
 function renderNL(){
   const nln=(db.nhap||[]).filter(x=>x.tt==="Chờ duyệt").length,nyc=db.yc.filter(y=>y.tt==="Mới").length,ndg=(db.review||[]).filter(r=>r.tt==="Chờ duyệt").length;
   view.innerHTML=`<div><h1>Nhập liệu</h1><p class="sub">Nhập ở đây thay cho gõ tay vào Google Sheets. Quầy và báo cáo cập nhật ngay.</p></div>
-  <div class="seg" role="group" aria-label="Loại nhập liệu" style="align-self:flex-start">${[["ln",`Nhập từ link${nln?` (${nln})`:""}`],["sp","Món trong kho"],["anh","Ảnh lookbook"],["dg",`Đánh giá${ndg?` (${ndg})`:""}`],["ns","Nhân sự"],["pq","Phân quyền"],["yc",`Yêu cầu web${nyc?` (${nyc})`:""}`]].map(([k,n])=>`<button type="button" data-nl="${k}" aria-pressed="${nl===k}">${n}</button>`).join("")}</div>
+  <div class="seg" role="group" aria-label="Loại nhập liệu" style="align-self:flex-start">${[["ln",`Nhập từ link${nln?` (${nln})`:""}`],["sp","Món trong kho"],["anh","Ảnh lookbook"],["dg",`Đánh giá${ndg?` (${ndg})`:""}`],["km","Khuyến mãi"],["ns","Nhân sự"],["pq","Phân quyền"],["yc",`Yêu cầu web${nyc?` (${nyc})`:""}`]].map(([k,n])=>`<button type="button" data-nl="${k}" aria-pressed="${nl===k}">${n}</button>`).join("")}</div>
   <div id="nlb"></div>`;
   view.querySelectorAll("[data-nl]").forEach(b=>b.onclick=()=>{nl=b.dataset.nl;renderNL()});
-  ({ns:nlNS,pq:nlPQ,ln:nlLN,anh:nlAnh,cp:nlCP,sp:nlSP,dg:nlDG,yc:nlYC})[nl](document.getElementById("nlb"));
+  ({km:nlKM,ns:nlNS,pq:nlPQ,ln:nlLN,anh:nlAnh,cp:nlCP,sp:nlSP,dg:nlDG,yc:nlYC})[nl](document.getElementById("nlb"));
 }
 /* ---------------- Chi phí: nhập như nói, tự phân loại ---------------- */
 const CP_DM=[
@@ -718,6 +718,34 @@ function nlNS(el){const ns=[...(db.nv||[])].sort((x,y)=>(!!x.nghi)-(!!y.nghi));c
     s.disabled=true;G.call("setPin",{nv:box.dataset.pbox,pin:v}).then(()=>{box.style.display="none";i.value="";s.disabled=false;pinOf[box.dataset.pbox]=true;showPin();toast("Đã lưu PIN")},x=>{s.disabled=false;i.value="";i.placeholder=x.message||"Lỗi, thử lại"})}});
   function showPin(){el.querySelectorAll("[data-pst]").forEach(sp=>{const id=sp.dataset.pst;if(id in pinOf)sp.innerHTML=pinOf[id]?'· <b style="color:var(--ok,#2e7d4f)">đã có PIN</b>':'· <b style="color:var(--bad,#b3261e)">chưa có PIN</b>';const pb=el.querySelector(`[data-pin="${id}"]`);if(pb&&id in pinOf)pb.textContent=pinOf[id]?"Đổi PIN":"Đặt PIN"})}
   if(G)G.call("pinStatus").then(r=>{(r.staff||[]).forEach(x=>pinOf[x.id]=!!x.pin);showPin()}).catch(()=>{});
+}
+/* Khuyến mãi: chủ tiệm tạo chương trình, Quầy, stylist và CS online chỉ chọn được chương trình đang chạy cho kênh của mình */
+let kmSua=null;
+function nlKM(el){const CDk=CD,ds=[...(db.km||[])].sort((a,b)=>(a.tu||"")<(b.tu||"")?1:-1);const T=TODAY;
+  const dung=id=>db.don.filter(d=>!d.demo&&d.km===id&&d.tt!=="Hủy");
+  const cur=kmSua?(db.km||[]).find(x=>x.id===kmSua)||{}:{};const v=(k,d)=>esc(cur[k]!=null?cur[k]:d);
+  const pill=m=>{const t=CDk.kmTrangThai(m,T);return `<span class="pill ${t==="Đang chạy"?"ok":t==="Sắp chạy"?"new":""}">${t}</span>`};
+  el.innerHTML=`<div class="grid2"><section class="card"><h2>${kmSua?"Sửa chương trình":"Tạo chương trình giảm giá"}</h2><form class="form" id="fkm" novalidate>
+   <label class="f">Tên chương trình<input type="text" id="kTen" value="${v("ten","")}" placeholder="Ví dụ: Khai trương giảm 20%"></label>
+   <div class="two"><label class="f">Kiểu giảm<select id="kLoai"><option value="pt" ${cur.loai!=="tien"?"selected":""}>Giảm % tiền thuê</option><option value="tien" ${cur.loai==="tien"?"selected":""}>Giảm số tiền cố định</option></select></label><label class="f"><span id="kGtL">Mức giảm (%)</span><input type="number" id="kGt" min="0" value="${v("giaTri","")}"></label></div>
+   <div class="two"><label class="f" id="kTdW">Giảm tối đa (đ, để trống nếu không giới hạn)<input type="number" id="kTd" min="0" step="10000" value="${v("toiDa","")}"></label><label class="f">Tiền thuê tối thiểu của đơn (đ)<input type="number" id="kTt" min="0" step="10000" value="${v("toiThieu","")}"></label></div>
+   <div class="two"><label class="f">Từ ngày<input type="date" id="kTu" value="${v("tu",T)}"></label><label class="f">Đến hết ngày<input type="date" id="kDen" value="${v("den","")}"></label></div>
+   <fieldset class="f" style="border:0;padding:0;margin:0"><span>Áp dụng cho</span>${CDk.KM_KENH.map(([k,n])=>`<label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" data-kk="${k}" style="width:auto" ${!cur.kenh||cur.kenh.includes(k)?"checked":""}> ${k} · ${n}</label>`).join("")}</fieldset>
+   <label class="f">Điều kiện, ghi chú cho nhân viên<input type="text" id="kDk" value="${v("dk","")}" placeholder="Ví dụ: áp dụng khách mới, không cộng dồn"></label>
+   <p class="err" id="kErr" hidden></p><div class="btns"><button class="btn primary" type="submit">${kmSua?"Lưu thay đổi":"Tạo chương trình"}</button>${kmSua?'<button class="btn" type="button" id="kHuy">Huỷ sửa</button>':""}</div>
+   <p class="note">Chỉ giảm trên tiền thuê, không trừ cọc, phí đến tận nơi và Gói Yên tâm. Nhân viên chỉ thấy chương trình đang chạy cho kênh của mình; đơn đã tạo giữ nguyên mức giảm dù chương trình hết hạn.</p></form></section>
+   <section class="card"><h2>Các chương trình · ${ds.length}</h2><div class="list">${ds.map(m=>{const u=dung(m.id),g=u.reduce((a,d)=>a+(+d.giam||0),0);return `<div class="it"><span class="t">${esc(m.ten)} ${pill(m)}</span><span class="s">${esc(CDk.kmMoTa(m))} · ${m.tu?esc(m.tu.slice(8,10)+"/"+m.tu.slice(5,7)):"…"} → ${m.den?esc(m.den.slice(8,10)+"/"+m.den.slice(5,7)):"không hạn"} · ${(m.kenh||[]).join(", ")||"mọi kênh"}<br>${u.length} đơn đã dùng · đã giảm ${money(g)}${m.dk?" · "+esc(m.dk):""}</span><span class="r"><button class="btn sm" type="button" data-kms="${m.id}">Sửa</button><button class="btn sm" type="button" data-kmt="${m.id}">${m.tt==="Tắt"?"Bật lại":"Tắt"}</button></span></div>`}).join("")||'<p class="empty">Chưa có chương trình nào.</p>'}</div></section></div>`;
+  const $=q=>el.querySelector(q);const loai=()=>{const pt=$("#kLoai").value==="pt";$("#kGtL").textContent=pt?"Mức giảm (%)":"Số tiền giảm (đ)";$("#kTdW").hidden=!pt};loai();$("#kLoai").onchange=loai;
+  if($("#kHuy"))$("#kHuy").onclick=()=>{kmSua=null;nlKM(el)};
+  $("#fkm").onsubmit=e=>{e.preventDefault();const fail=m=>{$("#kErr").textContent=m;$("#kErr").hidden=false};
+    const ten=$("#kTen").value.trim(),lo=$("#kLoai").value,gt=+$("#kGt").value,tu=$("#kTu").value,den=$("#kDen").value,kenh=[...el.querySelectorAll("[data-kk]")].filter(x=>x.checked).map(x=>x.dataset.kk);
+    if(!ten)return fail("Nhập tên chương trình.");if(!(gt>0))return fail("Nhập mức giảm.");if(lo==="pt"&&gt>100)return fail("Giảm % tối đa 100.");
+    if(!tu)return fail("Chọn ngày bắt đầu.");if(den&&den<tu)return fail("Ngày kết thúc phải sau ngày bắt đầu.");if(!kenh.length)return fail("Chọn ít nhất một kênh.");
+    db.km=db.km||[];let m=kmSua&&db.km.find(x=>x.id===kmSua);if(!m){m={id:CD.newId("KM"),tao:TODAY,tt:"Bật"};db.km.push(m)}
+    Object.assign(m,{ten,loai:lo,giaTri:gt,toiDa:lo==="pt"?(+$("#kTd").value||0):0,toiThieu:+$("#kTt").value||0,tu,den,kenh,dk:$("#kDk").value.trim()});
+    CD.save();kmSua=null;nlKM(el);toast(`Đã lưu "${ten}". Quầy, stylist, CS online thấy ngay khi chương trình đang chạy.`)};
+  el.querySelectorAll("[data-kms]").forEach(b=>b.onclick=()=>{kmSua=b.dataset.kms;nlKM(el);el.scrollIntoView({behavior:"smooth"})});
+  el.querySelectorAll("[data-kmt]").forEach(b=>b.onclick=()=>{const m=db.km.find(x=>x.id===b.dataset.kmt);m.tt=m.tt==="Tắt"?"Bật":"Tắt";CD.save();nlKM(el);toast(m.tt==="Tắt"?`Đã tắt "${m.ten}"`:`Đã bật lại "${m.ten}"`)});
 }
 /* Phân quyền: mỗi vai trò có mức Không / Xem / Sửa cho từng app; có thể đặt riêng cho từng người. Máy chủ kiểm tra lại mọi lần mở trang và lưu. */
 const Q_COT=[["quay","App Quầy","Bán tại tiệm, đơn, nhận trả, hoàn cọc"],["stylist","App Stylist","Chuyến giao, nhận, thử đồ"],["marketing","App Marketing","Khách online, nội dung, blog"],["admin","Admin","Báo cáo, P&L, kho, chi phí"],["rieng","Hồ sơ riêng","Hợp đồng, CCCD, ảnh tình trạng"]];

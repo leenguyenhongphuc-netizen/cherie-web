@@ -148,7 +148,9 @@ nav.tabs .add svg{width:20px;height:20px}
 /* inventory */
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0;text-align:left;overflow:hidden;display:flex;flex-direction:column}
-.swatch{aspect-ratio:4/3;max-width:100%;display:flex;align-items:flex-end;padding:8px;position:relative}
+.swatch{aspect-ratio:3/4;max-width:100%;display:flex;align-items:flex-end;padding:8px;position:relative;overflow:hidden}
+.swatch img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.swatch .code{position:relative}
 .swatch .code{font-size:10.5px;font-weight:600;letter-spacing:.08em;background:rgba(255,255,255,.85);color:#1B1618;padding:1px 6px;border-radius:4px}
 .item .body{padding:10px;display:flex;flex-direction:column;gap:4px}
 .item .nm{font-family:var(--display);font-size:16px;font-weight:600;line-height:1.1}
@@ -226,7 +228,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=ee81eed8"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=e5d5cd3b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -269,7 +271,8 @@ function nextId(t,p){let m=0;db[t].forEach(x=>{const n=parseInt(String(x.id).rep
 /* ---------- derived columns (mirror the AppSheet formulas) ---------- */
 function lines(d){return db.ct.filter(c=>c.don===d.id)}
 function L4txt(s,lv,yt){return lv==="L4"?money(window.CherieData.phiHu("L4",s,yt))+(yt?" (50% giá trị)":" (100% giá trị)"):money(window.CherieData.phiHu(lv,s,yt))}
-function tongThue(d){return lines(d).reduce((a,c)=>a+c.gia,0)}
+function tienGoc(d){return lines(d).reduce((a,c)=>a+c.gia,0)}
+function tongThue(d){return Math.max(0,tienGoc(d)-(+d.giam||0))}
 function tongHu(d){return lines(d).reduce((a,c)=>a+(c.hu?(d.yenTam&&!/^L4/.test(c.moTa||"")&&c.phiHu<=300000?0:c.phiHu):0),0)}
 function soNguoiMac(d){return new Set(lines(d).map(c=>c.mac)).size}
 function daTre(d){return !!d.traTT&&(D(d.traTT)-D(d.tra))>36e5}
@@ -454,12 +457,13 @@ function renderCal(){
 }
 
 /* ---------- Kho đồ ---------- */
+function anhSp(s){const a=(CD.anhCua?CD.anhCua(s.id,false):[])[0];return (a&&(a.th||a.src))||s.anhBrand||""}
 function renderKho(){
   const sts=["Tất cả","Sẵn sàng","Đang thuê","Đang mang đi","Chờ kiểm tra","Đang giặt","Sửa"];
   const list=db.sp.filter(s=>khoFilter==="Tất cả"||s.tt===khoFilter);
   view.innerHTML=`<div><h1>Kho đồ</h1><p class="sub">${db.sp.length} món · ${db.sp.filter(s=>s.tt==="Sẵn sàng").length} sẵn sàng</p></div>
   <div class="chips" role="group" aria-label="Lọc theo tình trạng">${sts.map(s=>`<button class="chip" type="button" aria-pressed="${s===khoFilter}" data-f="${s}">${s} ${s==="Tất cả"?"":"· "+db.sp.filter(x=>x.tt===s).length}</button>`).join("")}</div>
-  <div class="grid">${list.map(s=>`<button class="item" type="button" data-sp="${s.id}"><span class="swatch" style="background:${SWATCH[s.mau]||"#888"}"><span class="code">${s.id}</span></span><span class="body"><span class="nm">${esc(s.ten)}</span><span class="meta">${esc(s.mo)} · size ${s.size}</span><span class="pills">${spPill(s)}<span class="pill line">${k(s.gia)}</span></span></span></button>`).join("")||'<div class="empty">Không có món nào ở trạng thái này.</div>'}</div>`;
+  <div class="grid">${list.map(s=>`<button class="item" type="button" data-sp="${s.id}"><span class="swatch" style="background:${SWATCH[s.mau]||"#888"}">${(u=>u?`<img src="${esc(u)}" alt="" loading="lazy" decoding="async">`:"")(anhSp(s))}<span class="code">${s.id}</span></span><span class="body"><span class="nm">${esc(s.ten)}</span><span class="meta">${esc(s.mo)} · size ${s.size}</span><span class="pills">${spPill(s)}<span class="pill line">${k(s.gia)}</span></span></span></button>`).join("")||'<div class="empty">Không có món nào ở trạng thái này.</div>'}</div>`;
   view.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{khoFilter=b.dataset.f;renderKho()});
   bindRows(view);
 }
@@ -628,7 +632,7 @@ function openKhach(id){
 function nvTen(){try{const m=JSON.parse(localStorage.getItem("cherie-gas-me")||"null");if(m&&m.ten)return m.ten}catch(e){}return "Quầy"}
 function hdOpts(d,done){const kh=byId("kh",d.dat)||{id:d.dat,ten:"",sdt:""};const CD=window.CherieData;
   return {don:d.id,kh:{id:kh.id,ten:kh.ten,sdt:kh.sdt||""},items:lines(d).map(c=>{const s=byId("sp",c.sp)||{};return {id:c.sp,ten:s.ten||c.sp,size:s.size||"",giaTri:CD.giaTri(s),gia:c.gia}}),
-    nhan:d.nhan,tra:d.tra,luot:d.luot||CD.soLuot(d.nhan,d.tra),phiGiao:d.phiGiao||0,yenTam:!!d.yenTam,coc:d.coc,hinhThuc:d.hinhThuc||"",nv:nvTen(),
+    nhan:d.nhan,tra:d.tra,luot:d.luot||CD.soLuot(d.nhan,d.tra),phiGiao:d.phiGiao||0,giam:d.giam||0,kmTen:d.kmTen||"",yenTam:!!d.yenTam,coc:d.coc,hinhThuc:d.hinhThuc||"",nv:nvTen(),
     onDone:h=>{d.hd=h.id;save();render();if(done)done(h);else openDon(d.id);toast("Đã lưu hợp đồng "+h.id)}}}
 function openDon(id){nextSheet=()=>openDon(id);
   const d=byId("don",id);const kh=byId("kh",d.dat);const ls=lines(d);
@@ -657,7 +661,7 @@ function openDon(id){nextSheet=()=>openDon(id);
    <div class="pills">${ttPill(d)}<span class="pill line">${esc(d.dip)}</span>${d.yenTam?'<span class="pill good">Có Yên tâm</span>':'<span class="pill line">Không Yên tâm</span>'}${d.nhom?`<span class="pill mem">${esc(byId("nhom",d.nhom).ten)}</span>`:""}${daTre(d)?'<span class="pill bad">Đã trả trễ</span>':""}</div>
    ${act?`<div class="nextbox"><h2>Việc cần làm</h2>${act}</div>`:""}
    <button class="row box" type="button" data-kh="${kh.id}" style="border:1px solid var(--line)"><span class="main"><span class="t">${esc(kh.ten)}</span><span class="s">Người đặt · ${esc(kh.sdt||kh.email)}</span></span><span class="r">${segPill(kh.id)}</span></button>
-   <dl class="kv box"><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Hẹn trả</dt><dd>${when(d.tra)}</dd>${d.traTT?`<dt>Trả thực tế</dt><dd>${when(d.traTT)}</dd>`:""}<dt>Tiền thuê</dt><dd>${money(tongThue(d))}</dd><dt>Gói Yên tâm</dt><dd>${d.yenTam?"Có · "+money(window.CherieData.YEN_TAM.phi*lines(d).length):"Không"}</dd><dt>Cọc</dt><dd>${money(d.coc)}${d.hinhThuc?" · "+esc(d.hinhThuc):""}</dd><dt>Trạng thái cọc</dt><dd>${esc(d.ttCoc)}</dd>${d.phi?`<dt>Phí phát sinh</dt><dd>${money(d.phi)}</dd>`:""}${tongHu(d)?`<dt>Phí hư hỏng</dt><dd>${money(tongHu(d))}</dd>`:""}</dl>
+   <dl class="kv box"><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Hẹn trả</dt><dd>${when(d.tra)}</dd>${d.traTT?`<dt>Trả thực tế</dt><dd>${when(d.traTT)}</dd>`:""}<dt>Tiền thuê</dt><dd>${money(tienGoc(d))}</dd>${d.giam?`<dt>Giảm giá</dt><dd>−${money(d.giam)}${d.kmTen?" · "+esc(d.kmTen):""}</dd><dt>Thuê sau giảm</dt><dd><b>${money(tongThue(d))}</b></dd>`:""}<dt>Gói Yên tâm</dt><dd>${d.yenTam?"Có · "+money(window.CherieData.YEN_TAM.phi*lines(d).length):"Không"}</dd><dt>Cọc</dt><dd>${money(d.coc)}${d.hinhThuc?" · "+esc(d.hinhThuc):""}</dd><dt>Trạng thái cọc</dt><dd>${esc(d.ttCoc)}</dd>${d.phi?`<dt>Phí phát sinh</dt><dd>${money(d.phi)}</dd>`:""}${tongHu(d)?`<dt>Phí hư hỏng</dt><dd>${money(tongHu(d))}</dd>`:""}</dl>
    ${d.hd?`<button class="row box" type="button" id="hdXem" style="border:1px solid var(--line)"><span class="main"><span class="t">Hợp đồng ${esc(d.hd)}</span><span class="s">Khách đã ký · CCCD đã lưu</span></span><span class="r"><span class="pill good">Đã ký</span></span></button>`:(d.tt==="Đã đặt"||d.tt==="Đang thuê"?`<div class="banner warn">Chưa ký hợp đồng thuê. Chụp CCCD và để khách ký trước khi giao đồ. <button class="link" type="button" id="hdLap">Lập hợp đồng</button></div>`:"")}
    <section><h2>${ls.length} món · ${soNguoiMac(d)} người mặc</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp),m=byId("kh",c.mac);return `<button class="row" type="button" data-sp="${s.id}"><span class="stripe" style="background:${SWATCH[s.mau]}"></span><span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${esc(m.ten)}${c.hu?" · "+esc(c.moTa):""}</span></span><span class="r">${money(c.gia)}${c.hu?`<br><span class="pill bad">Hư ${k(c.phiHu)}</span>`:""}</span></button>`}).join("")}</div></section>
    ${tripsOfDon(d.id).length?`<section><h2>Chuyến stylist</h2><div class="list">${tripsOfDon(d.id).map(t=>tripRow(t)).join("")}</div></section>`:""}
@@ -734,7 +738,8 @@ function openDonForm(pre){
     <div id="dateErr" class="err" hidden></div>
     <section><h2>Món thuê</h2><div id="lines" style="display:flex;flex-direction:column;gap:8px"></div><button class="btn sm" type="button" id="addLine" style="margin-top:8px">Thêm người mặc / món</button></section>
     <label class="f" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="yt" style="width:auto"> Khách mua Gói Yên tâm (20.000đ/chiếc): miễn phí bẩn khó, sút chỉ, rách nhỏ; mất hoặc hư nặng đền 50% giá trị</label>
-    <div class="box"><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Số lượt</dt><dd id="luotTxt">1</dd><dt>Gói Yên tâm</dt><dd id="ytSum">Không</dd><dt>Cọc đề xuất</dt><dd id="cocDx">0đ</dd></dl></div>
+    <label class="f">Chương trình giảm giá<select id="km"></select><span class="note" id="kmNote"></span></label>
+    <div class="box"><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Số lượt</dt><dd id="luotTxt">1</dd><dt>Giảm giá</dt><dd id="giamTxt">Không</dd><dt>Khách trả tiền thuê</dt><dd id="netTxt"><b>0đ</b></dd><dt>Gói Yên tâm</dt><dd id="ytSum">Không</dd><dt>Cọc đề xuất</dt><dd id="cocDx">0đ</dd></dl></div>
     <div class="two"><label class="f">Tiền cọc thu (đ)<input type="number" id="coc" min="0" step="50000"></label><label class="f">Hình thức cọc<select id="ht"><option>Chuyển khoản</option><option>Tiền mặt</option><option>Giấy tờ (bản gốc)</option></select></label></div>
     <div id="formErr" class="err" hidden></div>
     <button class="btn primary" type="submit">Lưu đơn</button></form>`,root=>{
@@ -776,14 +781,17 @@ function openDonForm(pre){
         const s=byId("sp",l.sp);const kh=macId(l)&&byId("kh",macId(l));const gy=kh&&kh.do&&window.CherieData.goiYSize(kh.do);const sizeNote=gy?` · ${window.CherieData.doVua(s,gy).txt.toLowerCase()} (theo số đo: ${gy.size})`:kh&&kh.size!==s.size?` · lệch size (khách ${kh.size})`:"";
         box.innerHTML=msg?`<span class="err">${esc(msg)}</span>`:`<span class="ok">Trống lịch, tính cả ${s.giat} ngày giặt${esc(sizeNote)}</span>`;});
       const sps=st.lines.map(l=>l.sp).filter(Boolean);
-      const L=(nhan&&tra&&tra>nhan)?window.CherieData.soLuot(nhan,tra):1;$("#luotTxt").textContent=`${L} lượt`;$("#sum").textContent=money(sps.reduce((a,s)=>a+byId("sp",s).gia,0)*L);$("#ytSum").textContent=$("#yt").checked?money(window.CherieData.YEN_TAM.phi*sps.length):"Không";
+      const L=(nhan&&tra&&tra>nhan)?window.CherieData.soLuot(nhan,tra):1;$("#luotTxt").textContent=`${L} lượt`;const thue=sps.reduce((a,s)=>a+byId("sp",s).gia,0)*L;$("#sum").textContent=money(thue);
+      {const sel=$("#km");const cur=sel.value||st.km||"";sel.innerHTML=CD.kmOptions("Trực tiếp",cur,thue);st.km=sel.value;const m=(db.km||[]).find(x=>x.id===st.km);st.giam=CD.kmGiam(m,thue);
+       $("#kmNote").textContent=m?CD.kmMoTa(m)+(m.dk?" · "+m.dk:""):CD.kmChay("Trực tiếp").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam):"Không";$("#netTxt").innerHTML="<b>"+money(thue-st.giam)+"</b>"}
+      $("#ytSum").textContent=$("#yt").checked?money(window.CherieData.YEN_TAM.phi*sps.length):"Không";
       const dx=cocDeXuat(pk.id,sps);$("#cocDx").textContent=money(dx);if(st.coc===null)$("#coc").placeholder=String(dx);
       const r=pk.id;$("#riskBox").innerHTML=r&&phanKhuc(r)==="Rủi ro"?`<div class="banner bad">${esc(byId("kh",r).ten)} là khách rủi ro: cọc đề xuất +50%.</div>`:r&&hang(r)==="Muse"?`<div class="banner info">Khách hạng Muse: cọc giảm 50%.</div>`:"";
     }
     pk=khPickBind(root,"dat",pre.dat,()=>drawLines());
     const reTra=()=>{if(!st.traTay)$("#tra").value=window.CherieData.hanTra($("#nhan").value,+$("#luot").value)};
     $("#nhan").onchange=()=>{reTra();drawLines()};$("#luot").onchange=()=>{st.traTay=false;reTra();drawLines()};$("#tra").onchange=()=>{st.traTay=true;drawLines()};
-    $("#coc").oninput=()=>{st.coc=$("#coc").value};$("#yt").onchange=check;
+    $("#coc").oninput=()=>{st.coc=$("#coc").value};$("#yt").onchange=check;$("#km").onchange=()=>{st.km=$("#km").value;check()};
     $("#addLine").onclick=()=>{st.lines.push({mac:"@dat",ten:"",sp:""});drawLines();const q=root.querySelector(`[data-q="${st.lines.length-1}"]`);if(q)q.focus()};
     drawLines();
     $("#f").onsubmit=e=>{e.preventDefault();const err=$("#formErr");const nhan=$("#nhan").value,tra=$("#tra").value;
@@ -795,7 +803,7 @@ function openDonForm(pre){
       const seen={};for(const l of ls){const c=conflict(l.sp,nhan,tra);if(c)return fail(`${byId("sp",l.sp).ten}: ${c}`);if(seen[l.sp])return fail("Một món bị chọn hai lần.");seen[l.sp]=1}
       const dat=pk.luu("Tại quầy");const moi={};ls.forEach(l=>{if(l.mac==="@dat")l.macId=dat;else if(l.mac==="@moi"){const t=l.ten.trim().toLowerCase();l.macId=moi[t]||(moi[t]=khMoiTen(l.ten))}else l.macId=l.mac});
       const id=nextId("don","D");const dx=cocDeXuat(dat,ls.map(l=>l.sp));const coc=st.coc===null||st.coc===""?dx:+st.coc;
-      db.don.push({id,dat,nhom:$("#nhom").value,dip:$("#dip").value,nhan,tra,traTT:"",tt:"Đã đặt",tao:iso(new Date()),nv:(()=>{try{return JSON.parse(localStorage.getItem("cherie-gas-me")||"{}").ten||""}catch(e){return ""}})(),coc,hinhThuc:$("#ht").value,ttCoc:coc>0?"Đang giữ":"Chưa cọc",phi:0,note:"",yenTam:$("#yt").checked});
+      db.don.push({id,dat,nhom:$("#nhom").value,dip:$("#dip").value,nhan,tra,traTT:"",tt:"Đã đặt",tao:iso(new Date()),nv:(()=>{try{return JSON.parse(localStorage.getItem("cherie-gas-me")||"{}").ten||""}catch(e){return ""}})(),coc,hinhThuc:$("#ht").value,ttCoc:coc>0?"Đang giữ":"Chưa cọc",phi:0,note:"",yenTam:$("#yt").checked,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",giam:st.giam||0});
       ls.forEach(l=>db.ct.push({id:nextId("ct","CT"),don:id,mac:l.macId,sp:l.sp,gia:byId("sp",l.sp).gia,hu:false,moTa:"",phiHu:0}));
       save();calStart=addDays(NOW,-2);go("cal");openDon(id);toast(`Đã lưu đơn ${id}`)};
   });

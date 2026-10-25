@@ -246,7 +246,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=ee81eed8"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=e5d5cd3b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -435,7 +435,8 @@ function openOrder(pre){
    <section><h2>Món thuê</h2><div id="lines" style="display:flex;flex-direction:column;gap:8px"></div><button class="btn sm" type="button" id="add" style="margin-top:8px">Thêm món</button></section>
    <div class="seg2" role="group" aria-label="Cách nhận"><button type="button" class="chip" data-g="0" aria-pressed="${!st.giao}">Nhận tại tiệm</button><button type="button" class="chip" data-g="1" aria-pressed="${st.giao}">Stylist giao tận nơi</button></div>
    <div id="noiBox" ${st.giao?"":"hidden"} style="display:flex;flex-direction:column;gap:10px"><label class="f">Khu vực<select id="vung">${window.CherieData.VUNG.map(v=>`<option value="${v.id}">${v.ten} · ${k(v.phi)}</option>`).join("")}</select></label><p class="note">${window.CherieData.NGOAI_VUNG}</p><label class="f">Khách sạn, số phòng hoặc địa chỉ<input id="noi" type="text" value="${esc(st.noi)}"></label></div>
-   <div class="box"><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Cọc</dt><dd id="coc">0đ</dd></dl></div>
+   <label class="f">Chương trình giảm giá<select id="km"></select><span class="note" id="kmNote"></span></label>
+   <div class="box"><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Giảm giá</dt><dd id="giamTxt">Không</dd><dt>Khách trả (thuê + phí giao)</dt><dd id="netTxt"><b>0đ</b></dd><dt>Cọc</dt><dd id="coc">0đ</dd></dl></div>
    <label class="f">Trạng thái cọc<select id="ttCoc"><option>Chờ chuyển khoản</option><option>Đang giữ</option></select></label>
    <label class="f">Ghi chú cho quầy<input id="note" type="text" value="${esc(st.note)}"></label>
    <div id="err" class="err" hidden></div>
@@ -446,8 +447,10 @@ function openOrder(pre){
       root.querySelectorAll("[data-i]").forEach(s=>s.onchange=()=>{st.items[+s.dataset.i]=s.value;check()});
       root.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{st.items.splice(+b.dataset.rm,1);draw()});check()}
     function check(){st.items.forEach((id,i)=>{const m=root.querySelector(`[data-m="${i}"]`);if(!id){m.innerHTML="";return}const c=conflict(id,$("#nhan").value,$("#tra").value);m.innerHTML=c?`<span class="err">${esc(c)}</span>`:'<span class="ok">Trống lịch</span>'});
-      const ss=st.items.map(i=>byId("sp",i)).filter(Boolean);const L=window.CherieData.soLuot($("#nhan").value,$("#tra").value);$("#sum").textContent=money(ss.reduce((a,s)=>a+s.gia,0)*L+(st.giao?window.CherieData.phiVung($("#vung").value):0));$("#coc").textContent=money(ss.reduce((a,s)=>a+s.coc,0))}
-    $("#nhan").onchange=()=>{$("#tra").value=window.CherieData.hanTra($("#nhan").value,1);draw()};$("#tra").onchange=draw;$("#vung").onchange=check;$("#add").onclick=()=>{st.items.push("");draw()};
+      const ss=st.items.map(i=>byId("sp",i)).filter(Boolean);const L=window.CherieData.soLuot($("#nhan").value,$("#tra").value);const CDk=window.CherieData,thue=ss.reduce((a,s)=>a+s.gia,0)*L,giao=st.giao?CDk.phiVung($("#vung").value):0;$("#sum").textContent=money(thue);
+      {const sel=$("#km");sel.innerHTML=CDk.kmOptions("Online",st.km||"",thue);st.km=sel.value;const m=(db.km||[]).find(x=>x.id===st.km);st.giam=CDk.kmGiam(m,thue);
+       $("#kmNote").textContent=m?CDk.kmMoTa(m)+(m.dk?" · "+m.dk:""):CDk.kmChay("Online").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam):"Không";$("#netTxt").innerHTML="<b>"+money(thue-st.giam+giao)+"</b>"}$("#coc").textContent=money(ss.reduce((a,s)=>a+s.coc,0))}
+    $("#nhan").onchange=()=>{$("#tra").value=window.CherieData.hanTra($("#nhan").value,1);draw()};$("#tra").onchange=draw;$("#vung").onchange=check;$("#km").onchange=()=>{st.km=$("#km").value;check()};$("#add").onclick=()=>{st.items.push("");draw()};
     root.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{st.giao=b.dataset.g==="1";root.querySelectorAll("[data-g]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$("#noiBox").hidden=!st.giao;check()});
     draw();
     $("#f").onsubmit=e=>{e.preventDefault();const err=$("#err");const fail=m=>{err.textContent=m;err.hidden=false};
@@ -462,7 +465,7 @@ function openOrder(pre){
       let Lx=L||(p?(db.lead||[]).find(x=>x.id==="84"+p.slice(1)):null);
       if(!Lx&&p){Lx=upsertLead(p,kh.ten,$("#kenh").value,false)}
       const coc=items.reduce((a,i)=>a+byId("sp",i).coc,0);const id=nextId("don","D");
-      db.don.push({id,dat:khId,nhom:"",dip:$("#dip").value,nhan,tra,traTT:"",tt:"Đã đặt",coc,hinhThuc:"Chuyển khoản",ttCoc:$("#ttCoc").value,phi:0,note:$("#note").value.trim(),kenh:"Online",nguonDon:$("#kenh").value,nvTao:"CS online",taoLuc:nowIso(),giaoTanNoi:st.giao,vung:st.giao?$("#vung").value:"",phiGiao:st.giao?window.CherieData.phiVung($("#vung").value):0,noi:st.giao?$("#noi").value.trim():"",lead:Lx?Lx.id:"",quayDaNhan:false});
+      db.don.push({id,dat:khId,nhom:"",dip:$("#dip").value,nhan,tra,traTT:"",tt:"Đã đặt",coc,hinhThuc:"Chuyển khoản",ttCoc:$("#ttCoc").value,phi:0,note:$("#note").value.trim(),kenh:"Online",nguonDon:$("#kenh").value,nvTao:"CS online",taoLuc:nowIso(),giaoTanNoi:st.giao,vung:st.giao?$("#vung").value:"",phiGiao:st.giao?window.CherieData.phiVung($("#vung").value):0,noi:st.giao?$("#noi").value.trim():"",lead:Lx?Lx.id:"",quayDaNhan:false,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",giam:st.giam||0});
       items.forEach(i=>db.ct.push({id:nextId("ct","CT"),don:id,mac:khId,sp:i,gia:byId("sp",i).gia,hu:false,moTa:"",phiHu:0}));
       if(Lx){Lx.giaiDoan="Đã thuê";Lx.kh=khId;Lx.don=id}
       if(pre.yc){const y=(db.yc||[]).find(x=>x.id===pre.yc);if(y){y.tt="Đã chốt";y.don=id}}
@@ -471,7 +474,7 @@ function openOrder(pre){
 }
 function openDonView(id){nextSheet=()=>openDonView(id);const d=byId("don",id);if(!d){closeSheet();return}const kh=byId("kh",d.dat)||{ten:d.dat,sdt:""};const ls=lines(d);
   sheet(`Đơn ${d.id}`,`<div class="pills"><span class="pill mem">Online · ${esc(d.nguonDon||"")}</span><span class="pill line">${esc(d.tt)}</span><span class="pill ${d.quayDaNhan?"good":"warn"}">${d.quayDaNhan?"Quầy đã nhận":"Chờ quầy nhận"}</span></div>
-   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd><dt>Cọc</dt><dd>${money(d.coc)} · ${esc(d.ttCoc)}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl>
+   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd>${d.giam?`<dt>Giảm giá</dt><dd>−${money(d.giam)}${d.kmTen?" · "+esc(d.kmTen):""}</dd>`:""}<dt>Cọc</dt><dd>${money(d.coc)} · ${esc(d.ttCoc)}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl>
    <section><h2>${ls.length} món</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id}</span></span><span class="r">${money(c.gia)}</span></div>`}).join("")}</div></section>
    ${d.note?`<p class="note">Ghi chú cho quầy: ${esc(d.note)}</p>`:""}
    <p class="note">Quầy chuẩn bị đồ, nhận cọc tại tiệm hoặc cử stylist giao. Trạng thái cập nhật về đây khi quầy thao tác.</p>`,root=>bind(root))}
