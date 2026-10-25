@@ -197,6 +197,20 @@ label.row.off{cursor:not-allowed}
 .recon span{font-size:11px;color:var(--muted)}
 .recon i{font-style:normal;color:var(--muted);font-size:18px}
 .recon .bad b{color:var(--bad)}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.whosel{border:1px solid var(--line);border-radius:999px;background:var(--surface);font:inherit;font-size:13px;font-weight:600;color:var(--ink);padding:6px 10px}
+.homebtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;font-size:15px}
+.nextc{border:1.5px solid var(--wine);border-radius:var(--r);background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:10px}
+.nextc .when{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--wine)}
+.nextc .big{font-family:var(--display);font-size:24px;line-height:1.15}
+.nextc .meta{font-size:13.5px;color:var(--muted)}
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qa .btn{justify-content:center;text-align:center;text-decoration:none}
+details.more{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+details.more>summary{padding:12px;font-weight:600;font-size:13.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+details.more>summary::after{content:"Xem";color:var(--wine)}
+details.more[open]>summary::after{content:"Ẩn"}
+details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
 .footbar{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom,0px));background:var(--bg);padding-block:10px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
 .sel{user-select:all}
@@ -219,9 +233,8 @@ label.row.off{cursor:not-allowed}
 
   <div class="app">
     <header class="top gut">
-      <div class="top-row"><span class="mark">CHÉRIE</span><span class="branch">Stylist · <select id="who" aria-label="Bạn là ai" style="border:0;background:none;font:inherit;color:inherit"></select></span></div>
-      <div class="demo"><span>Bản chính thức · <b id="clock"></b></span></div>
-      <div class="demo sync"><span id="sync" class="syncchip" role="status">Đang tải…</span><a class="link" href="/quay/">Mở app Quầy</a></div>
+      <div class="top-row"><span class="mark">CHÉRIE</span><span class="hdr-r"><select id="who" class="whosel" aria-label="Bạn là ai"></select><a id="homeSlot" class="homebtn" href="/nhansu/" aria-label="Trang nhân sự, đổi app">☰</a></span></div>
+      <div class="demo sync"><span id="sync" class="syncchip" role="status">Đang tải…</span><b id="clock"></b></div>
     </header>
     <main class="gut" id="view"></main>
     <nav class="tabs three" aria-label="Điều hướng">
@@ -232,7 +245,7 @@ label.row.off{cursor:not-allowed}
   </div>
 </div>
 
-<script src="/gasdb.js?v=8f3cd76d"></script><script src="/shared.js?v=6ffc7390"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=5f1f94a4"></script><script src="/shared.js?v=6ffc7390"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -268,7 +281,7 @@ function tripRow(t,withDay){const c=kh(t.kh);const n=t.loai==="thu"?(t.d&&t.d.pi
   const thu=["CN","T2","T3","T4","T5","T6","T7"][new Date(t.ngay+"T00:00").getDay()];
   return `<button class="row" type="button" data-trip="${t.id}"><span class="time">${withDay?`${thu} ${dm(t.ngay+"T")}<br>`:""}${t.gio}</span><span class="main"><span class="t">${esc(TYPES[t.loai].name)} · ${esc(c.ten)}</span><span class="s">${esc(t.noi)} · ${n}</span></span><span class="r">${tripPill(t)}</span></button>`}
 function syncChip(st){const el=document.getElementById("sync");if(!el)return;
-  const m={live:["live","Đồng bộ trực tiếp với quầy"],connecting:["","Đang kết nối kho chung…"],local:["warn","Chỉ đồng bộ giữa các tab trên máy này"],empty:["warn","Kho chung chưa có dữ liệu"],readonly:["warn","Chỉ xem, không ghi được kho chung"],full:["warn","Kho chung đã đầy"],error:["warn","Mất kết nối, đang thử lại"]}[st]||["",st];
+  const m={live:["live","Đã đồng bộ với quầy"],connecting:["","Đang kết nối kho chung…"],local:["warn","Chỉ đồng bộ giữa các tab trên máy này"],empty:["warn","Kho chung chưa có dữ liệu"],readonly:["warn","Chỉ xem, không ghi được kho chung"],full:["warn","Kho chung đã đầy"],error:["warn","Mất kết nối, đang thử lại"]}[st]||["",st];
   el.className="syncchip "+m[0];el.textContent=m[1]}
 
 /* helpers */
@@ -317,22 +330,30 @@ function render(){
 }
 
 /* ---------- Hôm nay ---------- */
+function untilTxt(t){const m=Math.round((D(t.ngay+"T"+t.gio)-new Date())/6e4);if(t.ngay!==TODAY)return["CN","T2","T3","T4","T5","T6","T7"][new Date(t.ngay+"T00:00").getDay()]+" "+dm(t.ngay+"T")+" lúc "+t.gio;if(m<-5)return "Trễ "+(-m>=60?Math.floor(-m/60)+" giờ "+(-m%60)+" phút":(-m)+" phút")+" · hẹn "+t.gio;if(m<=5)return "Đến giờ · "+t.gio;return "Còn "+(m>=60?Math.floor(m/60)+" giờ "+(m%60)+" phút":m+" phút")+" · "+t.gio}
+function mapUrl(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q+", Đà Nẵng")}
+function quickBtns(t){const c=kh(t.kh);return `<div class="qa">${c.sdt?`<a class="btn" href="tel:${esc(c.sdt)}">Gọi khách</a>`:'<span class="btn" aria-disabled="true">Chưa có số</span>'}${t.noi?`<a class="btn" href="${mapUrl(t.noi)}" target="_blank" rel="noopener">Chỉ đường</a>`:'<span class="btn" aria-disabled="true">Chưa có địa chỉ</span>'}</div>`}
 function renderToday(){
-  const trips=myTrips().sort((a,b)=>a.gio<b.gio?-1:1);
+  const trips=myTrips().sort((a,b)=>a.gio<b.gio?-1:1);const o=myOther();
   const done=trips.filter(t=>t.tt==="Hoàn tất").length;
   const bag=db.sp.filter(s=>s.tt==="Đang mang đi").length;
-  const next=trips.find(t=>t.tt!=="Hoàn tất"&&t.tt!=="Lệch – chờ quản lý");
+  const lech=db.trips.filter(t=>t.stylist===STYLIST&&String(t.tt).startsWith("Lệch"));
+  const open=[...o.tre,...trips.filter(t=>t.tt!=="Hoàn tất"&&!String(t.tt).startsWith("Lệch")),...o.toi.filter(t=>t.tt!=="Hoàn tất")];
+  const next=open[0];
+  const nextCard=next?(()=>{const c=kh(next.kh),n=tripItems(next).length,dn=next.don?byId("don",next.don):null;return `<div class="nextc"><span class="when">${next.tt==="Đang làm"?"Đang làm dở · ":"Chuyến kế tiếp · "}${esc(untilTxt(next))}</span>
+    <span class="big">${esc(TYPES[next.loai].name)} · ${esc(c.ten)}</span>
+    <span class="meta">${esc(next.noi||"")} · ${n} món${dn&&dn.yenTam?" · có Gói Yên tâm":""}</span>
+    ${quickBtns(next)}
+    <button class="btn primary block" type="button" data-trip="${next.id}">${next.tt==="Đang làm"?"Làm tiếp":"Mở chuyến, bắt đầu"}</button></div>`})():`<div class="empty">Chưa có chuyến nào cần đi. Quầy cử chuyến là hiện ở đây ngay.</div>`;
+  const rest=t=>t!==next;
   view.innerHTML=`
-  <div><h1>Lịch đi${STYLIST?" của "+esc(STYLIST):""}</h1><p class="sub">${(()=>{const d=new Date();return ["Chủ nhật","Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy"][d.getDay()]+", "+d.getDate()+" tháng "+(d.getMonth()+1)})()} · ${trips.length} chuyến${next?` · kế tiếp ${next.gio}`:""}</p></div>
-  <div class="stats" style="grid-template-columns:repeat(3,1fr)">
-    <div class="stat"><div class="n">${done}/${trips.length}</div><div class="l">Chuyến xong</div></div>
-    <div class="stat"><div class="n">${bag}</div><div class="l">Món trong túi</div></div>
-    <div class="stat ${trips.some(t=>t.tt.startsWith("Lệch"))?"alert":""}"><div class="n">${trips.filter(t=>t.tt.startsWith("Lệch")).length}</div><div class="l">Phiếu lệch</div></div>
-  </div>
-  ${(()=>{const o=myOther();return o.tre.length?`<section><h2>Còn dở từ hôm trước · ${o.tre.length}</h2><div class="list">${o.tre.map(t=>tripRow(t,true)).join("")}</div></section>`:""})()}
-  <section><h2>Hôm nay</h2><div class="list">${trips.length?"":'<div class="empty">Hôm nay chưa có chuyến nào.</div>'}${trips.map(t=>tripRow(t,false)).join("")}</div></section>
-  ${(()=>{const o=myOther();return `<section><h2>Sắp tới · ${o.toi.length}</h2><div class="list">${o.toi.length?o.toi.map(t=>tripRow(t,true)).join(""):'<div class="empty">Chưa có chuyến nào trong 14 ngày tới.</div>'}</div></section>`})()}
-  <p class="note">Quầy phân công chuyến, chuyến hiện ở đây ngay khi quầy lưu.</p>`;
+  <div><h1>Chào ${STYLIST?esc(STYLIST):"bạn"}</h1><p class="sub">Hôm nay ${done}/${trips.length} chuyến xong${bag?` · ${bag} món đang trong túi`:""}</p></div>
+  ${!STYLIST?'<div class="banner warn">Chọn tên của bạn ở góc trên để thấy chuyến được giao.</div>':""}
+  ${lech.length?`<div class="banner bad">${lech.length} chuyến còn thiếu món, quầy đang kiểm tra. Nếu tìm thấy món, mang về tiệm.</div>`:""}
+  ${nextCard}
+  ${o.tre.filter(rest).length?`<section><h2>Còn dở từ hôm trước · ${o.tre.filter(rest).length}</h2><div class="list">${o.tre.filter(rest).map(t=>tripRow(t,true)).join("")}</div></section>`:""}
+  <section><h2>Hôm nay · ${trips.length} chuyến</h2><div class="list">${trips.filter(rest).length?trips.filter(rest).map(t=>tripRow(t,false)).join(""):`<div class="empty">${trips.length?"Không còn chuyến nào khác hôm nay.":"Hôm nay chưa có chuyến nào."}</div>`}</div></section>
+  ${o.toi.filter(rest).length?`<details class="more"><summary>Sắp tới 14 ngày · ${o.toi.filter(rest).length} chuyến</summary><div class="list">${o.toi.filter(rest).map(t=>tripRow(t,true)).join("")}</div></details>`:""}`;
   view.querySelectorAll("[data-trip]").forEach(b=>b.onclick=()=>{openTrip=b.dataset.trip;render();window.scrollTo(0,0)});
 }
 
@@ -354,11 +375,11 @@ function renderLog(){
 /* ---------- scan box ---------- */
 function scanBox(ids,doneMap,label){
   return `<div class="scan box"><label class="f" for="scanIn">${esc(label)}</label>
-   <div class="scanrow"><input id="scanIn" class="search mono" type="text" autocomplete="off" autocapitalize="characters" placeholder="Quét QR hoặc gõ mã, nhấn Enter"><button class="btn primary" type="button" id="scanGo">Quét</button></div>
+   <div class="scanrow"><input id="scanIn" class="search mono" type="text" autocomplete="off" autocapitalize="characters" placeholder="Quét QR hoặc gõ mã đầm"><button class="btn primary" type="button" id="scanGo">Quét</button></div>
    <div id="scanMsg" class="err" hidden></div>
    <div class="prog"><span style="width:${ids.length?Object.keys(doneMap).filter(x=>ids.includes(x)).length/ids.length*100:0}%"></span></div>
    <p class="note" style="margin:0">${Object.keys(doneMap).filter(x=>ids.includes(x)).length}/${ids.length} món đã quét</p></div>
-   <div class="list">${ids.map(id=>{const s=byId("sp",id);const ok=doneMap[id];return `<div class="row">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s mono">${id}</span></span><span class="r">${ok?`<span class="pill good">Đã quét ${hm(ok)}</span>`:`<button class="btn sm ghost" type="button" data-sim="${id}">Giả lập quét</button>`}</span></div>`}).join("")}</div>`;
+   <div class="list">${ids.map(id=>{const s=byId("sp",id);const ok=doneMap[id];return `<div class="row">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s mono">${id}</span></span><span class="r">${ok?`<span class="pill good">Đã quét ${hm(ok)}</span>`:`<button class="btn sm ghost" type="button" data-sim="${id}">Chọn tay</button>`}</span></div>`}).join("")}</div>`;
 }
 function bindScan(ids,doneMap,onOk){
   const inp=view.querySelector("#scanIn"),msg=view.querySelector("#scanMsg");
@@ -388,14 +409,15 @@ function renderTrip(){
   const t=byId("trips",openTrip),c=kh(t.kh),T=TYPES[t.loai],d=t.d,closed=t.tt==="Hoàn tất"||t.tt.startsWith("Lệch");
   if(t.tt==="Chưa đi"&&!closed){t.tt="Đang làm";save()}
   const step=t.step;
-  const head=`<button class="link back" type="button" id="back">← Lịch hôm nay</button>
-  <div><p class="eyebrow">${t.gio} · ${esc(T.name)}</p><h1>${esc(c.ten)}</h1></div>
-  <dl class="kv box"><dt>Địa điểm</dt><dd>${esc(t.noi)}</dd><dt>Liên hệ</dt><dd><span class="mono sel">${esc(c.sdt)}</span> <button class="link" type="button" id="copyPhone">Chép</button></dd>${t.don?`<dt>Đơn</dt><dd>${t.don} · cọc ${k((byId("don",t.don)||{}).coc)} ${esc(((byId("don",t.don)||{}).ttCoc||"").toLowerCase())}</dd>`:""}${t.loai==="thu"?`<dt>Dùng đồ</dt><dd>${dm(t.dungNhan)} ${hm(t.dungNhan)}–${hm(t.dungTra)} · ${esc(t.dip)}</dd><dt>Size · ngân sách</dt><dd>${c.size} · ${k(t.nganSach)}/set</dd>`:""}</dl>
+  const head=`<button class="link back" type="button" id="back">← Danh sách chuyến</button>
+  <div><p class="eyebrow">${t.ngay===TODAY?"Hôm nay":dm(t.ngay+"T")} ${t.gio} · ${esc(T.name)}</p><h1>${esc(c.ten)}</h1></div>
+  ${closed?"":quickBtns(t)}<dl class="kv box"><dt>Địa điểm</dt><dd>${esc(t.noi)}</dd><dt>Liên hệ</dt><dd><span class="mono sel">${esc(c.sdt)}</span> <button class="link" type="button" id="copyPhone">Chép</button></dd>${t.don?`<dt>Đơn</dt><dd>${t.don} · cọc ${k((byId("don",t.don)||{}).coc)} ${esc(((byId("don",t.don)||{}).ttCoc||"").toLowerCase())}</dd>`:""}${t.loai==="thu"?`<dt>Dùng đồ</dt><dd>${dm(t.dungNhan)} ${hm(t.dungNhan)}–${hm(t.dungTra)} · ${esc(t.dip)}</dd><dt>Size · ngân sách</dt><dd>${c.size} · ${k(t.nganSach)}/set</dd>`:""}</dl>
   ${t.note?`<p class="note">${esc(t.note)}</p>`:""}
   <ol class="stepper" aria-label="Các bước">${T.steps.map((s,i)=>`<li class="${i<step||closed?"done":i===step?"cur":""}"><span>${i+1}</span>${esc(s)}</li>`).join("")}</ol>`;
   let body="",foot="",bind=()=>{};
   if(closed){body=summary(t)}
   else ({thu:thuStep,giao:giaoStep,nhan:nhanStep})[t.loai](t,c,step,o=>{body=o.body;foot=o.foot||"";bind=o.bind||(()=>{})});
+  if(!t.d.checkin&&body.includes('id="checkin"'))foot="";
   view.innerHTML=head+body+(foot?`<div class="footbar">${foot}</div>`:"");
   view.querySelector("#back").onclick=()=>{openTrip=null;render();window.scrollTo(0,0)};
   view.querySelector("#copyPhone").onclick=()=>{const v=c.sdt;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(()=>toast("Đã chép số điện thoại"),()=>toast("Chọn số để chép thủ công"))}else toast("Chọn số để chép thủ công")};
@@ -406,8 +428,8 @@ function nextBtn(ok,label,why){return `<button class="btn primary" type="button"
 function goNext(t,fn){const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{if(fn)fn();t.step++;save();render();window.scrollTo(0,0)}}
 
 function checkinBlock(t){const d=t.d;
-  return d.checkin?`<div class="banner good">Đã đến lúc ${hm(d.checkin)} · ${esc(t.noi)}</div>`:`<button class="btn primary block" type="button" id="checkin">Đã đến nơi, bắt đầu</button><p class="note">Ghi giờ và vị trí đến. AppSheet lấy vị trí bằng HERE() khi bấm.</p>`}
-function bindCheckin(t){const b=view.querySelector("#checkin");if(b)b.onclick=()=>{atLeast(t.gio);tick(3);t.d.checkin=db.clock;save();render()}}
+  return d.checkin?`<div class="banner good">Đã đến lúc ${hm(d.checkin)} · ${esc(t.noi)}</div>`:`<button class="btn primary block" type="button" id="checkin">Tôi đã đến nơi</button><p class="note">Bấm khi gặp khách. App ghi giờ đến để tính đúng giờ trả.</p>`}
+function bindCheckin(t){const b=view.querySelector("#checkin");if(b)b.onclick=()=>{atLeast(t.gio);tick(3);t.d.checkin=db.clock;save();render();if(t.loai==="nhan"&&t.step===0){const n=view.querySelector("#nextStep");if(n&&!n.disabled)n.click()}}}
 
 /* Thử đồ */
 function thuStep(t,c,step,out){const d=t.d;
@@ -523,7 +545,7 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
         <label class="f full" for="lv-${i}">Mức tình trạng<select id="lv-${i}" data-lv="${i}">${LEVELS.map(L=>`<option value="${L[0]}" ${L[0]===lv?"selected":""}>${L[0]} · ${L[1]}${L[2]==null?" · đền theo giá trị đầm":L[2]?" · "+k(L[2]):""}${curDon&&curDon.yenTam&&L[0]>"L1"?" · có Gói Yên tâm":""}</option>`).join("")}</select></label>
         ${lv!=="L0"&&lv!=="L1"?`<label class="f full" for="mt-${i}">Mô tả và vị trí hư hỏng<input id="mt-${i}" data-mt="${i}" type="text" value="${esc(d.mota[i]||"")}"></label>`:""}
         <span class="s full">Ảnh lúc nhận: ${CDx.ttSo(don.id,"nhan",i)}/4${anhOk(i)?" · đủ":lv>"L1"&&CDx.ttDu(don.id,"nhan",i)?" · thiếu ảnh cận vết":""}</span></div>`}).join("")}</div>
-        <div class="btns" style="margin-top:8px"><button class="btn primary" type="button" id="ttN">Chụp ảnh lúc nhận</button><button class="btn" type="button" id="ttS">So với ảnh lúc giao</button></div>
+        <div class="btns" style="margin-top:8px"><button class="btn ${ids.filter(i=>done[i]).every(anhOk)?"":"primary"}" type="button" id="ttN">${ids.filter(i=>done[i]).every(anhOk)?"Xem, chụp lại ảnh":"Chụp ảnh lúc nhận"}</button><button class="btn" type="button" id="ttS">So với ảnh lúc giao</button></div>
         <p class="note">${curDon&&curDon.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách nhỏ được miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: tính phí theo mức tình trạng."} Phí là đề xuất; quầy duyệt khi kiểm đồ trước khi trừ cọc.</p></section>`:""}`,
       foot:nextBtn(all,"Tiếp tục ký biên bản",whyN),
       bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Nhận trả",t.id,t.noi,"Chờ kiểm tra");done[id]=db.clock});

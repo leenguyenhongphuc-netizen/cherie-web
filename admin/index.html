@@ -167,8 +167,8 @@ nav.tabs button[aria-current="page"]{color:var(--wine);font-weight:600}
 </style>
 
 <header class="top"><div class="wrap gut">
-  <div class="r1"><span class="mark">CHÉRIE<small>Admin</small></span><nav class="links" aria-label="Các app"><a href="/nhansu/">Tất cả</a><a href="/quay/">Quầy</a><a href="/marketing/">Marketing</a><a href="/stylist/">Stylist</a><a href="/">Website</a></nav></div>
-  <div class="r2"><span id="sync" class="syncchip" role="status">Đang tải…</span><span>Bản chính thức</span></div>
+  <div class="r1"><span class="mark">CHÉRIE<small>Admin</small></span><a id="homeSlot" class="homebtn" href="/nhansu/" aria-label="Trang nhân sự, đổi app">☰</a></div>
+  <div class="r2"><span id="sync" class="syncchip" role="status">Đang tải…</span></div>
 </div></header>
 <main class="wrap gut" id="view"></main>
 <nav class="tabs" aria-label="Điều hướng">
@@ -180,7 +180,7 @@ nav.tabs button[aria-current="page"]{color:var(--wine);font-weight:600}
   <button type="button" data-tab="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Nhập liệu</button>
 </nav>
 
-<script src="/gasdb.js?v=8f3cd76d"></script><script src="/shared.js?v=6ffc7390"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=5f1f94a4"></script><script src="/shared.js?v=6ffc7390"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -354,11 +354,28 @@ function series(a,b,g){const ks=buckets(a,b,g);const idx={};ks.forEach((k,i)=>id
 function hanhTrinh(s){const dk=duKien(),tt=tamTinh(),R=s.R;const row=(t,n,v,sub,c)=>`<div class="ln"><span class="nm"><b>${t}</b> · ${n} đơn<br><span class="note">${sub}</span></span><b style="color:${c}">${tr(v)}</b></div>`;
   return card("c0","Hành trình doanh thu","Một đơn đi qua 3 bước. Chỉ bước 3 được tính vào doanh thu và P&amp;L.",`<div class="pl">${row("1. Đã đặt, chưa giao",dk.length,sumRev(dk).tong,"Dự kiến theo giá thuê, Gói Yên tâm và phí đến tận nơi","var(--muted)")}${row("2. Đang thuê, chưa trả",tt.length,sumRev(tt).tong,"Tạm tính, chốt khi khách trả và kiểm đồ","var(--muted)")}${row("3. Đã trả trong kỳ",s.n,s.dt,"Ghi nhận doanh thu","var(--pos)")}
     <div class="ln tot"><span class="nm">Trong đó (bước 3)</span><b></b><small></small></div>${[["Tiền thuê",R.thue],["Gói Yên tâm",R.yt],["Phí đến tận nơi",R.giao],["Phí trả trễ",R.tre],["Phí hư hỏng (khách đền)",R.hu]].map(([n,v])=>`<div class="ln"><span class="nm">${n}</span><b>${tr(v)}</b><small>${s.dt?pct(v/s.dt):"–"}</small></div>`).join("")}</div>`,"")}
+function vanHanh(a,b){const os=orders(a,b),now=new Date();const D2=x=>new Date(x);
+  const dung=os.filter(d=>!(d.traTT&&(D2(d.traTT)-D2(d.tra))>36e5)).length;
+  const coAnh=os.filter(d=>{const ls=lines(d);return ls.length&&ls.every(c=>CD.ttDu&&CD.ttDu(d.id,"giao",c.sp)&&CD.ttDu(d.id,"nhan",c.sp))}).length;
+  const tr=db.trips.filter(t=>t.loai!=="thu"&&t.ngay>=a&&t.ngay<=b&&t.d&&t.d.checkin&&!(db.don.find(d=>d.id===t.don)||{}).demo);
+  const dg=tr.filter(t=>(D2(t.d.checkin)-D2(t.ngay+"T"+t.gio))<=15*6e4).length;
+  const yt=os.filter(d=>d.yenTam).length;
+  const live=db.don.filter(d=>!d.demo);
+  const qh=live.filter(d=>d.tt==="Đang thuê"&&now>D2(d.tra));
+  const ch=live.filter(d=>d.tt==="Đã trả"&&(d.ttCoc==="Chờ hoàn"||d.ttCoc==="Đang giữ"));const ch24=ch.filter(d=>d.traTT&&(now-D2(d.traTT))>24*36e5);
+  const ck=db.sp.filter(s=>s.tt==="Chờ kiểm tra").length,lech=db.trips.filter(t=>String(t.tt).startsWith("Lệch")).length;
+  const P=(x,n)=>n?Math.round(x/n*100)+"%":"–";const col=(x,n,ok)=>!n?"var(--muted)":x/n>=ok?"var(--pos)":"var(--neg)";
+  const m=(l,v,sub,c)=>`<div class="kpi"><span class="l">${l}</span><span class="v" style="color:${c||"inherit"}">${v}</span><span class="d">${sub}</span></div>`;
+  return card("cvh","Vận hành quầy và stylist","Tỷ lệ tính trên đơn đã trả trong kỳ. Hàng dưới là việc đang tồn ngay lúc này, mục tiêu là 0.",
+   `<div class="kpis">${m("Trả đúng hẹn",P(dung,os.length),`${dung}/${os.length} đơn`,col(dung,os.length,.9))}${m("Đủ ảnh giao và nhận",P(coAnh,os.length),`${coAnh}/${os.length} đơn có đủ 4 ảnh mỗi món`,col(coAnh,os.length,.95))}${m("Stylist đến đúng giờ",P(dg,tr.length),`${dg}/${tr.length} chuyến, trễ dưới 15 phút`,col(dg,tr.length,.9))}${m("Mua Gói Yên tâm",P(yt,os.length),`${yt}/${os.length} đơn`)}</div>
+   <div class="kpis" style="margin-top:10px">${m("Đơn quá hạn trả",qh.length,qh.length?"Quầy cần gọi khách":"Không có",qh.length?"var(--neg)":"var(--pos)")}${m("Cọc chờ hoàn",ch.length,ch24.length?`${ch24.length} đơn đã quá 24 giờ`:`${tr0(ch)}`,ch24.length?"var(--neg)":"inherit")}${m("Món chờ kiểm",ck,ck?"Stylist mang về, quầy chưa kiểm":"Không có",ck?"var(--neg)":"var(--pos)")}${m("Chuyến thiếu món",lech,lech?"Cần đối soát":"Không có",lech?"var(--neg)":"var(--pos)")}</div>`,"")}
+function tr0(ch){return ch.length?ch.reduce((x,d)=>x+(+d.coc||0),0).toLocaleString("vi-VN")+"đ đang giữ":"Không có"}
 function renderTQ(){const [a,b]=range(),g=gran(a,b),[pa,pb]=prevRange(a,b);const s=stats(a,b),p=stats(pa,pb);const S=series(a,b,g);
   const held=db.don.filter(d=>!d.demo&&(d.ttCoc==="Đang giữ"||d.ttCoc==="Chờ hoàn")).reduce((x,d)=>x+(+d.coc||0),0);
   const byLoai={};s.os.forEach(d=>lines(d).forEach(c=>{const sp=db.sp.find(x=>x.id===c.sp);const k=sp?sp.loai:"Khác";byLoai[k]=(byLoai[k]||0)+(+c.gia||0)}));
   view.innerHTML=`<div><h1>Tổng quan</h1><p class="sub">Doanh thu chỉ ghi nhận khi khách trả đồ và chốt phí phát sinh. Đơn chưa trả hiện ở phần tạm tính. Chi phí lấy từ tab Chi phí.</p></div>${periodBar()}
   <div class="kpis">${kpi("Doanh thu ghi nhận",big(s.dt),s.dt,p.dt,{hero:true,extra:`${s.n} đơn đã trả · thuê ${tr(s.thue)} · phát sinh ${tr(s.ps)}`})}${kpi("Tạm tính (đang thuê)",big(sumRev(tamTinh()).tong),null,null,{extra:`${tamTinh().length} đơn chưa trả, có thể thêm phí trễ, hư hỏng`})}${kpi("Dự kiến (đã đặt)",big(sumRev(duKien()).tong),null,null,{extra:`${duKien().length} đơn chưa giao`})}${kpi("EBITDA",big(s.ebitda),s.ebitda,p.ebitda,{extra:`Biên ${pct(s.dt?s.ebitda/s.dt:NaN)}`})}${kpi("Số đơn",s.n,s.n,p.n,{extra:`${s.items} lượt món`})}${kpi("Giá trị đơn TB",big(s.aov),s.aov,p.aov)}${kpi("Cọc đang giữ",big(held),null,null,{extra:"Hiện tại, gồm đơn chờ hoàn"})}</div>
+  ${vanHanh(a,b)}
   ${hanhTrinh(s)}
   <div class="grid2">
    ${card("c1",`Doanh thu và chi phí theo ${GN[g]}`,"Chi phí vận hành phân bổ đều theo ngày trong tháng, chưa gồm nhập hàng",`${legend([["var(--s1)","Doanh thu"],["var(--s2)","Chi phí vận hành"]])}<div class="chart" id="ch1"></div>`,tbl([GN[g][0].toUpperCase()+GN[g].slice(1),"Doanh thu","Chi phí","EBITDA","Số đơn"],S.ks.map((k,i)=>[bLong(k,g),money(S.r[i]),money(S.c[i]),money(S.e[i]),S.n[i]])))}

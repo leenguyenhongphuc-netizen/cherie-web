@@ -58,6 +58,25 @@ h2{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;c
 h3{font-size:15px;margin:0;font-weight:600}
 .sub{color:var(--muted);font-size:13px;margin:4px 0 0}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.homebtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;font-size:15px}
+.task{display:flex;align-items:stretch;gap:0;border-top:1px solid var(--line);background:var(--surface)}
+.task:first-child{border-top:0}
+.task .stripe{width:4px;flex:none;border-radius:0}
+.task .tmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;padding:12px 8px 12px 12px;background:none;border:0;text-align:left;color:inherit;font:inherit}
+.task .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task .why{font-size:13.5px;line-height:1.35;color:var(--ink)}
+.task .s{font-size:12px;color:var(--muted)}
+.task .tact{display:flex;flex-direction:column;justify-content:center;gap:6px;padding:10px 12px 10px 0;flex:none}
+.task .tact .btn{min-width:92px;justify-content:center;text-align:center;text-decoration:none}
+.row .time{font-weight:600;min-width:46px;font-variant-numeric:tabular-nums}
+details.more{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+details.more>summary{padding:12px;font-weight:600;font-size:13.5px;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+details.more>summary::after{content:"Xem";color:var(--wine);font-weight:600}
+details.more[open]>summary::after{content:"Ẩn"}
+details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
+.nextbox{border:1.5px solid var(--wine);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.nextbox>h2{color:var(--wine);margin:0}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 8px;text-align:left}
 .stat .n{font-size:22px;font-weight:600;line-height:1.1}
 .stat .l{font-size:11px;color:var(--muted);margin-top:2px}
@@ -191,9 +210,8 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
 
   <div class="app">
     <header class="top gut">
-      <div class="top-row"><span class="mark">CHÉRIE</span><span class="branch">Quầy · Sale · Đà Nẵng</span></div>
-      <div class="demo"><span>Bản chính thức</span></div>
-      <div class="demo sync"><span id="sync" class="syncchip" role="status">Đang tải…</span><span style="display:flex;gap:12px"><a class="link" href="/nhansu/">Tất cả app</a><a class="link" href="/stylist/">Stylist</a><a class="link" href="/">Website</a></span></div>
+      <div class="top-row"><span class="mark">CHÉRIE</span><span class="hdr-r"><span class="branch">Quầy</span><a id="homeSlot" class="homebtn" href="/nhansu/" aria-label="Trang nhân sự, đổi app">☰</a></span></div>
+      <div class="demo sync"><span id="sync" class="syncchip" role="status">Đang tải…</span></div>
       <div id="syncBar"></div>
     </header>
     <main class="gut" id="view"></main>
@@ -208,7 +226,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=8f3cd76d"></script><script src="/shared.js?v=6ffc7390"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=5f1f94a4"></script><script src="/shared.js?v=6ffc7390"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -316,40 +334,53 @@ function outbox(){
   return out;
 }
 function ngayDai(d){return ["Chủ nhật","Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy"][d.getDay()]+", "+d.getDate()+" tháng "+(d.getMonth()+1)}
+function viec(){
+  const out=[],covered=new Set();
+  const add=(pri,d,why,act,lbl,tel,key)=>{covered.add(d.id);out.push({pri,d,why,act,lbl,tel,key:key||d.nhan||""})};
+  db.don.forEach(d=>{if(d.tt==="Hủy")return;const kh=byId("kh",d.dat)||{};const trs=tripsOfDon(d.id);const ot=openTripOf(d.id);
+    if(d.tt==="Đang thuê"){const h=(D(d.tra)-NOW)/36e5;const giaoNoi=d.giaoTanNoi||trs.some(t=>t.loai==="giao");const coNhan=trs.some(t=>t.loai==="nhan");
+      if(quaHan(d)&&!(ot&&ot.loai==="nhan")){const can=giaoNoi&&!coNhan;add(0,d,`Quá hạn trả ${Math.max(1,Math.round(-h))} giờ. Gọi khách hẹn giờ trả${can?", rồi cử stylist đi lấy":""}`,can?"pick":"don",can?"Cử đi lấy":"Nhận trả",kh.sdt,d.tra);return}
+      if(quaHan(d))return;
+      if(giaoNoi&&!coNhan&&h<24){add(1,d,`Trả ${when(d.tra)} tại ${d.noi||"nơi khách ở"}. Chưa cử stylist đi lấy`,"pick","Cử đi lấy","",d.tra);return}
+      if(!giaoNoi&&dayNum(d.tra)===dayNum(TODAY))add(5,d,`Khách mang đồ đến trả lúc ${hm(d.tra)}`,"don","Nhận trả","",d.tra);
+      return}
+    if(d.tt==="Đã trả"){const wait=lines(d).filter(c=>(byId("sp",c.sp)||{}).tt==="Chờ kiểm tra").length;
+      if(wait){add(2,d,`Stylist mang ${wait} món về. Kiểm đồ, chốt phí`,"don","Kiểm đồ","",d.traTT);return}
+      if(d.ttCoc==="Chờ hoàn"||d.ttCoc==="Đang giữ"){const gap=d.traTT&&(NOW-D(d.traTT))>20*36e5;add(gap?1:3,d,`Hoàn cọc ${money(cocHoan(d))} cho khách${gap?". Sắp quá 24 giờ":""}`,"don","Hoàn cọc","",d.traTT)}
+      return}
+    if(d.tt==="Đã đặt"){const dn=dayNum(d.nhan)-dayNum(TODAY);const coGiao=trs.some(t=>t.loai==="giao");
+      if(d.kenh==="Online"&&!d.quayDaNhan){add(2,d,`Đơn online mới, nhận ${when(d.nhan)}. Xác nhận và chuẩn bị đồ`,"don","Xác nhận");return}
+      if(d.ttCoc==="Chờ chuyển khoản"&&dn<=2){add(3,d,`Chưa nhận cọc ${money(d.coc)}. Khách nhận đồ ${when(d.nhan)}`,"don","Ghi cọc",kh.sdt);return}
+      if(d.giaoTanNoi&&!coGiao&&dn<=1){add(1,d,`Giao tận nơi ${when(d.nhan)}${d.noi?" tại "+d.noi:""}. Chưa cử stylist`,"ship","Cử đi giao");return}
+      if(!d.giaoTanNoi&&!coGiao&&dn===0)add(4,d,`Khách đến nhận lúc ${hm(d.nhan)}${d.hd?"":". Cần ký hợp đồng"}`,"don","Giao đồ")}});
+  const T=db.trips.filter(t=>String(t.tt).startsWith("Lệch")).map(t=>({pri:0,trip:t,why:`Chuyến ${t.id} của ${t.stylist} thiếu ${((t.d&&t.d.missing)||[]).length} món. Kiểm tra lại`,lbl:"Xem chuyến",key:t.ngay+"T"+t.gio}));
+  const S=db.sp.filter(s=>s.tt==="Chờ kiểm tra"&&!db.ct.some(c=>c.sp===s.id&&covered.has(c.don))).map(s=>({pri:2,sp:s,why:"Đồ vừa mang về, kiểm rồi đem giặt",lbl:"Kiểm đồ",key:""}));
+  return [...out,...T,...S].sort((a,b)=>(a.pri-b.pri)||(a.key<b.key?-1:a.key>b.key?1:0));
+}
+function taskRow(x){const pc=x.pri<=1?"bad":x.pri<=3?"warn":"good";
+  if(x.trip){const t=x.trip,kh=byId("kh",t.kh)||{ten:t.kh};return `<div class="task"><span class="stripe ${pc}"></span><button class="tmain" type="button" data-trip="${t.id}"><span class="t">${esc(kh.ten)}</span><span class="why">${esc(x.why)}</span></button><span class="tact"><button class="btn sm primary" type="button" data-trip="${t.id}">${x.lbl}</button></span></div>`}
+  if(x.sp){const s=x.sp;return `<div class="task"><span class="stripe ${pc}"></span><button class="tmain" type="button" data-sp="${s.id}"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="why">${esc(x.why)}</span></button><span class="tact"><button class="btn sm primary" type="button" data-sp="${s.id}">${x.lbl}</button></span></div>`}
+  const d=x.d,kh=byId("kh",d.dat)||{ten:"Khách "+(d.dat||"")};
+  return `<div class="task"><span class="stripe ${pc}"></span><button class="tmain" type="button" data-don="${d.id}"><span class="t">${esc(kh.ten)}${d.kenh==="Online"?' <span class="pill mem">Online</span>':""}</span><span class="why">${esc(x.why)}</span><span class="s">${d.id} · ${lines(d).length} món · ${k(tongThue(d))}${d.yenTam?" · Yên tâm":""}</span></button><span class="tact"><button class="btn sm primary" type="button" data-act="${x.act}" data-id="${d.id}">${x.lbl}</button>${x.tel?`<a class="btn sm" href="tel:${esc(x.tel)}">Gọi</a>`:""}</span></div>`}
+function lichHomNay(){const ev=[];
+  db.trips.filter(t=>t.ngay===TODAY).forEach(t=>{const kh=byId("kh",t.kh)||{ten:t.kh};ev.push({g:t.gio,h:`<button class="row" type="button" data-trip="${t.id}"><span class="time">${t.gio}</span><span class="main"><span class="t">${esc(kh.ten)}</span><span class="s">${esc(TRIP[t.loai]||t.loai)} · ${esc(t.stylist)} · ${tripItems(t).length} món</span></span><span class="r">${tripPill(t)}</span></button>`})});
+  db.don.forEach(d=>{const trs=tripsOfDon(d.id);
+    if(d.tt==="Đã đặt"&&dayNum(d.nhan)===dayNum(TODAY)&&!d.giaoTanNoi&&!trs.some(t=>t.loai==="giao"))ev.push({g:hm(d.nhan),h:`<button class="row" type="button" data-don="${d.id}"><span class="time">${hm(d.nhan)}</span><span class="main"><span class="t">${esc((byId("kh",d.dat)||{}).ten||d.dat)}</span><span class="s">Đến tiệm nhận đồ · ${lines(d).length} món</span></span><span class="r">${ttPill(d)}</span></button>`});
+    if(d.tt==="Đang thuê"&&dayNum(d.tra)===dayNum(TODAY)&&!d.giaoTanNoi&&!trs.some(t=>t.loai!=="thu"))ev.push({g:hm(d.tra),h:`<button class="row" type="button" data-don="${d.id}"><span class="time">${hm(d.tra)}</span><span class="main"><span class="t">${esc((byId("kh",d.dat)||{}).ten||d.dat)}</span><span class="s">Đến tiệm trả đồ · ${lines(d).length} món</span></span><span class="r">${ttPill(d)}</span></button>`})});
+  return ev.sort((a,b)=>a.g<b.g?-1:1).map(e=>e.h)}
 function renderToday(){
-  const moiHomNay=db.don.filter(d=>d.tao&&d.tao.slice(0,10)===TODAY).sort((a,b)=>a.tao<b.tao?1:-1);
-  const nhan=db.don.filter(d=>d.tt==="Đã đặt"&&dayNum(d.nhan)===dayNum(TODAY));
-  const tra=db.don.filter(d=>d.tt==="Đang thuê"&&dayNum(d.tra)===dayNum(TODAY)&&!quaHan(d));
-  const qh=db.don.filter(quaHan);
+  const V=viec(),ev=lichHomNay(),ob=outbox();
   const soon=db.don.filter(d=>d.tt==="Đã đặt"&&dayNum(d.nhan)>dayNum(TODAY)&&dayNum(d.nhan)<=dayNum(TODAY)+7).sort((a,b)=>a.nhan<b.nhan?-1:1);
-  const ob=outbox();
-  const trs=db.trips.filter(t=>t.ngay===TODAY).sort((a,b)=>a.gio<b.gio?-1:1);
-  const mang=db.sp.filter(s=>s.tt==="Đang mang đi").length;
-  const lech=db.trips.filter(t=>String(t.tt).startsWith("Lệch")),ck=db.sp.filter(s=>s.tt==="Chờ kiểm tra"),chh=db.don.filter(d=>d.ttCoc==="Chờ hoàn");
-  const onl=db.don.filter(d=>d.kenh==="Online"&&d.tt==="Đã đặt"&&!d.quayDaNhan).sort((a,b)=>a.nhan<b.nhan?-1:1);
-  /* đơn đang ở ngoài, sắp đến hoặc đã quá giờ trả, giao tận nơi mà chưa cử stylist đi lấy */
-  const canLay=db.don.filter(d=>d.tt==="Đang thuê"&&(d.giaoTanNoi||tripsOfDon(d.id).some(t=>t.loai==="giao"))&&!tripsOfDon(d.id).some(t=>t.loai==="nhan")&&(D(d.tra)-NOW)<24*36e5).sort((a,b)=>a.tra<b.tra?-1:1);
-  const todo=[...canLay.map(d=>donRow(d,`${NOW>D(d.tra)?"Quá giờ trả":"Trả "+when(d.tra)} · chưa cử stylist đi lấy · ${esc(d.noi||"")}`)),...onl.map(d=>donRow(d,`Đơn online · ${d.nguonDon||""} · nhận ${when(d.nhan)}${d.giaoTanNoi?" · giao tận nơi":" · tại tiệm"}${d.ttCoc==="Chờ chuyển khoản"?" · chờ cọc":""}`)),...lech.map(t=>tripRow(t,`Thiếu ${(t.d.missing||[]).length} món sau chuyến ${t.id} · ${esc(t.stylist)}`)),...ck.map(s=>spRow(s,"Stylist vừa nhận lại, kiểm đồ rồi đem giặt")),...chh.map(d=>donRow(d,`Stylist đã nhận đồ · hoàn dự kiến ${k(cocHoan(d))}`))];
-  const sec=(title,arr,f,empty)=>`<section><h2>${title}</h2><div class="list">${arr.length?arr.map(f).join(""):`<div class="empty">${empty}</div>`}</div></section>`;
+  const gap=V.filter(x=>x.pri<=1).length;
   view.innerHTML=`
-  <div><h1>${ngayDai(NOW)}</h1><p class="sub">${moiHomNay.length} đơn mới hôm nay · ${db.don.filter(d=>d.tt==="Đang thuê").length} đơn đang ở ngoài · ${db.sp.filter(s=>s.tt==="Sẵn sàng").length}/${db.sp.length} món sẵn sàng</p></div>
-  <div class="stats">
-    <div class="stat ${qh.length?"alert":""}"><div class="n">${qh.length}</div><div class="l">Quá hạn</div></div>
-    <div class="stat"><div class="n">${tra.length}</div><div class="l">Trả hôm nay</div></div>
-    <div class="stat"><div class="n">${nhan.length}</div><div class="l">Nhận hôm nay</div></div>
-    <div class="stat"><div class="n">${soon.length}</div><div class="l">7 ngày tới</div></div>
-  </div>
-  ${moiHomNay.length?`<section><h2>Đơn mới hôm nay · ${moiHomNay.length}</h2><div class="list">${moiHomNay.map(d=>donRow(d,`${d.id} · tạo ${hm(d.tao)} · nhận ${when(d.nhan)}`)).join("")}</div></section>`:""}
-  ${todo.length?`<section><h2>Cần quầy xử lý</h2><div class="list">${todo.join("")}</div></section>`:""}
-  ${sec(`Stylist hôm nay${mang?` · ${mang} món đang mang theo`:""}`,trs,t=>tripRow(t),"Chưa có chuyến nào hôm nay.")}
-  ${sec("Quá hạn",qh,d=>donRow(d,`Hẹn trả ${when(d.tra)} · cọc ${k(d.coc)}`),"Không có đơn quá hạn.")}
-  ${sec("Trả hôm nay",tra,d=>donRow(d,`Trả lúc ${hm(d.tra)}${tripNote(d)} · ${lines(d).map(c=>byId("sp",c.sp).ten).join(", ")}`),"Không có đơn hẹn trả hôm nay.")}
-  ${sec("Nhận hôm nay",nhan,d=>donRow(d,`Nhận lúc ${hm(d.nhan)}${tripNote(d)} · ${d.dip}`),"Không có khách hẹn nhận đồ hôm nay.")}
-  ${sec("Chuẩn bị 7 ngày tới",soon,d=>donRow(d,`${when(d.nhan)} · ${d.dip} · ${soNguoiMac(d)} người mặc`),"Chưa có đơn nào trong 7 ngày tới.")}
-  <section><h2>Tin tự động hôm nay</h2><div class="list">${ob.length?ob.map(m=>`<div class="row"><span class="stripe ${m.ok?"good":""}"></span><span class="main"><span class="t">${esc(m.k)} · ${esc(m.who)}</span><span class="s">${esc(m.skip||m.why)}</span></span><span class="r"><span class="pill ${m.ok?"good":"line"}">${m.ok?esc(m.ch):"Không gửi"}</span></span></div>`).join(""):'<div class="empty">Không có tin nào cần gửi.</div>'}</div>
-  <p class="note" style="margin-top:6px">Tin nhắc trả là tin giao dịch nên gửi cho mọi đơn. Tin ưu đãi chỉ gửi khi khách đã đồng ý.</p></section>
+  <div><h1>${ngayDai(NOW)}</h1><p class="sub">${V.length?`<b style="color:${gap?"var(--bad)":"var(--ink)"}">${V.length} việc cần làm${gap?` · ${gap} gấp`:""}</b>`:"Không còn việc tồn"} · ${db.don.filter(d=>d.tt==="Đang thuê").length} đơn đang ở ngoài · ${db.sp.filter(s=>s.tt==="Sẵn sàng").length}/${db.sp.length} món sẵn sàng</p></div>
+  <section><h2>Việc cần làm ngay</h2><div class="list">${V.length?V.map(taskRow).join(""):'<div class="empty">Đã xử lý hết. Việc mới sẽ tự hiện ở đây.</div>'}</div><p class="note" style="margin-top:6px">Xếp theo mức gấp: đỏ làm trước, vàng trong ngày. Bấm vào tên để xem đơn.</p></section>
+  <section><h2>Lịch hôm nay · ${ev.length}</h2><div class="list">${ev.length?ev.join(""):'<div class="empty">Hôm nay không có lịch giao, nhận hay trả.</div>'}</div></section>
+  <details class="more"><summary>Chuẩn bị 7 ngày tới · ${soon.length} đơn</summary><div class="list">${soon.length?soon.map(d=>donRow(d,`${when(d.nhan)} · ${d.giaoTanNoi?"giao tận nơi":"tại tiệm"} · ${soNguoiMac(d)} người mặc`)).join(""):'<div class="empty">Chưa có đơn nào.</div>'}</div></details>
+  <details class="more"><summary>Tin tự động gửi khách hôm nay · ${ob.filter(m=>m.ok).length}</summary><div class="list">${ob.length?ob.map(m=>`<div class="row"><span class="stripe ${m.ok?"good":""}"></span><span class="main"><span class="t">${esc(m.k)} · ${esc(m.who)}</span><span class="s">${esc(m.skip||m.why)}</span></span><span class="r"><span class="pill ${m.ok?"good":"line"}">${m.ok?esc(m.ch):"Không gửi"}</span></span></div>`).join(""):'<div class="empty">Không có tin nào cần gửi.</div>'}</div></details>
   <div class="btns"><button class="btn" type="button" id="qTrip">Hẹn thử tại khách sạn</button><button class="btn" type="button" id="qThu">Ghi buổi thử</button><button class="btn" type="button" id="qKh">Thêm khách</button></div>`;
   bindRows(view);
+  view.querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{const id=b.dataset.id,a=b.dataset.act;if(a==="pick")return openTripForm({loai:"nhan",don:id});if(a==="ship")return openTripForm({loai:"giao",don:id});openDon(id)});
   view.querySelector("#qThu").onclick=()=>openThu();
   view.querySelector("#qTrip").onclick=()=>openTripForm({loai:"thu"});
   view.querySelector("#qKh").onclick=()=>openNewKhach();
@@ -545,7 +576,7 @@ function openLead(id){nextSheet=()=>openLead(id);const L=(db.lead||[]).find(x=>x
 function given(t){return String(t).trim().split(/\s+/).pop().normalize("NFD").replace(/\p{M}/gu,"").replace(/đ/gi,"D").toUpperCase()}
 function selectText(el){if(!el)return;const r=document.createRange();r.selectNodeContents(el);const s=window.getSelection();s.removeAllRanges();s.addRange(r)}
 function syncChip(s){const el=document.getElementById("sync");if(!el)return;
-  const m={live:["live","Đồng bộ trực tiếp với app Stylist"],connecting:["","Đang kết nối kho chung…"],local:["warn","Chỉ đồng bộ giữa các tab trên máy này"],empty:["warn","Kho chung chưa có dữ liệu"],readonly:["warn","Chỉ xem, không ghi được kho chung"],full:["warn","Kho chung đã đầy"],error:["warn","Mất kết nối, đang thử lại"]}[s]||["",s];
+  const m={live:["live","Đã đồng bộ với Stylist"],connecting:["","Đang kết nối kho chung…"],local:["warn","Chỉ đồng bộ giữa các tab trên máy này"],empty:["warn","Kho chung chưa có dữ liệu"],readonly:["warn","Chỉ xem, không ghi được kho chung"],full:["warn","Kho chung đã đầy"],error:["warn","Mất kết nối, đang thử lại"]}[s]||["",s];
   el.className="syncchip "+m[0];el.textContent=m[1];
   const bar=document.getElementById("syncBar");if(bar){bar.innerHTML=CD.canSeed()?`<div class="banner warn">Kho dữ liệu chung đang trống. <button class="link" type="button" id="seedBtn">Nạp dữ liệu mẫu</button> để hai app dùng chung.</div>`:"";const b=document.getElementById("seedBtn");if(b)b.onclick=()=>{CD.reset();render();toast("Đã nạp dữ liệu mẫu vào kho chung")}}}
 
@@ -608,12 +639,12 @@ function openDon(id){nextSheet=()=>openDon(id);
   const onBanner=d.kenh==="Online"?`<div class="banner info">Đơn online do ${esc(d.nvTao||"CS")} tạo qua ${esc(d.nguonDon||"")} lúc ${when(d.taoLuc)}.${d.giaoTanNoi?` Khách muốn giao tận nơi: ${esc(d.noi)}.`:" Khách nhận tại tiệm."}${d.note?" Ghi chú: "+esc(d.note):""}</div>${d.quayDaNhan?"":'<button class="btn primary block" type="button" id="aRecv">Quầy đã nhận đơn, chuẩn bị đồ</button>'}`:"";
   const cocBtn=d.ttCoc==="Chờ chuyển khoản"?'<button class="btn block" type="button" id="aCocIn">Đã nhận cọc chuyển khoản</button>':"";
   if(d.tt==="Đã đặt")act=onBanner+cocBtn+(ot&&ot.loai==="giao"?tripBanner:'')+(ot&&ot.loai==="giao"?"":`<div class="btns"><button class="btn primary" type="button" id="aGiao">${d.hd?"Giao tại quầy":"Ký hợp đồng và giao tại quầy"}</button><button class="btn" type="button" id="aShip">Cử stylist giao tận nơi</button></div>`);
-  if(d.tt==="Đang thuê")act=(ot&&ot.loai==="nhan"?tripBanner:`<button class="btn block" type="button" id="aPick">Cử stylist đi nhận lại</button>`)+`<section><h2>Nhận trả đồ</h2><div class="box" style="display:flex;flex-direction:column;gap:10px">${late?`<div class="banner bad">Trễ ${lateH} giờ so với hẹn ${when(d.tra)}.</div>`:""}
+  if(d.tt==="Đang thuê")act=(ot&&ot.loai==="nhan"?tripBanner+'<details class="more"><summary>Khách tự mang đến tiệm? Nhận trả tại quầy</summary><div style="padding:0 12px 12px">':`<button class="btn block" type="button" id="aPick">Cử stylist đi nhận lại</button>`)+`<section><h2>Nhận trả đồ tại quầy</h2><div class="box" style="display:flex;flex-direction:column;gap:10px">${late?`<div class="banner bad">Trễ ${lateH} giờ so với hẹn ${when(d.tra)}.</div>`:""}
     <p class="note">${d.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách nhỏ miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: phí theo mức tình trạng."} Chụp 4 ảnh lúc nhận cho mỗi món trước khi xác nhận.</p>
     ${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="line-item"><label class="f">${esc(s.ten)} (${s.id}) · tình trạng<select data-lvq="${c.id}">${window.CherieData.MUC_HU.map(L=>`<option value="${L[0]}">${L[0]} · ${L[1]} · ${L[0]==="L4"?"đền theo giá trị":money(window.CherieData.phiHu(L[0],s,d.yenTam))}</option>`).join("")}</select></label><label class="f" data-mtq="${c.id}" hidden>Mô tả vết, vị trí<input type="text" id="m-${c.id}"></label><span class="note">Ảnh lúc nhận: ${window.CherieData.ttSo(d.id,"nhan",c.sp)}/4</span></div>`}).join("")}
     <div class="btns"><button class="btn" type="button" id="ttNq">Chụp ảnh lúc nhận</button><button class="btn" type="button" id="ttSq">So với ảnh lúc giao</button></div>
     <label class="f">Phí trả trễ / phát sinh (đ)<input type="number" id="phi" min="0" step="10000" value="${lateFee}"></label>
-    <button class="btn primary" type="button" id="aTra">Xác nhận đã trả lúc ${hm(iso(NOW))}</button></div></section>`;
+    <button class="btn primary" type="button" id="aTra">Xác nhận đã trả lúc ${hm(iso(NOW))}</button></div></section>`+(ot&&ot.loai==="nhan"?"</div></details>":"");
   const waitCk=ls.filter(c=>byId("sp",c.sp).tt==="Chờ kiểm tra").length;
   const kiem=waitCk?`<section><h2>Kiểm đồ stylist mang về · ${waitCk} món</h2><div class="box" style="display:flex;flex-direction:column;gap:10px">
     <p class="note">${d.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách nhỏ miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: phí theo mức tình trạng."} So ảnh lúc giao và lúc nhận, chỉnh mức nếu stylist chấm chưa đúng.</p>
@@ -623,14 +654,14 @@ function openDon(id){nextSheet=()=>openDon(id);
     <div class="btns"><button class="btn" type="button" id="ttSk">So ảnh giao · nhận</button><button class="btn primary" type="button" id="aKiem">Kiểm xong, chốt phí</button></div></div></section>`:"";
   if(d.tt==="Đã trả"&&(d.ttCoc==="Đang giữ"||d.ttCoc==="Chờ hoàn"))act=kiem+(waitCk?`<div class="banner warn">Còn ${waitCk} món Chờ kiểm tra. Chốt phí ở trên rồi mới hoàn cọc.</div>`:`<div class="banner info">Hoàn lại ${money(cocHoan(d))} = cọc ${money(d.coc)} − phí trễ ${money(d.phi)} − hư hỏng ${money(tongHu(d))}${d.yenTam?" (đơn có Gói Yên tâm)":""}</div><button class="btn primary block" type="button" id="aCoc">Đã hoàn cọc</button>`);
   sheet(`Đơn ${d.id}`,`
-   <div class="pills">${ttPill(d)}<span class="pill line">${esc(d.dip)}</span>${d.nhom?`<span class="pill mem">${esc(byId("nhom",d.nhom).ten)}</span>`:""}${daTre(d)?'<span class="pill bad">Đã trả trễ</span>':""}</div>
+   <div class="pills">${ttPill(d)}<span class="pill line">${esc(d.dip)}</span>${d.yenTam?'<span class="pill good">Có Yên tâm</span>':'<span class="pill line">Không Yên tâm</span>'}${d.nhom?`<span class="pill mem">${esc(byId("nhom",d.nhom).ten)}</span>`:""}${daTre(d)?'<span class="pill bad">Đã trả trễ</span>':""}</div>
+   ${act?`<div class="nextbox"><h2>Việc cần làm</h2>${act}</div>`:""}
    <button class="row box" type="button" data-kh="${kh.id}" style="border:1px solid var(--line)"><span class="main"><span class="t">${esc(kh.ten)}</span><span class="s">Người đặt · ${esc(kh.sdt||kh.email)}</span></span><span class="r">${segPill(kh.id)}</span></button>
    <dl class="kv box"><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Hẹn trả</dt><dd>${when(d.tra)}</dd>${d.traTT?`<dt>Trả thực tế</dt><dd>${when(d.traTT)}</dd>`:""}<dt>Tiền thuê</dt><dd>${money(tongThue(d))}</dd><dt>Gói Yên tâm</dt><dd>${d.yenTam?"Có · "+money(window.CherieData.YEN_TAM.phi*lines(d).length):"Không"}</dd><dt>Cọc</dt><dd>${money(d.coc)}${d.hinhThuc?" · "+esc(d.hinhThuc):""}</dd><dt>Trạng thái cọc</dt><dd>${esc(d.ttCoc)}</dd>${d.phi?`<dt>Phí phát sinh</dt><dd>${money(d.phi)}</dd>`:""}${tongHu(d)?`<dt>Phí hư hỏng</dt><dd>${money(tongHu(d))}</dd>`:""}</dl>
    ${d.hd?`<button class="row box" type="button" id="hdXem" style="border:1px solid var(--line)"><span class="main"><span class="t">Hợp đồng ${esc(d.hd)}</span><span class="s">Khách đã ký · CCCD đã lưu</span></span><span class="r"><span class="pill good">Đã ký</span></span></button>`:(d.tt==="Đã đặt"||d.tt==="Đang thuê"?`<div class="banner warn">Chưa ký hợp đồng thuê. Chụp CCCD và để khách ký trước khi giao đồ. <button class="link" type="button" id="hdLap">Lập hợp đồng</button></div>`:"")}
    <section><h2>${ls.length} món · ${soNguoiMac(d)} người mặc</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp),m=byId("kh",c.mac);return `<button class="row" type="button" data-sp="${s.id}"><span class="stripe" style="background:${SWATCH[s.mau]}"></span><span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${esc(m.ten)}${c.hu?" · "+esc(c.moTa):""}</span></span><span class="r">${money(c.gia)}${c.hu?`<br><span class="pill bad">Hư ${k(c.phiHu)}</span>`:""}</span></button>`}).join("")}</div></section>
    ${tripsOfDon(d.id).length?`<section><h2>Chuyến stylist</h2><div class="list">${tripsOfDon(d.id).map(t=>tripRow(t)).join("")}</div></section>`:""}
-   ${d.note?`<p class="note">${esc(d.note)}</p>`:""}
-   ${act}`,root=>{
+   ${d.note?`<p class="note">${esc(d.note)}</p>`:""}`,root=>{
     bindRows(root);
     const rv=root.querySelector("#aRecv");if(rv)rv.onclick=()=>{d.quayDaNhan=true;d.quayNhanLuc=iso(NOW);save();render();openDon(id);toast("Đã nhận đơn online")};
     const ci=root.querySelector("#aCocIn");if(ci)ci.onclick=()=>{d.ttCoc="Đang giữ";save();render();openDon(id);toast("Đã ghi nhận cọc")};
