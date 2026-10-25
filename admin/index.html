@@ -164,6 +164,20 @@ nav.tabs button[aria-current="page"]{color:var(--wine);font-weight:600}
 .imgl{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:6px 0}.imgl a{display:flex;flex-direction:column;justify-content:flex-end;gap:2px;aspect-ratio:3/4;padding:10px;border-radius:12px;background:var(--sunk);border:1px solid var(--line);color:inherit;text-decoration:none}.imgl a span{font-size:11.5px;color:var(--muted)}
 .btns{display:flex;flex-wrap:wrap;gap:8px}.consent{display:flex;gap:8px;align-items:flex-start;font-size:13px}.consent input{margin-top:3px}
 .seg{flex-wrap:wrap}
+.homebtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;font-size:15px;flex:none}
+.pqbox{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;display:flex;flex-direction:column;gap:10px}
+.pqbox h3{margin:0;font-size:15px}
+details.pqbox>summary{cursor:pointer;list-style:none;font-size:14px}
+details.pqbox>summary::after{content:" · Chỉnh";color:var(--muted);font-size:12px}
+.pqrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;border-top:1px solid var(--line);padding-top:10px}
+.pqn{display:flex;flex-direction:column;min-width:0;flex:1 1 150px}.pqn small{color:var(--muted);font-size:12px}
+.pqseg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.pqseg button{border:0;background:var(--surface);color:var(--ink);font:inherit;font-size:13px;padding:7px 12px;display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.pqseg button small{font-size:10.5px;color:var(--muted)}
+.pqseg button+button{border-left:1px solid var(--line)}
+.pqseg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);font-weight:600}
+.pqseg button[aria-pressed="true"] small{color:inherit;opacity:.75}
+header .homebtn{text-decoration:none;color:var(--ink)}
 </style>
 
 <header class="top"><div class="wrap gut">
@@ -180,7 +194,7 @@ nav.tabs button[aria-current="page"]{color:var(--wine);font-weight:600}
   <button type="button" data-tab="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Nhập liệu</button>
 </nav>
 
-<script src="/gasdb.js?v=5f1f94a4"></script><script src="/shared.js?v=6ffc7390"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=cbf6ce38"></script><script src="/shared.js?v=ee81eed8"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -471,10 +485,10 @@ function nextSo(g){let m=0;db.sp.forEach(s=>{const x=s.id.split("-");if(x[1]===g
 function renderNL(){
   const nln=(db.nhap||[]).filter(x=>x.tt==="Chờ duyệt").length,nyc=db.yc.filter(y=>y.tt==="Mới").length,ndg=(db.review||[]).filter(r=>r.tt==="Chờ duyệt").length;
   view.innerHTML=`<div><h1>Nhập liệu</h1><p class="sub">Nhập ở đây thay cho gõ tay vào Google Sheets. Quầy và báo cáo cập nhật ngay.</p></div>
-  <div class="seg" role="group" aria-label="Loại nhập liệu" style="align-self:flex-start">${[["ln",`Nhập từ link${nln?` (${nln})`:""}`],["sp","Món trong kho"],["anh","Ảnh lookbook"],["dg",`Đánh giá${ndg?` (${ndg})`:""}`],["ns","Nhân sự"],["yc",`Yêu cầu web${nyc?` (${nyc})`:""}`]].map(([k,n])=>`<button type="button" data-nl="${k}" aria-pressed="${nl===k}">${n}</button>`).join("")}</div>
+  <div class="seg" role="group" aria-label="Loại nhập liệu" style="align-self:flex-start">${[["ln",`Nhập từ link${nln?` (${nln})`:""}`],["sp","Món trong kho"],["anh","Ảnh lookbook"],["dg",`Đánh giá${ndg?` (${ndg})`:""}`],["ns","Nhân sự"],["pq","Phân quyền"],["yc",`Yêu cầu web${nyc?` (${nyc})`:""}`]].map(([k,n])=>`<button type="button" data-nl="${k}" aria-pressed="${nl===k}">${n}</button>`).join("")}</div>
   <div id="nlb"></div>`;
   view.querySelectorAll("[data-nl]").forEach(b=>b.onclick=()=>{nl=b.dataset.nl;renderNL()});
-  ({ns:nlNS,ln:nlLN,anh:nlAnh,cp:nlCP,sp:nlSP,dg:nlDG,yc:nlYC})[nl](document.getElementById("nlb"));
+  ({ns:nlNS,pq:nlPQ,ln:nlLN,anh:nlAnh,cp:nlCP,sp:nlSP,dg:nlDG,yc:nlYC})[nl](document.getElementById("nlb"));
 }
 /* ---------------- Chi phí: nhập như nói, tự phân loại ---------------- */
 const CP_DM=[
@@ -704,6 +718,24 @@ function nlNS(el){const ns=[...(db.nv||[])].sort((x,y)=>(!!x.nghi)-(!!y.nghi));c
     s.disabled=true;G.call("setPin",{nv:box.dataset.pbox,pin:v}).then(()=>{box.style.display="none";i.value="";s.disabled=false;pinOf[box.dataset.pbox]=true;showPin();toast("Đã lưu PIN")},x=>{s.disabled=false;i.value="";i.placeholder=x.message||"Lỗi, thử lại"})}});
   function showPin(){el.querySelectorAll("[data-pst]").forEach(sp=>{const id=sp.dataset.pst;if(id in pinOf)sp.innerHTML=pinOf[id]?'· <b style="color:var(--ok,#2e7d4f)">đã có PIN</b>':'· <b style="color:var(--bad,#b3261e)">chưa có PIN</b>';const pb=el.querySelector(`[data-pin="${id}"]`);if(pb&&id in pinOf)pb.textContent=pinOf[id]?"Đổi PIN":"Đặt PIN"})}
   if(G)G.call("pinStatus").then(r=>{(r.staff||[]).forEach(x=>pinOf[x.id]=!!x.pin);showPin()}).catch(()=>{});
+}
+/* Phân quyền: mỗi vai trò có mức Không / Xem / Sửa cho từng app; có thể đặt riêng cho từng người. Máy chủ kiểm tra lại mọi lần mở trang và lưu. */
+const Q_COT=[["quay","App Quầy","Bán tại tiệm, đơn, nhận trả, hoàn cọc"],["stylist","App Stylist","Chuyến giao, nhận, thử đồ"],["marketing","App Marketing","Khách online, nội dung, blog"],["admin","Admin","Báo cáo, P&L, kho, chi phí"],["rieng","Hồ sơ riêng","Hợp đồng, CCCD, ảnh tình trạng"]];
+const Q_MUCS=[["khong","Không"],["xem","Xem"],["sua","Sửa"]];
+const Q_MD={"Quầy":{quay:"sua",stylist:"khong",marketing:"khong",admin:"khong",rieng:"sua"},"Stylist":{quay:"khong",stylist:"sua",marketing:"khong",admin:"khong",rieng:"sua"},"Marketing":{quay:"khong",stylist:"khong",marketing:"sua",admin:"khong",rieng:"khong"}};
+function qCfg(){db.cauhinh=db.cauhinh||[];let c=db.cauhinh.find(x=>x.id==="quyen");if(!c){c={id:"quyen",vaiTro:{}};db.cauhinh.push(c)}c.vaiTro=c.vaiTro||{};return c}
+function qVaiTro(vt){if(vt==="Admin")return{quay:"sua",stylist:"sua",marketing:"sua",admin:"sua",rieng:"sua"};const c=qCfg().vaiTro[vt]||{},m=Q_MD[vt]||Q_MD.Stylist,o={};Q_COT.forEach(([k])=>o[k]=c[k]||m[k]);return o}
+function nlPQ(el){const roles=["Quầy","Stylist","Marketing"];const ns=(db.nv||[]).filter(n=>!n.nghi&&n.vaiTro!=="Admin");
+  const seg=(attr,cur,dflt)=>`<div class="pqseg" role="group">${dflt?`<button type="button" ${attr} data-v="" aria-pressed="${!cur}">Theo vai trò<small>${Q_MUCS.find(x=>x[0]===dflt)[1]}</small></button>`:""}${Q_MUCS.map(([v,n])=>`<button type="button" ${attr} data-v="${v}" aria-pressed="${cur===v}" class="m-${v}">${n}</button>`).join("")}</div>`;
+  const rows=(attr,get,dflt)=>Q_COT.map(([k,n,d])=>`<div class="pqrow"><span class="pqn"><b>${n}</b><small>${d}</small></span>${seg(`${attr} data-k="${k}"`,get(k),dflt&&dflt[k])}</div>`).join("");
+  el.innerHTML=`<section class="card"><h2>Quyền theo vai trò</h2><p class="note">Không: app không hiện và không mở được. Xem: mở được nhưng không lưu thay đổi. Sửa: dùng đầy đủ. Chủ tiệm luôn có toàn quyền. Nhân viên tải lại trang là áp dụng.</p>
+   ${roles.map(r=>{const q=qVaiTro(r);return `<div class="pqbox"><h3>${r}</h3>${rows(`data-vt="${r}"`,k=>q[k])}</div>`}).join("")}
+   <div class="btns"><button class="btn" type="button" id="pqMd">Về mặc định</button></div></section>
+  <section class="card"><h2>Quyền riêng từng người</h2><p class="note">Mặc định mỗi người theo quyền vai trò. Chỉ đặt riêng khi một người cần khác đồng nghiệp, ví dụ một bạn quầy kiêm đi giao.</p>
+   ${ns.length?ns.map(n=>{const own=n.quyen||{},q=qVaiTro(n.vaiTro),nr=Object.keys(own).length;return `<details class="pqbox"><summary><b>${esc(n.ten)}</b> · ${esc(n.vaiTro)}${nr?` <span class="pill new">${nr} quyền riêng</span>`:""}</summary>${rows(`data-nv="${n.id}"`,k=>own[k]||"",q)}</details>`}).join(""):'<p class="empty">Chưa có nhân sự nào ngoài chủ tiệm.</p>'}</section>`;
+  el.querySelectorAll("[data-vt]").forEach(b=>b.onclick=()=>{const c=qCfg();c.vaiTro[b.dataset.vt]=Object.assign({},qVaiTro(b.dataset.vt),{[b.dataset.k]:b.dataset.v});CD.save();nlPQ(el);toast(`Đã lưu quyền ${b.dataset.vt}`)});
+  el.querySelectorAll("[data-nv]").forEach(b=>b.onclick=()=>{const n=db.nv.find(x=>x.id===b.dataset.nv);const q=Object.assign({},n.quyen||{});if(b.dataset.v)q[b.dataset.k]=b.dataset.v;else delete q[b.dataset.k];n.quyen=q;CD.save();nlPQ(el);const d=el.querySelector(`details [data-nv="${n.id}"]`);if(d)d.closest("details").open=true;toast(`Đã lưu quyền riêng của ${n.ten}`)});
+  el.querySelector("#pqMd").onclick=()=>{const c=qCfg();c.vaiTro={};CD.save();nlPQ(el);toast("Đã đưa quyền các vai trò về mặc định")};
 }
 /* Đánh giá: chỉ đăng lên website khi admin duyệt. Không tự viết đánh giá thay khách. */
 function nlDG(el){const rs=[...(db.review||[])].sort((x,y)=>x.tg<y.tg?1:-1);

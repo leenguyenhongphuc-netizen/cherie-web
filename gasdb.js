@@ -57,7 +57,7 @@ function gate(){return new Promise(function(done){
       call("login",{nv:g.querySelector("#gN").value,pin:g.querySelector("#gP").value}).then(function(x){saveAuth(x.token,x.me);closeGate();done(x.me)},function(x){e.textContent=x.message;b.disabled=false})};
     g.querySelector("#gB").onclick=go;g.querySelector("#gP").onkeydown=function(ev){if(ev.key==="Enter")go()};
   },function(e){box('<h1>Chưa kết nối được</h1><p>'+esc(e.message)+'</p><button onclick="location.reload()">Thử lại</button>')})})}
-function denied(msg){box('<h1>Không mở được trang này</h1><p>'+esc(msg)+'</p><p><a href="'+esc(C.url)+'?p=home" target="_top">Về trang nhân sự</a></p><button id="gO">Đăng xuất</button>').querySelector("#gO").onclick=logout}
+function denied(msg){box('<h1>Không mở được trang này</h1><p>'+esc(msg)+'</p><p><a href="'+esc(C.paths?C.paths.home:C.url+'?p=home')+'" target="_top">Về trang nhân sự</a></p><button id="gO">Đăng xuất</button>').querySelector("#gO").onclick=logout}
 
 /* ---------- kho dữ liệu giả lập ---------- */
 var store={},subs={},lastT=0,loaded=false,queue=[],flushT=0;
@@ -71,8 +71,15 @@ function flush(){flushT=0;var q=queue;queue=[];if(!q.length)return;
   call(fn,{ops:ops}).then(function(r){var rows=(r&&r.rows)||[];rows.forEach(function(x){store[x.c]=store[x.c]||{};if(x.d==null)delete store[x.c][x.id];else store[x.c][x.id]=x.d});
       q.forEach(function(x){x.ok()});setTimeout(function(){var ts={};rows.forEach(function(x){ts[x.c]=1});Object.keys(ts).forEach(emit)},60)},
     function(e){q.forEach(function(x){x.no(e)})})}
+var chiXem=false,baoT=0;
+function baoChiXem(){if(baoT)return;var n=document.createElement("div");n.setAttribute("role","alert");n.textContent="Bạn chỉ có quyền xem trang này. Thay đổi không được lưu, trang sẽ tải lại.";
+  n.style.cssText="position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:10000;background:#7A1E3A;color:#fff;padding:12px 14px;border-radius:10px;font:600 14px/1.4 system-ui";document.body.appendChild(n);baoT=setTimeout(function(){location.reload()},1800)}
+function cheDo(){var q=me&&me.q;if(!q||["quay","stylist","marketing","admin"].indexOf(C.page)<0||q[C.page]!=="xem")return;chiXem=true;
+  var st=document.createElement("style");st.textContent=".chi-xem .btn.primary,.chi-xem nav.tabs .add{display:none!important}.chixem-bar{position:sticky;top:0;z-index:30;background:#F3E3C3;color:#6B4A00;font:600 13px/1.4 system-ui;padding:8px 16px;text-align:center}";document.head.appendChild(st);
+  document.documentElement.classList.add("chi-xem");var b=document.createElement("div");b.className="chixem-bar";b.textContent="Chế độ chỉ xem. Muốn chỉnh, nhờ chủ tiệm cấp quyền Sửa trong Admin.";document.body.insertBefore(b,document.body.firstChild)}
 function enqueue(c,id,d){return new Promise(function(ok,no){
   if(C.pub&&["yc","review","lead"].indexOf(c)<0)return ok();
+  if(chiXem){ok();baoChiXem();return}
   queue=queue.filter(function(x){if(x.c===c&&x.id===id){x.ok();return false}return true});
   queue.push({c:c,id:id,d:d,ok:ok,no:no});if(!flushT)flushT=setTimeout(flush,80)})}
 var remote={collection:function(t){return{
@@ -84,7 +91,7 @@ function start(){
   if(ready)return ready;
   ready=(C.pub?call("pubLoad"):(token?call("me"):Promise.reject({code:"revoked"})).catch(function(){return gate().then(function(m){return{me:m}})}).then(function(x){
       if(x&&x.me)me=x.me;return call("load",{page:C.page})}))
-    .then(function(r){applyRows(r.rows);lastT=r.t||0;loaded=true;Object.keys(subs).forEach(emit);
+    .then(function(r){if(r&&r.me)me=r.me;cheDo();applyRows(r.rows);lastT=r.t||0;loaded=true;Object.keys(subs).forEach(emit);
       if(!C.pub){setInterval(poll,15000);document.addEventListener("visibilitychange",function(){if(!document.hidden)poll()})}
       return remote},
     function(e){if(e&&e.code==="not_granted")denied(e.message);return remote});

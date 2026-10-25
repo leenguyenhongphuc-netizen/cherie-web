@@ -1,7 +1,7 @@
 /* Chérie: dữ liệu dùng chung cho app Quầy và app Stylist */
 (function(){
 "use strict";
-const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb"];
+const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb","cauhinh"];
 const STORE=(window.CHERIE&&window.CHERIE.pub)?"cherie-pub-v1":"cherie-prod-v1";/* website công khai dùng bộ nhớ riêng, không lẫn với app nhân sự *//* bản chính thức: không dùng chung bộ nhớ với bản demo */
 function seed(){return gen(base())}
 function base(){return {
@@ -290,7 +290,9 @@ function maMoi(nhom,size){let m=0;db.sp.forEach(s=>{const x=String(s.id).split("
 const HANG_ANH=a=>a.loai==="Ảnh AI"?2:a.loai==="Ảnh hãng"?1:0;
 function anhCua(spId,congKhai){return (db.anh||[]).filter(a=>a.sp===spId&&!a.an&&(!congKhai||a.loai!=="Lookbook khách"||a.dongY)).sort((a,b)=>(HANG_ANH(a)-HANG_ANH(b))||(a.thuTu||0)-(b.thuTu||0)||(a.tao<b.tao?-1:1))}
 /* Nhân sự: admin thêm trong Nhập liệu > Nhân sự. vaiTro: Stylist, Quầy, Marketing */
-function nhanSu(vaiTro){return (db.nv||[]).filter(n=>!n.nghi&&(!vaiTro||n.vaiTro===vaiTro)).map(n=>n.ten)}
+/* ai làm được việc của một vai trò: đúng vai trò, hoặc được cấp quyền Sửa app đó (theo vai trò hay riêng từng người) */
+function nhanSu(vaiTro){const app={"Stylist":"stylist","Quầy":"quay","Marketing":"marketing"}[vaiTro];const cfg=((db.cauhinh||[]).find(x=>x.id==="quyen")||{}).vaiTro||{};
+  return (db.nv||[]).filter(n=>!n.nghi&&(!vaiTro||n.vaiTro===vaiTro||(app&&n.vaiTro!=="Admin"&&((n.quyen||{})[app]||(cfg[n.vaiTro]||{})[app])==="sua"))).map(n=>n.ten)}
 function anhThat(spId){return anhCua(spId,false).filter(a=>a.loai!=="Ảnh AI"&&a.loai!=="Ảnh hãng")}/* ảnh của hãng không tính là ảnh tự chụp */
 function nenAnh(file,max,q){return new Promise((ok,no)=>{const r=new FileReader();r.onerror=()=>no(new Error("Không đọc được ảnh"));r.onload=()=>{const im=new Image();im.onerror=()=>no(new Error("File không phải ảnh"));im.onload=()=>{const k=Math.min(1,(max||1100)/Math.max(im.width,im.height));const c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);let d=c.toDataURL("image/jpeg",q||0.72);if(d.length>600000)d=c.toDataURL("image/jpeg",0.55);ok(d)};im.src=r.result};r.readAsDataURL(file)})}
 /* Mỗi mẫu cần ít nhất 4 ảnh tự chụp. Brief mặc định khi agent chưa viết brief riêng. */
