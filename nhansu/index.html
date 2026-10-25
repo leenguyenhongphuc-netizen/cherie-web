@@ -17,6 +17,8 @@ h1{font-family:"Playfair Display",Georgia,serif;font-weight:500;font-size:clamp(
 .sub{color:var(--muted);margin:0}
 h2{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 12px}
 .grid{display:grid;grid-template-columns:1fr;gap:12px}@media(min-width:620px){.grid{grid-template-columns:1fr 1fr}}
+.sk{height:78px;border-radius:20px;background:linear-gradient(90deg,var(--surface) 0%,var(--line) 50%,var(--surface) 100%);background-size:200% 100%;animation:sk 1.2s linear infinite}@keyframes sk{to{background-position:-200% 0}}
+a.card.main{border-color:currentColor}
 a.card{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;min-width:0}
 a.card:hover{border-color:var(--hair)}
 .card .n{font-family:"Playfair Display",Georgia,serif;font-size:21px}.card .d{color:var(--muted);font-size:14px}
@@ -42,19 +44,27 @@ button.p{background:var(--action);border-color:var(--action);color:var(--action-
   </section>
   <section><div class="box"><div class="row"><span class="t" id="me2"></span><button id="out">Đăng xuất</button></div></div></section>
 </main>
-<script src="/gasdb.js?v=cbf6ce38"></script><script src="/shared.js?v=ee81eed8"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=6b171ef2"></script><script src="/shared.js?v=ee81eed8"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
 var C=window.CHERIE||{},G=window.GASDB,$=function(q){return document.querySelector(q)};
 var APPS={quay:["Quầy","Bán tại tiệm, đơn online, nhận trả, hoàn cọc, cử stylist"],marketing:["Marketing","Khách online, tư vấn, tạo đơn online, kế hoạch và nội dung"],stylist:["Stylist","Chuyến giao và thử, quét đồ, biên bản"],admin:["Admin","Nhập hàng, chi phí, doanh thu, P&L, nhân sự"]};
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-G.start().then(function(){return G.call("me")}).then(function(r){
-  var me=r.me;$("#hi").textContent="Chào "+me.ten;$("#who").textContent="Vai trò: "+me.vaiTro;$("#me2").textContent=me.ten+" · "+me.vaiTro;
-  $("#apps").innerHTML='<a class="card web" href="'+esc(C.url)+'" target="_top"><span class="n">Website Chérie</span><span class="d">Trang khách xem và đặt lịch</span></a>'+
-    r.pages.filter(function(p){return APPS[p]}).map(function(p){return '<a class="card" href="'+esc(C.paths?C.paths[p]:C.url+'?p='+p)+'" target="_top"><span class="n">'+APPS[p][0]+'</span><span class="d">'+APPS[p][1]+'</span></a>'}).join("");
-  if(me.vaiTro==="Admin"){$("#adm").hidden=false;$("#wurl").textContent=C.url;pins()}
-}).catch(function(){});
+var MAIN={"Quầy":"quay","Stylist":"stylist","Marketing":"marketing","Admin":"admin"};
+function link(p){return C.paths?C.paths[p]:C.url+"?p="+p}
+function draw(r){var me=r.me;$("#hi").textContent="Chào "+me.ten;$("#who").textContent="Vai trò: "+me.vaiTro;$("#me2").textContent=me.ten+" · "+me.vaiTro;
+  var main=MAIN[me.vaiTro],ps=r.pages.filter(function(p){return APPS[p]}).sort(function(a,b){return (b===main)-(a===main)});
+  $("#apps").innerHTML=ps.map(function(p){return '<a class="card'+(p===main?" main":"")+'" href="'+esc(link(p))+'" target="_top"><span class="n">'+APPS[p][0]+'</span><span class="d">'+APPS[p][1]+'</span></a>'}).join("")+
+    '<a class="card web" href="'+esc(C.url)+'" target="_top"><span class="n">Website Chérie</span><span class="d">Trang khách xem và đặt lịch</span></a>';
+  if(me.vaiTro==="Admin"&&$("#adm").hidden){$("#adm").hidden=false;$("#wurl").textContent=C.url;pins()}}
+var cache=null;try{cache=JSON.parse(localStorage.getItem("cherie-home")||"null")}catch(e){}
+if(cache&&cache.me&&cache.pages)draw(cache);else $("#apps").innerHTML='<div class="sk"></div><div class="sk"></div>';
+G.who().then(function(r){try{localStorage.setItem("cherie-home",JSON.stringify({me:r.me,pages:r.pages}))}catch(e){}
+  var ps=r.pages.filter(function(p){return APPS[p]});
+  /* vừa nhập PIN và chỉ có một app: vào thẳng app, không dừng ở trang này */
+  if(r.moi&&ps.length===1&&r.me.vaiTro!=="Admin"){location.replace(link(ps[0]));return}
+  draw(r)}).catch(function(){});
 $("#out").onclick=function(){G.logout()};
 $("#wcp").onclick=function(){try{navigator.clipboard.writeText(C.url).then(function(){$("#wcp").textContent="Đã chép"})}catch(e){}};
 function pins(){G.call("pinStatus").then(function(r){

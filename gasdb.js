@@ -30,7 +30,7 @@ function call(fn,args){return new Promise(function(ok,no){var done=false,tm=setT
     .api(Object.assign({fn:fn,token:token,page:C.page},args||{}))})}
 function saveAuth(t,m){token=t||"";me=m||null;try{if(token){localStorage.setItem(KEY,token);localStorage.setItem(ME,JSON.stringify(me))}else{localStorage.removeItem(KEY);localStorage.removeItem(ME)}}catch(e){}
   if(me&&me.ten){try{if(me.vaiTro==="Stylist"||!localStorage.getItem("cherie-stylist-ten"))localStorage.setItem("cherie-stylist-ten",me.ten)}catch(e){}}}
-function logout(){saveAuth("",null);location.reload()}
+function logout(){saveAuth("",null);try{localStorage.removeItem("cherie-home")}catch(e){}location.reload()}
 var revoked=false;function onRevoked(){if(revoked||C.pub)return;revoked=true;saveAuth("",null);gate().then(function(){location.reload()})}
 
 /* ---------- màn đăng nhập ---------- */
@@ -97,7 +97,9 @@ function start(){
     function(e){if(e&&e.code==="not_granted")denied(e.message);return remote});
   return ready}
 window.claude={use:function(n){return n==="db"?start():Promise.resolve(null)}};
-window.GASDB={call:call,me:function(){return me},logout:logout,start:start,
+/* trang nhân sự: chỉ cần biết mình là ai và được mở app nào, không tải cả kho dữ liệu */
+function who(){var moi=false;return (token?call("me"):Promise.reject({code:"revoked"})).catch(function(){moi=true;return gate().then(function(){return call("me")})}).then(function(r){r.moi=moi;return r})}
+window.GASDB={call:call,who:who,me:function(){return me},logout:logout,start:start,
   afterShared:function(){var CD=window.CherieData;if(!CD)return;
     /* website: giá trị đã tính sẵn ở máy chủ, không gửi giá nhập ra ngoài */
     if(C.pub){var g=CD.giaTri;CD.giaTri=function(s){return s&&s.giaTri!=null?+s.giaTri:g(s)}}
