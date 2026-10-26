@@ -1,0 +1,91 @@
+{
+ "format": "chon-1",
+ "hookTop": "Đỏ, ngà hay đen?",
+ "hookBig": "Chỉ được chọn 1.",
+ "hookSub": "Nàng chọn số mấy?",
+ "dresses": [
+  {
+   "ten": "Bordeaux Tricot",
+   "loai": "Đầm xoè",
+   "size": "L",
+   "gia": "950k",
+   "giaTri": "10 triệu",
+   "cau": "Ôm sát, đuôi vải chảy tới gót.",
+   "shots": [
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/limited_10-56-1792555941.jpg",
+     "pos": "52% 30%",
+     "scale": 1.3
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-51.jpg",
+     "pos": "0% 30%",
+     "scale": 1.1
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-50.jpg",
+     "pos": "50% 30%",
+     "scale": 1
+    }
+   ]
+  },
+  {
+   "ten": "Ivoire Brocart",
+   "loai": "Đầm xoè",
+   "size": "M",
+   "gia": "780k",
+   "giaTri": "8 triệu",
+   "cau": "Năm chiếc nơ, chân váy bung theo bước.",
+   "shots": [
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-5.jpg",
+     "pos": "47% 30%",
+     "scale": 1.42
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-4.jpg",
+     "pos": "35% 30%",
+     "scale": 1.15
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-3.jpg",
+     "pos": "0% 30%",
+     "scale": 1.3
+    }
+   ]
+  },
+  {
+   "ten": "Nuit Brocart",
+   "loai": "Đầm xoè",
+   "size": "M",
+   "gia": "950k",
+   "giaTri": "10 triệu",
+   "cau": "Một vòng xoay, gấm đen tung ra.",
+   "shots": [
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-44.jpg",
+     "pos": "48% 30%",
+     "scale": 1.18
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-38.jpg",
+     "pos": "50% 30%",
+     "scale": 1
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-45.jpg",
+     "pos": "100% 30%",
+     "scale": 1.15
+    }
+   ]
+  }
+ ],
+ "dichVu": [
+  "Tụi mình tới tận nơi.",
+  "Khách sạn hay nhà riêng.",
+  "Phí mang tới từ 120k"
+ ],
+ "cta": "Comment số nàng chọn",
+ "ctaSub": "Chiếc thắng xoay thật tuần sau.",
+ "nguon": "Ảnh lookbook: SIXDO"
+}
