@@ -1,10 +1,12 @@
 // Tải ảnh URL trong props về public/dl/, thu nhỏ còn rộng 1500px, rồi ghi props mới trỏ tới file cục bộ.
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+// Hỗ trợ khuôn cũ (dresses[].a/b, hookImg, serviceImg) và khuôn v2 (dresses[].shots[].src).
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
 const [, , inp, outp] = process.argv;
 const p = JSON.parse(readFileSync(inp, "utf8"));
+mkdirSync("public/dl", { recursive: true });
 
 const local = (u) => {
   if (!u || !/^https?:\/\//.test(u)) return u;
@@ -17,9 +19,11 @@ const local = (u) => {
   return `dl/${id}.jpg`;
 };
 
-p.hookImg = local(p.hookImg);
-p.serviceImg = local(p.serviceImg);
-p.dresses = (p.dresses || []).map((d) => ({ ...d, a: local(d.a), b: local(d.b) }));
+if (p.hookImg) p.hookImg = local(p.hookImg);
+if (p.serviceImg) p.serviceImg = local(p.serviceImg);
+p.dresses = (p.dresses || []).map((d) =>
+  d.shots ? { ...d, shots: d.shots.map((s) => ({ ...s, src: local(s.src) })) } : { ...d, a: local(d.a), b: local(d.b) }
+);
 p.nhac = false;
 writeFileSync(outp, JSON.stringify(p));
-console.log("props ok:", p.dresses.length, "mẫu");
+console.log("props ok:", p.format || "khuôn cũ", p.dresses.length, "mẫu");
