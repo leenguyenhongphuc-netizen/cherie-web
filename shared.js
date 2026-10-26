@@ -236,6 +236,10 @@ const YEN_TAM={phi:20000,tyLe:0.01,toiThieu:20000,ten:"Gói Yên tâm",
   khong:["Mất đồ hoặc hư nặng không sửa được: nàng đền 50% giá trị chiếc đầm thay vì 100%","Tự ý cắt, may sửa, nhuộm đầm","Trả trễ: vẫn tính 20.000đ mỗi giờ"]};
 function phiYenTam(sp){const v=(sp&&sp.giaTri!=null?+sp.giaTri:giaTri(sp))||0;return Math.max(YEN_TAM.toiThieu,Math.ceil(v*YEN_TAM.tyLe/10000)*10000)}
 function phiYenTamDs(sps){return (sps||[]).reduce((a,s)=>a+(s?phiYenTam(s):YEN_TAM.toiThieu),0)}
+/* phí gói của một món trong đơn: đơn cũ (trước 26/10, không có phiYenTam) là 20.000đ mỗi chiếc */
+function ytMon(d,sp){if(!d||!d.yenTam)return 0;return d.phiYenTam!=null?phiYenTam(sp):YEN_TAM.phi}
+/* câu giải thích số tiền đền, nói rõ vì sao */
+function denGiaiThich(lv,sp,yenTam){const f=phiHu(lv,sp,yenTam),gt=giaTri(sp);if(lv==="L4")return yenTam?`đền ${vnd(f)} = 50% giá trị ${vnd(gt)} (có Gói Yên tâm)`:`đền ${vnd(f)} = 100% giá trị (không có Gói Yên tâm)`;if(lv==="L0"||lv==="L1")return "miễn phí";return f?`đền ${vnd(f)} (không có Gói Yên tâm)`:"miễn phí nhờ Gói Yên tâm"}
 function ytCuaDon(d,sps){if(!d||!d.yenTam)return 0;if(d.phiYenTam!=null)return +d.phiYenTam||0;return YEN_TAM.phi*(sps||[]).length}
 /* ---------- Gói Yên tâm và quy tắc đền: dùng chung cho Quầy, Stylist, Marketing để ai cũng thấy giống nhau ---------- */
 const DEN_CSS=`.den-rules{margin-top:8px;border:1px solid var(--line,#E2D6C6);border-radius:12px;padding:10px 12px;background:var(--surface,#fff)}.den-rules summary{font-weight:600;cursor:pointer}.den-w{overflow-x:auto}.den-t{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}.den-t th,.den-t td{text-align:left;padding:6px;border-bottom:1px solid var(--line,#E2D6C6);vertical-align:top}.den-t .on{background:var(--good-soft,#E6F2EA);font-weight:600}.den-b{border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45}.den-b.co{background:var(--good-soft,#E6F2EA);color:var(--good,#2F6B47)}.den-b.khong{background:var(--warn-soft,#FBF0DC);color:var(--warn,#8A5A12)}`;
@@ -248,7 +252,7 @@ function ytBanner(d){if(!d)return "";denCss();const ls=ctCuaDon(d);return d.yenT
 /* bảng quy tắc đền, tô cột áp dụng cho đơn; kèm số tiền đền nếu mất từng món */
 function quyTacDen(d){denCss();const yt=!!(d&&d.yenTam);const ten={L0:"Như mới",L1:"Bẩn nhẹ, giặt thường",L2:"Vết bẩn khó, sút chỉ",L3:"Rách, hỏng cần thợ",L4:"Hư nặng hoặc mất"};
   const o=(L,co)=>L[0]==="L4"?(co?"50% giá trị":"100% giá trị"):co&&L[0]!=="L0"&&L[0]!=="L1"?"Miễn phí":L[2]?kk(L[2]):"Miễn phí";const on=c=>c===yt?' class="on"':"";
-  const mon=d?ctCuaDon(d).map(c=>{const sp=(db.sp||[]).find(x=>x.id===c.sp)||{};const gt=giaTri(sp);return gt?`<li>${sp.ten||c.sp} (giá trị ${kk(gt)}): mất hoặc hư nặng đền ${kk(phiHu("L4",sp,yt))}</li>`:""}).join(""):"";
+  const mon=d?ctCuaDon(d).map(c=>{const sp=(db.sp||[]).find(x=>x.id===c.sp)||{};const gt=giaTri(sp);return gt?`<li>${sp.ten||c.sp} (giá trị ${vnd(gt)}): mất hoặc hư nặng đền ${vnd(phiHu("L4",sp,yt))}</li>`:""}).join(""):"";
   return `<details class="den-rules"><summary>Quy tắc đền khi hư, mất</summary><div class="den-w"><table class="den-t"><tr><th>Mức</th><th>Tình trạng</th><th${on(false)}>Không có gói</th><th${on(true)}>Có Gói Yên tâm</th></tr>${MUC_HU.map(L=>`<tr><td>${L[0]}</td><td>${ten[L[0]]}</td><td${on(false)}>${o(L,false)}</td><td${on(true)}>${o(L,true)}</td></tr>`).join("")}</table></div>${mon?`<p style="margin:8px 0 2px;font-size:13px"><b>Đơn này, nếu mất hoặc hư nặng:</b></p><ul style="margin:0;padding-left:18px;font-size:13px">${mon}</ul>`:""}<p style="font-size:12.5px;opacity:.8;margin:8px 0 0">Cột tô màu là cột áp dụng cho đơn này. Trả trễ: từ giờ thứ hai 20.000đ mỗi giờ, có gói hay không đều tính. Phí là đề xuất, quầy duyệt khi kiểm đồ rồi mới trừ cọc.</p></details>`}
 
 const MUC_HU=[["L0","Như mới",0],["L1","Bẩn nhẹ, giặt thường",0],["L2","Vết bẩn khó hoặc sút chỉ",100000],["L3","Rách, hỏng cần thợ",300000],["L4","Hư nặng hoặc mất",null]];
@@ -544,7 +548,7 @@ function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn")
 window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
-  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
+  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
   init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},
   reset(){/* bản chính thức: tắt nạp lại dữ liệu mẫu để không ghi đè dữ liệu thật */},

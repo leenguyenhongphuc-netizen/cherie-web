@@ -213,7 +213,7 @@ details.more>summary::after{content:"Xem";color:var(--wine)}
 details.more[open]>summary::after{content:"Ẩn"}
 details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
 .rules{margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}.rules summary{font-weight:600;cursor:pointer}.tblw{overflow-x:auto}.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}.tbl th,.tbl td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}.tbl .on{background:var(--good-soft);font-weight:600}
-.footbar{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom,0px));background:var(--bg);padding-block:10px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.footbar{position:sticky;bottom:var(--navh,64px);z-index:15;background:var(--bg);padding-block:8px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:8px}.footbar .fwhy{order:-1;flex-basis:100%;font-size:12.5px;color:var(--muted);line-height:1.3}.footbar .fnext{flex:1;min-height:44px}.footbar .fprev{min-height:44px;padding:0 12px;flex:0 0 auto;font-size:14px}
 .btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
 .sel{user-select:all}
 .row .main{display:flex;flex-direction:column;gap:1px}
@@ -247,7 +247,7 @@ details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
   </div>
 </div>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=ed94450b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=3f71e5d5"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -421,14 +421,16 @@ function renderTrip(){
   else ({thu:thuStep,giao:giaoStep,nhan:nhanStep})[t.loai](t,c,step,o=>{body=o.body;foot=o.foot||"";bind=o.bind||(()=>{})});
   if(!t.d.checkin&&body.includes('id="checkin"'))foot="";
   /* luôn có đường quay lại bước trước (dữ liệu đã nhập ở các bước được giữ nguyên) */
-  if(!closed&&step>0&&!foot.includes('id="prevStep"'))foot=`<button class="btn ghost" type="button" id="prevStep">← Quay lại bước ${step}</button>`+foot;
-  view.innerHTML=head+body+(foot?`<div class="footbar">${foot}</div>`:"");
+  if(!closed&&step>0&&!foot.includes('id="prevStep"'))foot=`<button class="btn ghost fprev" type="button" id="prevStep" aria-label="Quay lại">← Quay lại</button>`+foot;
+  view.innerHTML=head+body+(foot?`<div class="footbar">${foot}</div>`:"");setNavH();
   view.querySelector("#back").onclick=()=>{openTrip=null;render();window.scrollTo(0,0)};
   view.querySelector("#copyPhone").onclick=()=>{const v=c.sdt;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(()=>toast("Đã chép số điện thoại"),()=>toast("Chọn số để chép thủ công"))}else toast("Chọn số để chép thủ công")};
   const pb=view.querySelector("#prevStep");if(pb)pb.onclick=()=>{t.step--;save();render()};
   bind();
 }
-function nextBtn(ok,label,why){return `<button class="btn primary" type="button" id="nextStep" ${ok?"":"disabled"}>${esc(label)}</button>${!ok&&why?`<span class="note">${esc(why)}</span>`:""}`}
+function setNavH(){const n=document.querySelector("nav.tabs");if(n)document.documentElement.style.setProperty("--navh",Math.round(n.getBoundingClientRect().height)+"px")}
+window.addEventListener("resize",setNavH);setTimeout(setNavH,300);
+function nextBtn(ok,label,why){const ngan=/^Hoàn tất|^Đóng|^Lập phiếu/.test(label)?label.replace(/ (giao đồ|nhận đồ|phiên thử)$/,""):"Tiếp tục";return `${!ok&&why?`<span class="fwhy">${esc(why)}</span>`:""}<button class="btn primary fnext" type="button" id="nextStep" title="${esc(label)}" ${ok?"":"disabled"}>${esc(ngan)} →</button>`}
 function goNext(t,fn){const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{if(fn)fn();t.step++;save();render();window.scrollTo(0,0)}}
 
 function checkinBlock(t){const d=t.d;
@@ -535,7 +537,7 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
 /* ---------- thông tin đơn: ai thuê, thuê gì, có Gói Yên tâm không, quy tắc đền ---------- */
 const ytBanner=d=>window.CherieData.ytBanner(d),quyTacDen=d=>window.CherieData.quyTacDen(d);
 function donBox(t){if(!t.don)return "";const don=byId("don",t.don);if(!don)return "";const CD=window.CherieData,ls=lines(don),dat=kh(don.dat)||{};
-  const it=ls.map(l=>{const sp=byId("sp",l.sp)||{},gt=CD.giaTri(sp),mac=l.mac&&l.mac!==don.dat?(kh(l.mac)||{}).ten:"";return `<div class="row">${sw(sp)}<span class="main"><span class="t">${esc(sp.ten||l.sp)} · ${esc(sp.size||"")}</span><span class="s mono">${esc(l.sp)}</span><span class="s">Thuê ${k(+l.ct.gia||sp.gia||0)} · giá trị ${gt?k(gt):"chưa có"}${don.yenTam?` · gói ${k(CD.phiYenTam(sp))}`:""}${mac?` · người mặc: ${esc(mac)}`:""}</span></span></div>`}).join("");
+  const it=ls.map(l=>{const sp=byId("sp",l.sp)||{},gt=CD.giaTri(sp),mac=l.mac&&l.mac!==don.dat?(kh(l.mac)||{}).ten:"";return `<div class="row">${sw(sp)}<span class="main"><span class="t">${esc(sp.ten||l.sp)} · ${esc(sp.size||"")}</span><span class="s mono">${esc(l.sp)}</span><span class="s">Thuê ${k(+l.ct.gia||sp.gia||0)} · giá trị ${gt?k(gt):"chưa có"}${don.yenTam?` · đã mua gói ${k(CD.ytMon(don,sp))}`:""}${mac?` · người mặc: ${esc(mac)}`:""}</span></span></div>`}).join("");
   return `<section><h2>Đơn hàng ${esc(don.id)}</h2>
    <div class="pills" style="margin-bottom:8px">${don.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill warn">Không mua Gói Yên tâm</span>'}<span class="pill line">${esc(don.tt||"")}</span>${don.giaoTanNoi?'<span class="pill line">Giao tận nơi</span>':""}</div>
    <dl class="kv box"><dt>Người đặt</dt><dd>${esc(dat.ten||don.dat)}</dd><dt>Nhận đồ</dt><dd>${dm(don.nhan)} lúc ${hm(don.nhan)}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd><dt>Cọc đang giữ</dt><dd>${money(don.coc)}${don.hinhThuc?` · ${esc(don.hinhThuc)}`:""} · ${esc((don.ttCoc||"").toLowerCase())}</dd>${don.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(don.phiGiao)}</dd>`:""}${don.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(CD.ytCuaDon(don,ls))}</dd>`:""}</dl>
@@ -553,12 +555,12 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
       foot:nextBtn(!!d.checkin,"Bắt đầu nhận đồ","Bấm đã đến nơi"),bind:()=>{bindCheckin(t);goNext(t,()=>{d.in=d.in||{};d.lv=d.lv||{};d.mota=d.mota||{}})}});
   } else if(step===1){
     const done=d.in||(d.in={});d.lv=d.lv||{};d.mota=d.mota||{};const CDx=window.CherieData;
-    const lvSel=(i,cur)=>{const sp=byId("sp",i),gt=window.CherieData.giaTri(sp),ten={L0:"Như mới",L1:"Bẩn nhẹ, giặt thường",L2:"Vết bẩn khó hoặc sút chỉ",L3:"Rách, hỏng cần thợ",L4:"Hư nặng không sửa được"};const tien=lv=>{const f=fee(lv,sp);return f?"đền "+k(f):"miễn phí"};
+    const lvSel=(i,cur)=>{const sp=byId("sp",i),gt=window.CherieData.giaTri(sp),ten={L0:"Như mới",L1:"Bẩn nhẹ, giặt thường",L2:"Vết bẩn khó hoặc sút chỉ",L3:"Rách, hỏng cần thợ",L4:"Hư nặng không sửa được"};const tien=lv=>window.CherieData.denGiaiThich(lv,sp,!!(curDon&&curDon.yenTam));
   return `<label class="f full" for="lv-${i}">Mức tình trạng (số tiền là khách phải đền cho món này)<select id="lv-${i}" data-lv="${i}">${LEVELS.map(L=>`<option value="${L[0]}" ${L[0]===cur?"selected":""}>${L[0]} · ${ten[L[0]]} · ${tien(L[0])}</option>`).join("")}<option value="MAT" ${cur==="MAT"?"selected":""}>Mất · khách làm mất · ${tien("L4")} · không cần ảnh</option></select></label>`};d.mat=d.mat||{};const anhOk=i=>d.mat[i]?!!(d.mota[i]||"").trim():CDx.ttDu(don.id,"nhan",i)&&((d.lv[i]||"L0")<="L1"||((CDx.bbOf(don.id,"nhan")||{mon:{}}).mon[i]||{them:[]}).them.some(Boolean));
     const scanned=ids.every(i=>done[i]),all=scanned&&ids.every(anhOk);
     const whyN=!scanned?"Quét đủ các món (món khách làm mất: bấm Báo mất)":ids.some(i=>d.mat[i]&&!(d.mota[i]||"").trim())?"Ghi chú món bị mất (khách nói mất ở đâu, khi nào)":"Chụp đủ ảnh lúc nhận (vết hư cần thêm ảnh cận vết)";
     out({body:`<section><h2>Bước 2 · Quét và kiểm từng món</h2>${scanBox(ids,done,"Quét món khách trả",d.mat)}</section>
-      ${Object.keys(done).length?`<section><h2>Tình trạng lúc nhận</h2><div class="list">${ids.filter(i=>done[i]).map(i=>{const s=byId("sp",i),lv=d.lv[i]||"L0";if(d.mat[i])return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · khách làm mất</span><span class="s">Phí đề xuất ${money(fee("L4",s))}${curDon&&curDon.yenTam?" (có Gói Yên tâm: 50% giá trị)":" (100% giá trị)"}</span></span>${lvSel(i,"MAT")}<label class="f full" for="mt-${i}">Ghi chú: mất ở đâu, khi nào (không cần chụp ảnh)<input id="mt-${i}" data-mt="${i}" type="text" value="${esc(d.mota[i]||"")}" placeholder="Ví dụ: khách để quên trên taxi tối 25/10"></label></div>`;return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)}</span><span class="s">Phí đề xuất ${money(fee(lv,s))}</span></span>
+      ${Object.keys(done).length?`<section><h2>Tình trạng lúc nhận</h2><div class="list">${ids.filter(i=>done[i]).map(i=>{const s=byId("sp",i),lv=d.lv[i]||"L0";if(d.mat[i])return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · khách làm mất</span><span class="s">Phí đề xuất ${money(fee("L4",s))}${curDon&&curDon.yenTam?" (có Gói Yên tâm: 50% giá trị)":" (100% giá trị)"}</span></span>${lvSel(i,"MAT")}<label class="f full" for="mt-${i}">Ghi chú: mất ở đâu, khi nào (không cần chụp ảnh)<input id="mt-${i}" data-mt="${i}" type="text" value="${esc(d.mota[i]||"")}" placeholder="Ví dụ: khách để quên trên taxi tối 25/10"></label></div>`;return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)}</span><span class="s">Phí đề xuất ${money(fee(lv,s))} · ${window.CherieData.denGiaiThich(lv,s,!!(curDon&&curDon.yenTam))}</span></span>
         ${lvSel(i,lv)}
         ${lv!=="L0"&&lv!=="L1"?`<label class="f full" for="mt-${i}">Mô tả và vị trí hư hỏng<input id="mt-${i}" data-mt="${i}" type="text" value="${esc(d.mota[i]||"")}"></label>`:""}
         <span class="s full">Ảnh lúc nhận: ${CDx.ttSo(don.id,"nhan",i)}/4${anhOk(i)?" · đủ":lv>"L1"&&CDx.ttDu(don.id,"nhan",i)?" · thiếu ảnh cận vết":""}</span></div>`}).join("")}</div>

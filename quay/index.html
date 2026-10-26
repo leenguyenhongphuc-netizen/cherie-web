@@ -229,7 +229,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=ed94450b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=3f71e5d5"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -647,7 +647,7 @@ function openDon(id){nextSheet=()=>openDon(id);
   if(d.tt==="Đã đặt")act=onBanner+cocBtn+(ot&&ot.loai==="giao"?tripBanner:'')+(ot&&ot.loai==="giao"?"":`<div class="btns"><button class="btn primary" type="button" id="aGiao">${d.hd?"Giao tại quầy":"Ký hợp đồng và giao tại quầy"}</button><button class="btn" type="button" id="aShip">Cử stylist giao tận nơi</button></div>`);
   if(d.tt==="Đang thuê")act=(ot&&ot.loai==="nhan"?tripBanner+'<details class="more"><summary>Khách tự mang đến tiệm? Nhận trả tại quầy</summary><div style="padding:0 12px 12px">':`<button class="btn block" type="button" id="aPick">Cử stylist đi nhận lại</button>`)+`<section><h2>Nhận trả đồ tại quầy</h2><div class="box" style="display:flex;flex-direction:column;gap:10px">${late?`<div class="banner bad">Trễ ${lateH} giờ so với hẹn ${when(d.tra)}.</div>`:""}
     <p class="note">${d.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách nhỏ miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: phí theo mức tình trạng."} Chụp 4 ảnh lúc nhận cho mỗi món trước khi xác nhận.</p>
-    ${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="line-item"><label class="f">${esc(s.ten)} (${s.id}) · tình trạng<select data-lvq="${c.id}">${window.CherieData.MUC_HU.map(L=>`<option value="${L[0]}">${L[0]} · ${L[1]} · ${L[0]==="L4"?"đền theo giá trị":money(window.CherieData.phiHu(L[0],s,d.yenTam))}</option>`).join("")}</select></label><label class="f" data-mtq="${c.id}" hidden>Mô tả vết, vị trí<input type="text" id="m-${c.id}"></label><span class="note">Ảnh lúc nhận: ${window.CherieData.ttSo(d.id,"nhan",c.sp)}/4</span></div>`}).join("")}
+    ${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="line-item"><label class="f">${esc(s.ten)} (${s.id}) · tình trạng<select data-lvq="${c.id}">${window.CherieData.MUC_HU.map(L=>`<option value="${L[0]}">${L[0]} · ${L[1]} · ${window.CherieData.denGiaiThich(L[0],s,!!d.yenTam)}</option>`).join("")}</select></label><label class="f" data-mtq="${c.id}" hidden>Mô tả vết, vị trí<input type="text" id="m-${c.id}"></label><span class="note">Ảnh lúc nhận: ${window.CherieData.ttSo(d.id,"nhan",c.sp)}/4</span></div>`}).join("")}
     <div class="btns"><button class="btn" type="button" id="ttNq">Chụp ảnh lúc nhận</button><button class="btn" type="button" id="ttSq">So với ảnh lúc giao</button></div>
     <label class="f">Phí trả trễ / phát sinh (đ)<input type="number" id="phi" min="0" step="10000" value="${lateFee}"></label>
     <button class="btn primary" type="button" id="aTra">Xác nhận đã trả lúc ${hm(iso(NOW))}</button></div></section>`+(ot&&ot.loai==="nhan"?"</div></details>":"");
@@ -655,8 +655,8 @@ function openDon(id){nextSheet=()=>openDon(id);
   const kiem=waitCk?`<section><h2>Kiểm đồ stylist mang về · ${waitCk} món</h2><div class="box" style="display:flex;flex-direction:column;gap:10px">
     <p class="note">${d.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách nhỏ miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: phí theo mức tình trạng."} So ảnh lúc giao và lúc nhận, chỉnh mức nếu stylist chấm chưa đúng.</p>
     ${ls.filter(c=>byId("sp",c.sp).tt==="Chờ kiểm tra").map(c=>{const s=byId("sp",c.sp),cur=c.muc||(c.hu?String(c.moTa||"").slice(0,2):"L0");return `<div class="line-item"><b>${esc(s.ten)} (${s.id})</b><span class="note">Stylist ghi: ${c.hu?esc(c.moTa):"không hư hỏng"} · phí đề xuất ${money(c.phiHu||0)}</span>
-      <label class="f">Mức quầy xác nhận<select data-kq="${c.id}">${window.CherieData.MUC_HU.map(L=>`<option value="${L[0]}" ${L[0]===cur?"selected":""}>${L[0]} · ${L[1]} · ${L[0]==="L4"?"đền theo giá trị":money(window.CherieData.phiHu(L[0],s,d.yenTam))}</option>`).join("")}</select></label>
-      <span class="note">So sánh: không có gói ${L4txt(s,cur,false)} · có Gói Yên tâm ${L4txt(s,cur,true)}</span></div>`}).join("")}
+      <label class="f">Mức quầy xác nhận<select data-kq="${c.id}">${window.CherieData.MUC_HU.map(L=>`<option value="${L[0]}" ${L[0]===cur?"selected":""}>${L[0]} · ${L[1]} · ${window.CherieData.denGiaiThich(L[0],s,!!d.yenTam)}</option>`).join("")}</select></label>
+      <span class="note">Đơn ${d.yenTam?"CÓ":"KHÔNG có"} Gói Yên tâm: ${window.CherieData.denGiaiThich(cur,s,!!d.yenTam)}</span></div>`}).join("")}
     <div class="btns"><button class="btn" type="button" id="ttSk">So ảnh giao · nhận</button><button class="btn primary" type="button" id="aKiem">Kiểm xong, chốt phí</button></div></div></section>`:"";
   if(d.tt==="Đã trả"&&(d.ttCoc==="Đang giữ"||d.ttCoc==="Chờ hoàn"))act=kiem+(waitCk?`<div class="banner warn">Còn ${waitCk} món Chờ kiểm tra. Chốt phí ở trên rồi mới hoàn cọc.</div>`:`<div class="banner info">Hoàn lại ${money(cocHoan(d))} = cọc ${money(d.coc)} − phí trễ ${money(d.phi)} − hư hỏng ${money(tongHu(d))}${d.yenTam?" (đơn có Gói Yên tâm)":""}</div><button class="btn primary block" type="button" id="aCoc">Đã hoàn cọc</button>`);
   sheet(`Đơn ${d.id}`,`
