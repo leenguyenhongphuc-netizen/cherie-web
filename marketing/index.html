@@ -788,7 +788,7 @@ function openSoTay(){
       const n=(db.sotay||[]).filter(r=>r.id!=="META").reduce((m,r)=>Math.max(m,+String(r.id).replace(/\D/g,"")||0),0)+1,ap=root.querySelector("#stAp").value;
       db.sotay=db.sotay||[];db.sotay.push({id:"ST"+String(n).padStart(3,"0"),ngay:new Date(Date.now()+252e5).toISOString().slice(0,16),apDung:[ap],quyTac:t,viDuSai:"",nguon:"Chủ tiệm dạy trong app",tt:"Hiệu lực"});save();openSoTay();toast("Đã lưu. Agent áp dụng từ lượt chạy kế tiếp")};
     root.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const r=(db.sotay||[]).find(x=>x.id===b.dataset.st);if(!r)return;r.tt=r.tt==="Đã bỏ"?"Hiệu lực":"Đã bỏ";save();openSoTay()})})}
-function dinhHuongHtml(P){const H=P.dinhHuong;if(!H)return "";const li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join("");
+function dinhHuongHtml(P){const H=P.dinhHuong;if(!H)return "";const li=a=>(Array.isArray(a)?a:a?[a]:[]).map(x=>`<li>${esc(typeof x==="string"?x:JSON.stringify(x))}</li>`).join("");
   const K=H.keyVisual||{};const sw=(K.mau||[]).map(c=>{const m=String(c).match(/#[0-9a-f]{6}/i);return `<span class="dh-sw"><i style="background:${m?m[0]:"var(--sunk)"}"></i>${esc(String(c))}</span>`}).join("");
   const imgs=(K.anhMau||[]).map(id=>{const L=anhMau(id);return L.length?`<img src="${esc(L[0])}" alt="${esc((byId("sp",id)||{ten:id}).ten)}" loading="lazy">`:""}).join("");
   return `<section><h2>Định hướng tháng</h2><div class="box dh">
@@ -805,12 +805,14 @@ function openPlan(id){nextSheet=()=>openPlan(id);const P=byId("kehoach",id);if(!
   const steps=["Agent lập","Agent đánh giá","Bạn duyệt",P.loai==="Tháng"?"Lập kế hoạch tuần":"Sản xuất"];
   const cur=running[P.id]?(running[P.id].includes("Đánh giá")?1:0):P.tt==="Chờ chủ duyệt"?2:P.tt==="Đã duyệt"?3:0;
   const R=P.review;
+  /* agent có thể ghi nhận xét dạng chuỗi, mảng hoặc đối tượng: đọc được cả ba */
+  const dsach=v=>Array.isArray(v)?v.map(x=>typeof x==="string"?x:Array.isArray(x)?x.join(" · "):(x&&typeof x==="object")?Object.values(x).join(" · "):String(x??"")):typeof v==="string"?(v.trim()?[v]:[]):(v&&typeof v==="object")?Object.entries(v).map(([k,x])=>k+": "+(Array.isArray(x)?x.join(" · "):String(x))):[];
   sheet(String(P.ky||"").startsWith(P.loai)?P.ky:`${P.loai} ${P.ky}`,`<div class="flow">${steps.map((s,i)=>`<span class="${i<cur?"done":i===cur?"on":""}">${s}</span>`).join("")}</div>
    ${agentBox(P.id)}
    <p class="note">${esc(P.giaiDoan)} · bản ${P.vong||0}${P.tao?` · ${when(P.tao)}`:""}</p>
-   ${gopYHtml(P,"kh",P.review&&P.review.sua)}
+   ${gopYHtml(P,"kh",dsach(P.review&&P.review.sua))}
    ${(P.mucTieu||[]).length?`<section><h2>Mục tiêu</h2><div class="box"><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px">${P.mucTieu.map(m=>`<li>${esc(m)}</li>`).join("")}</ol></div></section>`:""}
-   ${R?`<section><h2>Agent Đánh giá <span class="score ${R.diem>=9?"ok":"no"}">${String(R.diem).replace(".",",")}/10</span></h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:6px">${R.nhanXet.map(x=>`<span>${esc(x)}</span>`).join("")}${(R.sua||[]).length?`<span class="note"><b>Đã sửa:</b> ${R.sua.map(esc).join(" · ")}</span>`:""}</div></section>`:""}
+   ${R?`<section><h2>Agent Đánh giá <span class="score ${R.diem>=9?"ok":"no"}">${String(R.diem).replace(".",",")}/10</span></h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:6px">${dsach(R.nhanXet).map(x=>`<span>${esc(x)}</span>`).join("")}${dsach(R.sua).length?`<span class="note"><b>Đã sửa:</b> ${dsach(R.sua).map(esc).join(" · ")}</span>`:""}</div></section>`:""}
    ${P.loai==="Tháng"?dinhHuongHtml(P):""}${P.loai==="Tháng"&&!(P.items||[]).length?"":`<section><h2>${(P.items||[]).length} hạng mục</h2>${P.tt==="Chờ chủ duyệt"?'<p class="note" style="margin:0 0 8px">Chọn từng mục: AI dựng (agent làm luôn hình, video) hay Tự quay (team quay dựng).</p>':""}<div class="list">${(P.items||[]).map((x,i)=>`<div class="row" style="flex-wrap:wrap"><span class="main"><span class="t">${dm(x.ngay)} · ${esc(x.chuDe)}</span><span class="s">${esc(x.kenh)} · ${esc(x.dinhDang)} · ${esc(x.angle||"")}${(x.mau||[]).length?" · "+x.mau.map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", "):""}</span></span>${P.tt==="Chờ chủ duyệt"?`<span class="seg2" style="width:100%">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-pi="${i}" data-v="${v}" aria-pressed="${cachLam(x)===v}">${v}</button>`).join("")}</span>`:`<span class="r"><span class="note">${cachLam(x)}</span></span>`}</div>`).join("")||'<div class="empty">Agent chưa lập.</div>'}</div></section>`}
    ${(P.lichSu||[]).length?`<details class="mota"><summary>Lịch sử ${P.lichSu.length} lần sửa</summary><div class="box log">${P.lichSu.slice().reverse().map(l=>`<div>${when(l[0])} · <b>${esc(l[1])}</b> · ${esc(l[2])}</div>`).join("")}</div></details>`:""}
    <div id="actions" style="display:flex;flex-direction:column;gap:10px"></div>`,root=>{
