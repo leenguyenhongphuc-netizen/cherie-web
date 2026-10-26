@@ -197,7 +197,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
 </style>
 <style>
 .app{max-width:520px}
-nav.tabs{max-width:520px;grid-template-columns:repeat(4,1fr)}
+nav.tabs{max-width:520px;grid-template-columns:repeat(5,1fr)}
 .sheet{max-width:520px}
 .seg2{display:flex;gap:6px;flex-wrap:wrap}
 .assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
@@ -236,6 +236,31 @@ nav.tabs{max-width:520px;grid-template-columns:repeat(4,1fr)}
 .funnel b{font-size:18px}
 .log{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font-size:14px;min-height:72px}
+[hidden]{display:none!important}
+a.btn{text-decoration:none;color:var(--ink)}a.btn.primary{color:var(--wine-ink)}
+.hnl{display:flex;flex-direction:column;gap:8px}
+.hn{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.hn-n{font-family:var(--display);font-size:28px;font-weight:500;min-width:30px;text-align:center;line-height:1}
+.hn.hot{border-color:var(--bad)}.hn.hot .hn-n{color:var(--bad)}
+.hn-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.hn-m b{font-size:14.5px;font-weight:600}.hn-m span{font-size:12.5px;color:var(--muted)}
+.hn .btn{flex:none;min-height:40px;padding:0 16px}
+.hn-done{background:var(--good-soft);color:var(--good);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:4px}.hn-done b{font-family:var(--display);font-size:20px;font-weight:500}
+.hn-kpi{display:flex;flex-direction:column;gap:6px}.hn-kpi div{display:flex;flex-direction:column;gap:1px;padding:10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}.hn-kpi b{font-size:13.5px;font-weight:600}.hn-kpi span{font-size:12.5px;color:var(--muted)}
+.ndsum{margin:0;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.ndmore>summary{font-weight:600;font-size:13.5px;padding:10px 0;cursor:pointer}
+.ndmore[open]{display:flex;flex-direction:column;gap:14px}
+.ndbar{position:sticky;bottom:calc(-20px - env(safe-area-inset-bottom,0px));z-index:3;display:flex;gap:8px;background:var(--bg);padding:10px 0 calc(14px + env(safe-area-inset-bottom,0px));margin-top:-6px;border-top:1px solid var(--line)}
+.ndbar .btn{flex:1;min-height:46px}.ndbar .btn[disabled]{opacity:.5}
+.pkSel{display:flex;gap:10px;align-items:center}
+.pkq{padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.pk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-height:430px;overflow:auto;padding:2px}
+.pkc{display:flex;flex-direction:column;gap:2px;text-align:left;border:1px solid var(--line);border-radius:12px;padding:4px 4px 6px;background:var(--surface);color:var(--ink);font-size:12px;line-height:1.3;cursor:pointer;min-width:0}
+.pkc img,.pkc i{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:9px;background:var(--sunk);display:block;margin-bottom:3px}
+.pkc b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pkc span{color:var(--muted)}
+.pkc em{font-style:normal;font-size:11px;font-weight:600;color:var(--good)}
+.pkc.kin{opacity:.45;cursor:not-allowed}.pkc.kin em{color:var(--bad)}
+.stale{position:sticky;top:0;z-index:2;align-self:stretch;background:var(--ink);color:var(--bg);border:0;border-radius:999px;padding:9px 14px;font-weight:600;font-size:13px}
 </style>
 
 <div class="shell">
@@ -269,7 +294,8 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
     </header>
     <main class="gut" id="view"></main>
     <nav class="tabs" aria-label="Điều hướng">
-      <button type="button" data-tab="online"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 10h8M8 13h5"/></svg>Khách online</button>
+      <button type="button" data-tab="hn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-5"/></svg>Hôm nay</button>
+      <button type="button" data-tab="online"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 10h8M8 13h5"/></svg>Khách</button>
       <button type="button" data-tab="nd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>Nội dung</button>
       <button type="button" data-tab="kh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h4"/></svg>Kế hoạch</button>
       <button type="button" data-tab="kq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Hiệu quả</button>
@@ -277,7 +303,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d2d9eaf"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=2220d1e0"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -339,15 +365,15 @@ function sheetTruoc(title){const o=layer.querySelector(".sheet"),t=o&&o.getAttri
 function sheet(title,html,onMount){sheetTruoc(title);const o=layer.querySelector(".sheet"),same=o&&o.getAttribute("aria-label")===String(title),y=same?o.scrollTop:0;curSheet=nextSheet;nextSheet=null;layer.innerHTML=`<div class="scrim" data-close><div class="sheet${same?" still":""}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sheet-head gut">${sheetHist.length?'<button class="x" type="button" data-back aria-label="Quay lại" style="font-size:20px">‹</button>':""}<h3 style="flex:1">${esc(title)}</h3><button class="x" type="button" data-close aria-label="Đóng">×</button></div><div class="sheet-body gut">${html}</div></div></div>`;
   layer.querySelector(".scrim").addEventListener("click",e=>{if(e.target.classList.contains("scrim")&&layer.querySelector(".sheet form"))return toast("Đang nhập dở. Bấm × để đóng.");if(e.target.hasAttribute("data-close"))closeSheet()});{const bk=layer.querySelector("[data-back]");if(bk)bk.onclick=()=>{const f=sheetHist.pop();if(f){sheetBack=true;f()}}}const n=layer.querySelector(".sheet");if(same&&n)n.scrollTop=y;if(onMount)onMount(layer.querySelector(".sheet-body"));if(same&&n&&n.scrollTop!==y)n.scrollTop=y}
 function closeSheet(){layer.innerHTML="";curSheet=null;sheetHist=[]}
-function refreshSheet(){if(!curSheet||!layer.innerHTML)return;const a=document.activeElement;if(a&&layer.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;const b0=layer.querySelector(".sheet"),y=b0?b0.scrollTop:0;try{curSheet()}catch(e){closeSheet();return}const b=layer.querySelector(".sheet");if(b&&y)b.scrollTop=y}
+function refreshSheet(){if(!curSheet||!layer.innerHTML)return;const a=document.activeElement;if(a&&layer.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;if([...layer.querySelectorAll("textarea")].some(t=>t.value.trim())||[...layer.querySelectorAll("video")].some(v=>!v.paused&&!v.ended)){const bd=layer.querySelector(".sheet-body");if(bd&&!bd.querySelector(".stale")){const b=document.createElement("button");b.type="button";b.className="stale";b.textContent="Có cập nhật mới · Bấm để tải lại";b.onclick=()=>{const t=[...layer.querySelectorAll("textarea")].map(x=>x.value);curSheet();layer.querySelectorAll("textarea").forEach((x,i)=>{if(t[i])x.value=t[i]})};bd.prepend(b)}return}const b0=layer.querySelector(".sheet"),y=b0?b0.scrollTop:0;try{curSheet()}catch(e){closeSheet();return}const b=layer.querySelector(".sheet");if(b&&y)b.scrollTop=y}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
 
-let tab="online";
-try{const h=location.hash.replace("#","");if(["online","nd","kh","kq"].includes(h))tab=h}catch(e){}
+let tab="hn";
+try{const h=location.hash.replace("#","");if(["hn","online","nd","kh","kq"].includes(h))tab=h}catch(e){}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.tab;render();window.scrollTo(0,0)}));
 (()=>{const d=new Date(),w=["CN","T2","T3","T4","T5","T6","T7"][d.getDay()];const el=document.getElementById("todayLbl");if(el)el.textContent=`${w} ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`})();
 function render(){document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));
-  try{({online:renderOnline,nd:renderND,kh:renderKH,kq:renderKQ})[tab]()}catch(e){setTimeout(render,300)}}
+  try{({hn:renderHN,online:renderOnline,nd:renderND,kh:renderKH,kq:renderKQ})[tab]()}catch(e){setTimeout(render,300)}}
 function bind(root){
   root.querySelectorAll("[data-lead]").forEach(b=>b.onclick=()=>openLead(b.dataset.lead));
   root.querySelectorAll("[data-yc]").forEach(b=>b.onclick=()=>openYC(b.dataset.yc));
@@ -355,6 +381,38 @@ function bind(root){
   root.querySelectorAll("[data-nd]").forEach(b=>b.onclick=()=>openND(b.dataset.nd));
   root.querySelectorAll("[data-plan]").forEach(b=>b.onclick=()=>openPlan(b.dataset.plan));}
 const sec=(title,arr,f,empty)=>`<section><h2>${title}</h2><div class="list">${arr.length?arr.map(f).join(""):`<div class="empty">${empty}</div>`}</div></section>`;
+
+/* ================= HÔM NAY: mọi việc đang chờ bạn, mỗi việc một nút ================= */
+function renderHN(){
+  const ND=(db.noidung||[]).filter(n=>n.tt!=="Đã bỏ"),byNgay=(a,b)=>(a.dang||a.ngay)<(b.dang||b.ngay)?-1:1;
+  const duyet=ND.filter(ndReady).sort(byNgay),choVideo=ND.filter(n=>n.tt==="Chờ duyệt cuối"&&!ndReady(n)).length;
+  const kh=(db.kehoach||[]).filter(p=>p.tt==="Chờ chủ duyệt").sort((a,b)=>a.tu<b.tu?-1:1);
+  const leads=db.lead||[],moi=leads.filter(l=>l.giaiDoan==="Mới"&&l.dongYZalo),ycMoi=(db.yc||[]).filter(y=>y.tt==="Mới");
+  const tre=moi.filter(l=>l.lanDau&&Date.now()-D(l.lanDau)>18e5).length;
+  const donCho=onlineDon().filter(d=>!d.quayDaNhan&&d.tt==="Đã đặt");
+  const blog=(db.blog||[]).filter(b=>b.tt==="Nháp");
+  const mai=ymd(addDays(new Date(),1));
+  const dang=ND.filter(n=>n.tt==="Đã duyệt"&&(n.dang||n.ngay)&&(n.dang||n.ngay)<=mai).sort(byNgay);
+  const quay=ND.filter(n=>cachLam(n)==="Tự quay"&&n.tt!=="Đã đăng"&&n.ngay>=TODAY&&n.ngay<=ymd(addDays(new Date(),2))).sort(byNgay);
+  const ten=x=>esc(tenNgan(x.chuDe));
+  const C=[];
+  if(duyet.length)C.push({n:duyet.length,t:duyet.length>1?"Bài chờ bạn duyệt":"Bài chờ bạn duyệt",s:`${ten(duyet[0])}${duyet.length>1?` và ${duyet.length-1} bài nữa`:""}`,b:"Duyệt",p:1,go:()=>openND(duyet[0].id)});
+  if(kh.length)C.push({n:kh.length,t:`${kh[0].loai==="Tháng"?"Kế hoạch tháng":"Kế hoạch tuần"} chờ duyệt`,s:esc(kh[0].ky||"")+(kh[0].review&&kh[0].review.diem!=null?` · ${String(kh[0].review.diem).replace(".",",")}/10`:""),b:"Xem",p:!duyet.length,go:()=>openPlan(kh[0].id)});
+  if(moi.length+ycMoi.length)C.push({n:moi.length+ycMoi.length,hot:tre>0,t:"Khách chờ phản hồi",s:tre?`${tre} khách đã chờ quá 30 phút`:"Nhắn trong 30 phút",b:"Nhắn",go:()=>{tab="online";render();window.scrollTo(0,0)}});
+  if(donCho.length)C.push({n:donCho.length,t:"Đơn online chờ quầy nhận",s:donCho.map(d=>d.id).slice(0,3).join(", "),b:"Xem",go:()=>donCho.length===1?openDonView(donCho[0].id):(tab="online",render())});
+  if(dang.length)C.push({n:dang.length,t:"Bài đến ngày đăng",s:`${ten(dang[0])} · ${dm(dang[0].dang||dang[0].ngay)}`,b:"Đăng",go:()=>openND(dang[0].id)});
+  if(quay.length)C.push({n:quay.length,t:"Lịch tự quay 3 ngày tới",s:`${ten(quay[0])} · ${dm(quay[0].ngay)}`,b:"Xem",go:()=>openND(quay[0].id)});
+  if(blog.length)C.push({n:blog.length,t:"Bài blog nháp",s:"Điểm dưới 8, chờ bạn xem",b:"Xem",go:openBlog});
+  const thang=(db.kehoach||[]).filter(p=>p.loai==="Tháng"&&p.dinhHuong&&p.tu<=TODAY&&p.den>=TODAY).sort((a,b)=>(a.tt==="Đã duyệt"?0:1)-(b.tt==="Đã duyệt"?0:1))[0];
+  const kpi=thang?(Array.isArray(thang.dinhHuong.kpi)?thang.dinhHuong.kpi:[]).slice(0,3):[];
+  const big=thang?String(thang.dinhHuong.bigIdea||"").match(/^[“"]([^”"]+)[”"]/):null;
+  view.innerHTML=`<div><h1>Hôm nay</h1><p class="sub">${C.length?`${C.length} việc đang chờ bạn`:"Không có việc nào đang chờ bạn"}</p></div>
+  ${C.length?`<div class="hnl">${C.map((c,i)=>`<div class="hn${c.hot?" hot":""}"><div class="hn-n">${c.n}</div><div class="hn-m"><b>${c.t}</b><span>${c.s}</span></div><button class="btn${c.p?" primary":""}" type="button" data-hn="${i}">${c.b}</button></div>`).join("")}</div>`:`<div class="hn-done"><b>Hôm nay xong rồi.</b><span>Bài mới, kế hoạch mới và khách mới sẽ hiện ở đây.</span></div>`}
+  ${choVideo?`<p class="note">${choVideo} bài đang chờ dựng video, xong sẽ tự hiện ở đây.</p>`:""}
+  ${kpi.length?`<section><h2>Mục tiêu ${esc(thang.ky||"tháng")}${big?` · ${esc(big[1])}`:""}</h2><div class="hn-kpi">${kpi.map(x=>`<div><b>${esc(x.chiSo||"")}</b><span>${esc(x.mucTieu||"")}</span></div>`).join("")}</div><button class="link" type="button" id="hnPlan" style="margin-top:8px">Xem kế hoạch tháng</button></section>`:""}`;
+  view.querySelectorAll("[data-hn]").forEach(b=>b.onclick=()=>C[+b.dataset.hn].go());
+  const hp=view.querySelector("#hnPlan");if(hp)hp.onclick=()=>openPlan(thang.id);
+}
 
 /* ================= KHÁCH ONLINE ================= */
 function leadRow(L){const st=L.giaiDoan==="Mới"?"warn":L.giaiDoan==="Đã thuê"?"good":"wine";
@@ -462,18 +520,18 @@ function openYC(id){nextSheet=()=>openYC(id);const y=(db.yc||[]).find(x=>x.id===
 function openOrder(pre){
   const L=pre.lead?(db.lead||[]).find(x=>x.id===pre.lead):null;
   const st={kh:L&&L.kh||"",ten:pre.ten||(L&&L.ten)||"",sdt:pre.sdt||(L&&L.sdt)||"",kenh:pre.kenh||(L&&L.nguon)||"Zalo",nhan:pre.nhan||ymd(addDays(NOW,1))+"T15:00",tra:pre.tra||window.CherieData.hanTra(ymd(addDays(NOW,1))+"T15:00",1),vung:"V1",items:(pre.items||[]).slice(),giao:!!pre.giao,noi:pre.noi||"",note:pre.note||""};
-  if(!st.items.length)st.items=[""];
+  if(!st.items.length)st.items=[""];st.open=-1;st.q="";
   sheet("Đơn online",`<form id="f" novalidate style="display:flex;flex-direction:column;gap:14px">
    <label class="f">Khách<select id="kh"><option value="">Khách mới (tạo hồ sơ theo số Zalo)</option>${db.kh.map(x=>`<option value="${x.id}" ${x.id===st.kh?"selected":""}>${esc(x.ten)} · ${esc(x.sdt||"")}</option>`).join("")}</select></label>
    <div class="two" id="newKh"><label class="f">Tên khách<input id="ten" type="text" value="${esc(st.ten)}"></label><label class="f">Số Zalo<input id="sdt" type="tel" value="${esc(st.sdt)}"></label></div>
-   <div class="two"><label class="f">Kênh chốt<select id="kenh">${KENH.map(x=>`<option ${x===st.kenh?"selected":""}>${x}</option>`).join("")}</select></label><label class="f">Dịp<select id="dip">${DIPS.map(x=>`<option>${x}</option>`).join("")}</select></label></div>
+   <div class="two"><label class="f">Kênh chốt<select id="kenh">${KENH.map(x=>`<option ${x===st.kenh?"selected":""}>${x}</option>`).join("")}</select></label><label class="f">Dịp (nếu khách kể)<select id="dip"><option value="">Chưa rõ</option>${DIPS.map(x=>`<option>${x}</option>`).join("")}</select></label></div>
    <div class="two"><label class="f">Nhận đồ<input id="nhan" type="datetime-local" value="${st.nhan}"></label><label class="f">Trả đồ<input id="tra" type="datetime-local" value="${st.tra}"></label></div>
-   <section><h2>Món thuê</h2><div id="lines" style="display:flex;flex-direction:column;gap:8px"></div><button class="btn sm" type="button" id="add" style="margin-top:8px">Thêm món</button></section>
+   <section><h2>Món thuê</h2><div id="lines" style="display:flex;flex-direction:column;gap:8px"></div><button class="btn sm" type="button" id="add" style="margin-top:8px">Thêm đầm</button></section>
    <div class="seg2" role="group" aria-label="Cách nhận"><button type="button" class="chip" data-g="0" aria-pressed="${!st.giao}">Nhận tại tiệm</button><button type="button" class="chip" data-g="1" aria-pressed="${st.giao}">Stylist giao tận nơi</button></div>
    <div id="noiBox" ${st.giao?"":"hidden"} style="display:flex;flex-direction:column;gap:10px"><label class="f">Khu vực<select id="vung">${window.CherieData.VUNG.map(v=>`<option value="${v.id}">${v.ten} · ${k(v.phi)}</option>`).join("")}</select></label><p class="note">${window.CherieData.NGOAI_VUNG}</p><label class="f">Khách sạn, số phòng hoặc địa chỉ<input id="noi" type="text" value="${esc(st.noi)}"></label></div>
    <label class="f" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="yt" style="width:22px;height:22px;min-width:22px;flex:none;margin:0"> <span><b>Gói Yên tâm (tuỳ chọn, khách muốn thì tick)</b>: 1% giá trị mỗi chiếc, tối thiểu 20.000đ: miễn phí bẩn khó, sút chỉ, rách cần thợ sửa; mất hoặc hư nặng đền 50% giá trị</span></label>
    <label class="f">Chương trình giảm giá<select id="km"></select><span class="note" id="kmNote"></span></label>
-   <div class="box"><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Gói Yên tâm</dt><dd id="ytSum">Không</dd><dt>Giảm giá</dt><dd id="giamTxt">Không</dd><dt>Khách trả (thuê + phí giao)</dt><dd id="netTxt"><b>0đ</b></dd><dt>Cọc</dt><dd id="coc">0đ</dd></dl><div id="tongBox"></div></div>
+   <div class="box"><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Gói Yên tâm</dt><dd id="ytSum">Không</dd><dt>Giảm giá</dt><dd id="giamTxt">Không</dd></dl><span id="netTxt" hidden></span><span id="coc" hidden></span><div id="tongBox"></div></div>
    <input type="hidden" id="ttCoc" value="Chờ chuyển khoản"><p class="note">Khách chuyển tiền xong, mở đơn bấm "Ghi nhận khách đã chuyển" và đính kèm ảnh giao dịch để kế toán đối chiếu.</p>
    <p class="note"><b>Tài khoản nhận lại cọc (bắt buộc).</b> Xin khách khi chốt đơn, để trả đồ xong quầy hoàn liền. Khách cũ đã có thì tự điền.</p>${window.CherieData.hoanFields(null,"cs")}
    <label class="f">Ghi chú cho quầy<input id="note" type="text" value="${esc(st.note)}"></label>
@@ -482,15 +540,23 @@ function openOrder(pre){
     const $=q=>root.querySelector(q);
     const fillTk=()=>{const kk=$("#kh").value&&byId("kh",$("#kh").value),w=root.querySelector('[data-hoanf="cs"]');if(!kk||!kk.stk||!w)return;const g=k=>w.querySelector(`[data-h="${k}"]`);if(g("stk").value)return;g("cach").value="Chuyển khoản";g("nh").value=kk.nganHang||"";g("stk").value=kk.stk;g("chu").value=kk.chuTk||"";w.querySelector("[data-hck]").style.display="flex"};
     const toggleNew=()=>{$("#newKh").hidden=!!$("#kh").value;fillTk()};toggleNew();$("#kh").onchange=toggleNew;$("#yt").onchange=()=>check();
-    function draw(){$("#lines").innerHTML=st.items.map((id,i)=>`<div class="line-item"><label class="f">Món<select data-i="${i}"><option value="">Chọn món</option>${db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất").map(s=>{const c=conflict(s.id,$("#nhan").value,$("#tra").value);return `<option value="${s.id}" ${s.id===id?"selected":""}>${s.id} ${esc(s.ten)} · ${k(s.gia)} ${c?"· kín":"· trống"}</option>`}).join("")}</select></label><div data-m="${i}"></div>${st.items.length>1?`<button class="link" type="button" data-rm="${i}" style="align-self:flex-start">Bỏ</button>`:""}</div>`).join("");
-      root.querySelectorAll("[data-i]").forEach(s=>s.onchange=()=>{st.items[+s.dataset.i]=s.value;check()});
-      root.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{st.items.splice(+b.dataset.rm,1);draw()});check()}
-    function check(){st.items.forEach((id,i)=>{const m=root.querySelector(`[data-m="${i}"]`);if(!id){m.innerHTML="";return}const c=conflict(id,$("#nhan").value,$("#tra").value);m.innerHTML=c?`<span class="err">${esc(c)}</span>`:'<span class="ok">Trống lịch</span>'});
+    const nrm=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d");
+    function fillPk(i){const el=root.querySelector(`[data-pk="${i}"]`);if(!el)return;const nh=$("#nhan").value,tr=$("#tra").value,q=nrm(st.q),other=st.items.filter((x,j)=>j!==i&&x);
+      const ls=db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&(!q||nrm(s.ten+" "+(s.mau||"")+" "+(s.loai||"")+" "+s.id).includes(q))).map(s=>({s,c:other.includes(s.id)?"Đã chọn":conflict(s.id,nh,tr)})).sort((a,b)=>(!!a.c)-(!!b.c));
+      el.innerHTML=ls.map(({s,c})=>{const u=window.CherieData.anhDau(s.id);return `<button type="button" class="pkc${c?" kin":""}" data-pick="${i}" data-sp="${s.id}" ${c?"disabled":""} title="${esc(c||"Trống lịch")}">${u?`<img src="${esc(u)}" alt="" loading="lazy">`:"<i></i>"}<b>${esc(s.ten)}</b><span>${k(s.gia)} · ${esc(s.size)}</span><em>${c?(/^Kín/.test(c)?"Kín lịch":esc(c)):"Trống"}</em></button>`}).join("")||'<p class="note" style="grid-column:1/-1;margin:0">Không có mẫu khớp.</p>';
+      el.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{st.items[+b.dataset.pick]=b.dataset.sp;st.open=-1;st.q="";draw()})}
+    function draw(){$("#lines").innerHTML=st.items.map((id,i)=>{const s=id&&byId("sp",id),open=st.open===i||!s;
+      return `<div class="line-item">${s?`<div class="pkSel">${window.CherieData.anhThumb(s.id,48,64)}<span style="flex:1;min-width:0"><b>${esc(s.ten)}</b><span class="note" style="display:block">Size ${esc(s.size)} · ${k(s.gia)}/lượt</span><span data-m="${i}"></span></span><button class="btn sm" type="button" data-doi="${i}">${open?"Đóng":"Đổi"}</button></div>`:`<b style="font-size:13.5px">${st.items.length>1?"Chọn đầm thứ "+(i+1):"Chọn đầm"}</b>`}${open?`<input class="pkq" type="search" data-q="${i}" placeholder="Tìm theo tên, màu, kiểu" value="${esc(st.q||"")}"><div class="pk" data-pk="${i}"></div>`:""}${st.items.length>1?`<button class="link" type="button" data-rm="${i}" style="align-self:flex-start">Bỏ món này</button>`:""}</div>`}).join("");
+      root.querySelectorAll("[data-doi]").forEach(b=>b.onclick=()=>{const i=+b.dataset.doi;st.open=st.open===i?-1:i;draw()});
+      root.querySelectorAll("[data-q]").forEach(x=>x.oninput=()=>{st.q=x.value;fillPk(+x.dataset.q)});
+      root.querySelectorAll("[data-pk]").forEach(x=>fillPk(+x.dataset.pk));
+      root.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{st.items.splice(+b.dataset.rm,1);st.open=-1;draw()});check()}
+    function check(){st.items.forEach((id,i)=>{const m=root.querySelector(`[data-m="${i}"]`);if(!m)return;if(!id){m.innerHTML="";return}const c=conflict(id,$("#nhan").value,$("#tra").value);m.innerHTML=c?`<span class="err">${esc(c)}</span>`:'<span class="ok">Trống lịch</span>'});
       const ss=st.items.map(i=>byId("sp",i)).filter(Boolean);const L=window.CherieData.soLuot($("#nhan").value,$("#tra").value);const CDk=window.CherieData,thue=ss.reduce((a,s)=>a+s.gia,0)*L,giao=st.giao?CDk.phiVung($("#vung").value):0;$("#sum").textContent=money(thue);
       {const ytv=$("#yt").checked?CDk.phiYenTamDs(ss):0;const sel=$("#km");sel.innerHTML=CDk.kmOptions("Online",st.km||"",thue,ytv);st.km=sel.value;const m=(db.km||[]).find(x=>x.id===st.km);st.giam=CDk.kmGiam(m,thue,ytv);st.kmAp=CDk.kmAp(m);
        $("#kmNote").textContent=m?CDk.kmMoTa(m)+(m.dk?" · "+m.dk:""):CDk.kmChay("Online").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam)+(st.kmAp==="yt"?" phí gói":""):"Không";$("#netTxt").innerHTML="<b>"+money(thue-(st.kmAp==="yt"?0:st.giam)+giao)+"</b>"}$("#coc").textContent=money(ss.reduce((a,s)=>a+s.coc,0));$("#ytSum").textContent=$("#yt").checked?money(CDk.phiYenTamDs(ss)):"Không";
       $("#tongBox").innerHTML=ss.length?CDk.tongHtml({luot:L,giam:st.giam||0,kmAp:st.kmAp||"",yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?CDk.phiYenTamDs(ss):0,phiGiao:giao,coc:ss.reduce((a,s)=>a+s.coc,0)},ss.map(s=>({gia:s.gia}))):""}
-    $("#nhan").onchange=()=>{$("#tra").value=window.CherieData.hanTra($("#nhan").value,1);draw()};$("#tra").onchange=draw;$("#vung").onchange=check;$("#km").onchange=()=>{st.km=$("#km").value;check()};$("#add").onclick=()=>{st.items.push("");draw()};
+    $("#nhan").onchange=()=>{$("#tra").value=window.CherieData.hanTra($("#nhan").value,1);draw()};$("#tra").onchange=draw;$("#vung").onchange=check;$("#km").onchange=()=>{st.km=$("#km").value;check()};$("#add").onclick=()=>{st.items.push("");st.open=st.items.length-1;draw()};
     root.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{st.giao=b.dataset.g==="1";root.querySelectorAll("[data-g]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$("#noiBox").hidden=!st.giao;check()});
     draw();window.CherieData.hoanBind(root,"cs");
     $("#f").onsubmit=e=>{e.preventDefault();const err=$("#err");const fail=m=>{err.textContent=m;err.hidden=false};
@@ -527,7 +593,7 @@ let sampleFn=null,sampleChecked=false;
 (async()=>{try{const c=window.claude;if(c&&typeof c.use==="function")sampleFn=await c.use("sample")}catch(e){sampleFn=null}sampleChecked=true;render()})();
 const running={};
 function agentBox(id){return running[id]?`<div class="agent" role="status"><span class="dot"></span><span>${esc(running[id])}</span></div>`:""}
-function agentNote(){return sampleChecked&&!sampleFn?`<p class="note">Agent marketing chạy mỗi giờ: lập kế hoạch phút 05, đánh giá phút 20, sản xuất phút 35, dựng video phút 41, kiểm duyệt phút 50. Chỉ bản đạt từ 9/10 mới tới bạn.</p>`:""}
+function agentNote(){return sampleChecked&&!sampleFn?`<p class="note">Trợ lý tự lập, viết, dựng và chấm mỗi giờ. Chỉ bản đạt từ 9/10 mới tới bạn, ở mục Hôm nay.</p>`:""}
 async function ask(prompt){if(!sampleFn)throw{code:"unavailable"};return await sampleFn.json(prompt,{modelTier:"default",cache:false})}
 function errMsg(e){const c=e&&e.code;return c==="not_granted"?"Bạn chưa cho phép trang gọi Claude.":c==="rate_limited"?"Đang gọi quá nhanh, thử lại sau ít phút.":"Agent chưa chạy được, thử lại sau."}
 function kho(){return db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&s.tt!=="Sửa").map(s=>`${s.id} | ${s.ten} | ${s.loai} | size ${s.size} | ${s.mau} | ${s.gia}đ/lượt | giá trị ${window.CherieData.giaTri(s)}đ | co giãn: ${s.co||"?"} | cọc ${s.coc}đ (chỉ dùng nội bộ, không ghi vào caption)`).join("\n")}
@@ -667,12 +733,12 @@ function canVideo(N){return cachLam(N)==="AI dựng"&&/tiktok|reels|shorts|video
 function coVideo(N){return !!(N.video&&/^https:\/\//.test(N.video.url||""))}
 function vidHtml(N){const V=N.video;if(!V||!/^https:\/\//.test(V.url||""))return "";
   const q=V.qa||{};
-  return `<section><h2>Video agent đã dựng</h2>
-   <video src="${esc(V.url)}" controls playsinline preload="metadata" style="width:100%;max-width:420px;aspect-ratio:9/16;border-radius:24px;background:#141414;display:block"></video>
-   ${q.diem!=null?`<p class="note" style="margin-top:10px">Agent kiểm duyệt chấm <b>${esc(q.diem)}/10</b>${V.vong?` sau ${esc(V.vong)} vòng sửa`:""}.${q.ghiChu?" "+esc(q.ghiChu):""}</p>`:""}
+  return `<section>
+   <video src="${esc(V.url)}" controls playsinline preload="metadata" style="height:min(62vh,calc((100vw - 32px)*16/9));width:auto;max-width:100%;aspect-ratio:9/16;border-radius:20px;background:#141414;display:block;margin:0 auto"></video>
+   ${q.ghiChu?`<p class="note" style="margin-top:10px">${esc(q.ghiChu)}</p>`:""}
    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-    <a class="btn primary" href="${esc(V.url)}" target="_blank" rel="noopener">Mở bản không nhạc (TikTok, Reels)</a>
-    ${/^https:\/\//.test(V.urlNhac||"")?`<a class="btn ghost" href="${esc(V.urlNhac)}" target="_blank" rel="noopener">Mở bản có nhạc (Facebook, Zalo)</a>`:""}
+    <a class="btn" href="${esc(V.url)}" target="_blank" rel="noopener">Tải bản không nhạc (TikTok, Reels)</a>
+    ${/^https:\/\//.test(V.urlNhac||"")?`<a class="btn ghost" href="${esc(V.urlNhac)}" target="_blank" rel="noopener">Tải bản có nhạc (Facebook, Zalo)</a>`:""}
    </div>
    <p class="note" style="margin-top:8px">Trên iPhone: mở video, bấm nút chia sẻ, chọn Lưu video. Đăng TikTok, Reels bằng bản không nhạc và chọn nhạc trong thư viện của app.</p></section>`}
 function assetHtml(N){const A=N.asset||[];if(!A.length)return "";
@@ -699,12 +765,11 @@ function renderND(){
   const tabs=["Tất cả","Chờ duyệt cuối","Chờ sản xuất","Cần sửa","Đã duyệt","Đã đăng"];
   const list=all.filter(n=>ndFilter==="Tất cả"||(ndFilter==="Cần sửa"?n.tt.startsWith("Cần sửa"):n.tt===ndFilter)).sort((a,b)=>a.ngay<b.ngay?-1:1);
   const waiting=all.filter(n=>n.tt==="Chờ sản xuất");
-  view.innerHTML=`<div><h1>Nội dung</h1><p class="sub">Agent sản xuất, agent kiểm duyệt chấm 10 tiêu chí, bạn duyệt cuối</p></div>
-  <div class="stats"><div class="stat ${cnt("Chờ duyệt cuối")?"alert":""}"><div class="n">${cnt("Chờ duyệt cuối")}</div><div class="l">Chờ bạn duyệt</div></div><div class="stat"><div class="n">${cnt("Chờ sản xuất")}</div><div class="l">Chờ sản xuất</div></div><div class="stat"><div class="n">${all.filter(n=>n.tt.startsWith("Cần sửa")).length}</div><div class="l">Cần sửa</div></div><div class="stat"><div class="n">${cnt("Đã duyệt")+cnt("Đã đăng")}</div><div class="l">Đã duyệt</div></div></div>
+  view.innerHTML=`<div><h1>Nội dung</h1><p class="sub">Trợ lý viết, dựng và chấm. Bạn chỉ duyệt bản đạt 9/10.</p></div>
+  <div class="stats"><div class="stat ${all.filter(ndReady).length?"alert":""}"><div class="n">${all.filter(ndReady).length}</div><div class="l">Chờ bạn duyệt</div></div><div class="stat"><div class="n">${cnt("Chờ sản xuất")}</div><div class="l">Chờ sản xuất</div></div><div class="stat"><div class="n">${all.filter(n=>n.tt.startsWith("Cần sửa")).length}</div><div class="l">Cần sửa</div></div><div class="stat"><div class="n">${cnt("Đã duyệt")+cnt("Đã đăng")}</div><div class="l">Đã duyệt</div></div></div>
   ${waiting.length&&sampleFn?`<button class="btn primary block" type="button" id="runAll">Cho agent sản xuất ${waiting.length} mục đang chờ</button>`:""}
   <button class="btn block" type="button" id="openAnh">Ảnh lookbook: thêm ảnh shooting hoặc ảnh khách cho từng mẫu</button>
   ${(()=>{const B=db.blog||[],hom=CD.today(),d=B.filter(b=>b.tt==="Đã đăng").length,h=B.filter(b=>b.tt==="Đã đăng"&&(b.tg||"").slice(0,10)===hom).length,n=B.filter(b=>b.tt==="Nháp").length;return `<button class="btn block" type="button" id="openBlog">Blog website · ${d} bài đã đăng${h?`, ${h} bài hôm nay`:""}${n?` · ${n} nháp chờ bạn`:""}</button>`})()}
-  ${agentNote()}
   <div class="chips" role="group" aria-label="Lọc">${tabs.map(t=>`<button class="chip" type="button" data-f="${t}" aria-pressed="${t===ndFilter}">${t}</button>`).join("")}</div>
   <div class="list">${list.map(ndRow).join("")||'<div class="empty">Không có nội dung ở trạng thái này. Duyệt kế hoạch để tạo các mục nội dung.</div>'}</div>`;
   view.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{ndFilter=b.dataset.f;renderND()});
@@ -738,36 +803,52 @@ function openAnh(){nextSheet=()=>openAnh();const CD=window.CherieData;const sps=
   });
 }
 function tenNgan(t){t=String(t||"").trim();const m=t.match(/^(\[[^\]]*\]\s*)?([^.(:;]+)/);let r=((m&&m[1])||"")+((m&&m[2])||t).trim();r=r.replace(/[\s,·-]+$/,"");return r.length>64?r.slice(0,62).replace(/\s+\S*$/,"")+"…":r}
+function ndReady(N){return N.tt==="Chờ duyệt cuối"&&(coVideo(N)||!canVideo(N))}
 function openND(id){nextSheet=()=>openND(id);const N=(db.noidung||[]).find(x=>x.id===id);if(!N){closeSheet();return}if(gopYState(N,"nd")==="xong")ghiXem(N);
-  const steps=["Chờ sản xuất","Agent viết","Agent dựng hình, video","Agent kiểm duyệt","Chờ duyệt cuối","Đã duyệt","Đã đăng"];
+  const steps=["Chờ sản xuất","Đang viết","Đang dựng hình, video","Đang chấm","Chờ bạn duyệt","Đã duyệt","Đã đăng"];
   const cur=running[N.id]?(running[N.id].includes("Kiểm duyệt")?3:1):N.tt==="Chờ sản xuất"?0:N.tt.startsWith("Cần sửa")?1:N.tt==="Chờ dựng"?2:N.tt==="Agent đang chạy"?3:N.tt==="Chờ duyệt cuối"?4:N.tt==="Đã duyệt"?5:N.tt==="Đã đăng"?6:0;
-  const B=N.ban,Q=N.qa;
+  const B=N.ban,Q=N.qa,f=x=>String(x).replace(".",","),tuQuay=cachLam(N)==="Tự quay";
   const dai=tenNgan(N.chuDe)!==String(N.chuDe||"").trim();
-  sheet(tenNgan(N.chuDe),`${dai?`<details class="mota"><summary>Mô tả hạng mục</summary><p>${esc(N.chuDe)}</p></details>`:""}<div class="flow" aria-label="Tiến trình">${steps.map((s,i)=>`<span class="${i<cur?"done":i===cur?"on":""}">${s}</span>`).join("")}</div>
-   ${agentBox(N.id)}
-   <div class="box" style="display:flex;flex-direction:column;gap:8px"><span class="note"><b>Cách làm</b> · AI dựng: agent làm luôn hình, video từ ảnh mẫu đầm để bạn duyệt. Tự quay: team quay dựng, agent dựng storyboard bằng hình để bạn duyệt trước.</span><div class="seg2">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-cl="${v}" aria-pressed="${cachLam(N)===v}">${v}</button>`).join("")}</div></div>
-   ${vidHtml(N)}${canVideo(N)&&!coVideo(N)?`<div class="banner info">Bài này chưa có video. Agent Dựng sẽ dựng theo khuôn bạn đã duyệt (như bản "Hé lộ 3 chiếc"), cho kiểm duyệt chấm đến 9/10 rồi đưa video vào đây. Chưa nên duyệt cuối khi chưa có video.${N.loiVideo?" Lần dựng trước lỗi: "+esc(N.loiVideo):""}</div>`:""}${N.ban&&!coVideo(N)&&!canVideo(N)?`<section><h2>${cachLam(N)==="Tự quay"?"Phác thảo kịch bản để team quay":"Bản xem trước"}</h2><p class="note" style="margin:0 0 8px">Đây là phác thảo nhanh từ ảnh mẫu để hình dung kịch bản, không phải video đăng.</p><div id="reel"></div></section>`:N.ban?"":`<div class="banner info">Agent đang viết kịch bản.</div>`}
-   ${assetHtml(N)}
-   <dl class="kv box"><dt>Kênh</dt><dd>${esc(N.kenh)} · ${esc(N.dinhDang)}</dd><dt>Góc nội dung</dt><dd>${esc(N.angle||"")}</dd><dt>Quay</dt><dd>${dm(N.ngay)}</dd>${N.dang?`<dt>Đăng dự kiến</dt><dd>${dm(N.dang)}</dd>`:""}<dt>Mẫu đầm</dt><dd>${(N.mau||[]).map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", ")||"Không"}</dd>${N.link?`<dt>Đã đăng</dt><dd>${esc(N.link)}</dd>`:""}</dl>
+  const vq=coVideo(N)&&N.video.qa&&N.video.qa.diem!=null?N.video.qa.diem:null,diem=vq!=null?vq:Q?Q.diem:null;
+  const mauTen=(N.mau||[]).map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", ");
+  const media=coVideo(N)?vidHtml(N):canVideo(N)?`<div class="banner info"><b>Video đang được dựng.</b> Khi video đạt 9/10, video hiện ở đây và bạn duyệt được.${N.loiVideo?" Lần dựng trước lỗi: "+esc(N.loiVideo):""}</div>`:B?`<section><h2>${tuQuay?"Phác thảo để team quay":"Bản xem trước"}</h2><p class="note" style="margin:0 0 8px">Phác thảo nhanh từ ảnh mẫu để hình dung, không phải video đăng.</p><div id="reel"></div></section>`:`<div class="banner info">Bài đang được viết.</div>`;
+  const kichBan=B&&(B.canh||[]).length?`<section><h2>${tuQuay?"Kịch bản cho team quay":"Kịch bản"}</h2><div class="box">${(B.canh||[]).map(c=>`<div class="scene"><b>${esc(c[0])}</b><span>${esc(c[1])}${c[2]?`<em>${esc(c[2])}</em>`:""}</span></div>`).join("")}</div></section>`:"";
+  const brief=B&&(B.quay||B.anh)?`<section><h2>Ghi chú quay và ảnh</h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:8px">${B.quay?`<span><b>Quay:</b> ${esc(B.quay)}</span>`:""}${B.anh?`<span><b>Gợi ý ảnh tham khảo:</b> ${esc(B.anh)}</span>`:""}</div></section>`:"";
+  sheet(tenNgan(N.chuDe),`${agentBox(N.id)}
    ${gopYHtml(N,"nd",(N.lichSu||[]).filter(l=>/^Agent Sản xuất/.test(l[1])&&(!N.phanHoiLuc||msOf(l[0])>N.phanHoiLuc)).map(l=>l[2]).slice(-3))}
-   ${Q?`<section><h2>Kiểm duyệt <span class="score ${Q.diem>=9?"ok":"no"}">${String(Q.diem).replace(".",",")}/10</span></h2><div class="box"><div class="crit">${(Q.tieuChi||[]).map(c=>`<span>${esc(c[0])}</span><b>${c[1]}</b><span class="bar2"><i class="${c[1]<9?"low":""}" style="width:${c[1]*10}%"></i></span>${c[2]?`<span class="gc">${esc(c[2])}</span>`:""}`).join("")}</div>${(Q.canSua||[]).length?`<p class="note" style="margin-top:10px"><b>Cần sửa:</b> ${(Q.canSua||[]).map(esc).join(" · ")}</p>`:""}${N.chuaDat?`<div class="banner warn" style="margin-top:10px">Agent đã sửa 3 vòng nhưng chưa đạt 9/10. Bạn quyết định duyệt, góp ý hoặc làm lại.</div>`:""}</div></section>`:""}
-   ${B?`<section><h2>Bản sản xuất</h2><div class="box">${B.hook?`<p style="margin:0 0 8px"><b>Hook:</b> ${esc(B.hook)}</p>`:""}${(B.canh||[]).map(c=>`<div class="scene"><b>${esc(c[0])}</b><span>${esc(c[1])}${c[2]?`<em>${esc(c[2])}</em>`:""}</span></div>`).join("")}</div></section>
-   <section><h2>Caption</h2><div class="box" id="cap" style="font-size:13.5px;line-height:1.55">${esc(B.caption)}${(B.hashtag||[]).length?`<br><span class="note">Hashtag (thêm dấu thăng khi đăng): ${B.hashtag.map(esc).join(", ")}</span>`:""}${B.cta?`<br><b>CTA:</b> ${esc(B.cta)}`:""}</div><div class="btns" style="margin-top:8px"><button class="btn sm" type="button" id="cpCap">Chép caption</button></div></section>
-   ${B.quay||B.anh?`<section><h2>Brief quay và ảnh</h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:8px">${B.quay?`<span><b>Quay:</b> ${esc(B.quay)}</span>`:""}${B.anh?`<span><b>Prompt moodboard:</b> <span class="mono">${esc(B.anh)}</span></span>`:""}</div></section>`:""}`:`<div class="empty box">Chưa có bản sản xuất.</div>`}
-   <section><h2>Lịch sử</h2><div class="box log">${(N.lichSu||[]).map(l=>`<div>${when(l[0])} · <b>${esc(l[1])}</b> · ${esc(l[2])}</div>`).join("")||"Chưa có."}</div></section>
-   <div id="actions" style="display:flex;flex-direction:column;gap:10px"></div>`,root=>{
-    bind(root);if(N.ban)reelPlayer(root,N);root.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>{const sy=(layer.querySelector(".sheet")||{}).scrollTop||0;if(cachLam(N)===b.dataset.cl)return;N.cachLam=b.dataset.cl;N.asset=[];delete N.moda;(N.lichSu=N.lichSu||[]).push([nowIso(),"Chủ tiệm","Đổi cách làm: "+b.dataset.cl]);save();render();openND(id);{const n=layer.querySelector(".sheet");if(n)n.scrollTop=sy}toast(`Đã chọn ${b.dataset.cl}. Agent dựng lại hình, video ở lượt tới`)});
+   ${media}
+   ${assetHtml(N)}
+   <p class="ndsum">${diem!=null?`<span class="score ${diem>=9?"ok":"no"}">${f(diem)}/10</span> `:""}${esc(N.kenh)} · ${N.dang?"đăng "+dm(N.dang):"quay "+dm(N.ngay)}${mauTen?" · "+mauTen:""}${N.chuaDat?` · <b style="color:var(--warn)">chưa đạt 9/10 sau 3 vòng sửa</b>`:""}</p>
+   ${B?`<section><h2>Câu mở đầu và caption</h2><div class="box" id="cap" style="font-size:13.5px;line-height:1.55">${B.hook?`<p style="margin:0 0 8px;font-weight:600">${esc(B.hook)}</p>`:""}${esc(B.caption)}${(B.hashtag||[]).length?`<br><span class="note">${B.hashtag.map(h=>"#"+esc(h)).join(" ")}</span>`:""}${B.cta?`<br><span class="note">Lời mời: ${esc(B.cta)}</span>`:""}</div><div class="btns" style="margin-top:8px"><button class="btn sm" type="button" id="cpCap">Chép caption</button></div></section>`:""}
+   ${tuQuay?kichBan+brief:""}
+   <details class="mota ndmore"><summary>Xem chi tiết: điểm từng tiêu chí, ${tuQuay?"":"kịch bản, "}lịch sử</summary>
+    ${dai?`<p>${esc(N.chuDe)}</p>`:""}
+    <div class="flow" aria-label="Tiến trình">${steps.map((s,i)=>`<span class="${i<cur?"done":i===cur?"on":""}">${s}</span>`).join("")}</div>
+    ${Q?`<section><h2>Điểm chấm <span class="score ${Q.diem>=9?"ok":"no"}">${f(Q.diem)}/10</span></h2><div class="box"><div class="crit">${(Q.tieuChi||[]).map(c=>`<span>${esc(c[0])}</span><b>${c[1]}</b><span class="bar2"><i class="${c[1]<9?"low":""}" style="width:${c[1]*10}%"></i></span>${c[2]?`<span class="gc">${esc(c[2])}</span>`:""}`).join("")}</div>${(Q.canSua||[]).length?`<p class="note" style="margin-top:10px"><b>Còn cần sửa:</b> ${(Q.canSua||[]).map(esc).join(" · ")}</p>`:""}</div></section>`:""}
+    ${tuQuay?"":kichBan+brief}
+    <dl class="kv box"><dt>Kênh</dt><dd>${esc(N.kenh)} · ${esc(N.dinhDang)}</dd><dt>Góc nội dung</dt><dd>${esc(N.angle||"")}</dd><dt>Quay</dt><dd>${dm(N.ngay)}</dd>${N.dang?`<dt>Đăng dự kiến</dt><dd>${dm(N.dang)}</dd>`:""}<dt>Mẫu đầm</dt><dd>${mauTen||"Không"}</dd>${N.link?`<dt>Đã đăng</dt><dd>${esc(N.link)}</dd>`:""}</dl>
+    <div class="box" style="display:flex;flex-direction:column;gap:8px"><span class="note"><b>Cách làm</b> · AI dựng: trợ lý dựng hình, video từ ảnh mẫu. Tự quay: team quay, trợ lý viết kịch bản.</span><div class="seg2">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-cl="${v}" aria-pressed="${cachLam(N)===v}">${v}</button>`).join("")}</div></div>
+    <section><h2>Lịch sử</h2><div class="box log">${(N.lichSu||[]).map(l=>`<div>${when(l[0])} · <b>${esc(l[1])}</b> · ${esc(l[2])}</div>`).join("")||"Chưa có."}</div></section>
+   </details>
+   <div id="actions" style="display:flex;flex-direction:column;gap:10px"></div>
+   <div class="ndbar" id="ndbar" hidden></div>`,root=>{
+    bind(root);if(N.ban&&!coVideo(N)&&!canVideo(N))reelPlayer(root,N);root.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>{const sy=(layer.querySelector(".sheet")||{}).scrollTop||0;if(cachLam(N)===b.dataset.cl)return;if(((N.asset||[]).length||coVideo(N))&&b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Bấm lần nữa: bỏ bản đã dựng";toast("Đổi cách làm sẽ bỏ hình, video đã dựng của bài này");return}N.cachLam=b.dataset.cl;N.asset=[];delete N.moda;(N.lichSu=N.lichSu||[]).push([nowIso(),"Chủ tiệm","Đổi cách làm: "+b.dataset.cl]);save();render();openND(id);{const n=layer.querySelector(".sheet");if(n)n.scrollTop=sy}toast(`Đã chọn ${b.dataset.cl}. Bài sẽ được làm lại ở lượt tới`)});
     const cp=root.querySelector("#cpCap");if(cp)cp.onclick=()=>copy(B.caption+(B.hashtag?"\n"+B.hashtag.map(h=>"#"+h).join(" "):""),root.querySelector("#cap"));
-    const A=root.querySelector("#actions");if(running[N.id])return;
+    const A=root.querySelector("#actions"),bar=root.querySelector("#ndbar");if(running[N.id])return;
     const log=(ai,viec)=>N.lichSu=[...(N.lichSu||[]),[nowIso(),ai,viec]];
-    if(N.tt==="Chờ sản xuất"||N.tt.startsWith("Cần sửa")){A.innerHTML=sampleFn?`<button class="btn primary" type="button" id="aRun">${N.tt==="Chờ sản xuất"?"Cho agent sản xuất":"Cho agent sửa và chấm lại"}</button>`:agentNote();
+    if(N.tt==="Chờ sản xuất"||N.tt.startsWith("Cần sửa")){A.innerHTML=sampleFn?`<button class="btn primary" type="button" id="aRun">${N.tt==="Chờ sản xuất"?"Cho trợ lý làm bài này":"Cho trợ lý sửa và chấm lại"}</button>`:`<p class="note">Trợ lý đang làm bài này, xong sẽ hiện ở mục Hôm nay.</p>`;
       const r=A.querySelector("#aRun");if(r)r.onclick=()=>agentProduce(N,N.tt==="Cần sửa (chủ)"?N.phanHoi:(N.qa&&N.qa.canSua||[]).join("; "))}
-    if(N.tt==="Chờ duyệt cuối"){A.innerHTML=`<button class="btn primary" type="button" id="aOk">Duyệt cuối, lưu vào lịch đăng</button><label class="f">Góp ý để sửa<textarea id="fb" placeholder="Ví dụ: hook mạnh hơn, thêm giá thuê, đổi mẫu sang Émeraude"></textarea></label><div class="btns"><button class="btn" type="button" id="aFix">Gửi góp ý, sửa bản này</button><button class="btn" type="button" id="aRedo">Làm lại từ đầu</button></div>`;
-      A.querySelector("#aOk").onclick=()=>{N.tt="Đã duyệt";N.duyetLuc=nowIso();log("Chủ tiệm","Duyệt cuối");save();render();openND(id);toast("Đã duyệt, chuyển vào lịch đăng")};
-      A.querySelector("#aFix").onclick=()=>{const v=A.querySelector("#fb").value.trim();if(!v){A.querySelector("#fb").focus();return}N.phanHoi=v;N.phanHoiLuc=Date.now();N.tt="Cần sửa (chủ)";log("Chủ tiệm","Góp ý: "+v);save();render();openND(id);if(sampleFn)agentProduce(N,v)};
-      A.querySelector("#aRedo").onclick=()=>{const v=A.querySelector("#fb").value.trim();N.phanHoi=v?("Làm lại từ đầu: "+v):"Làm lại từ đầu với hướng mới";N.phanHoiLuc=Date.now();delete N.ban;delete N.qa;N.vong=0;N.chuaDat=false;N.tt="Chờ sản xuất";log("Chủ tiệm","Yêu cầu làm lại từ đầu");save();render();openND(id)}}
-    if(N.tt==="Đã duyệt"){A.innerHTML=`<label class="f">Link bài đã đăng<input id="lk" type="url" placeholder="https://www.tiktok.com/@cherie…"></label><button class="btn primary" type="button" id="aPost">Đánh dấu đã đăng</button><button class="btn" type="button" id="aBack">Mở lại để sửa</button>`;
-      A.querySelector("#aPost").onclick=()=>{N.link=A.querySelector("#lk").value.trim();N.tt="Đã đăng";N.dangLuc=nowIso();log("Marketing","Đã đăng");save();render();openND(id)};
+    if(N.tt==="Chờ duyệt cuối"){const ok=ndReady(N);
+      A.innerHTML=`<div id="fbBox" hidden style="display:flex;flex-direction:column;gap:8px"><label class="f">Góp ý để sửa bài này<textarea id="fb" placeholder="Ví dụ: câu mở đầu mạnh hơn, đổi sang mẫu Émeraude"></textarea></label><button class="btn primary" type="button" id="aFix">Gửi góp ý</button><button class="link" type="button" id="aRedo" style="align-self:flex-start">Làm lại từ đầu với hướng khác</button></div>`;
+      bar.hidden=false;bar.innerHTML=`<button class="btn" type="button" id="aFb">Góp ý</button><button class="btn primary" type="button" id="aOk" ${ok?"":"disabled"}>${ok?"Duyệt":"Chờ video"}</button>`;
+      bar.querySelector("#aFb").onclick=()=>{const fb=A.querySelector("#fbBox");fb.hidden=false;fb.scrollIntoView({block:"center",behavior:"smooth"});setTimeout(()=>A.querySelector("#fb").focus(),250)};
+      bar.querySelector("#aOk").onclick=()=>{if(!ndReady(N))return;N.tt="Đã duyệt";N.duyetLuc=nowIso();log("Chủ tiệm","Duyệt cuối");save();
+        const con=(db.noidung||[]).filter(ndReady).sort((a,b)=>a.ngay<b.ngay?-1:1);closeSheet();render();
+        if(con.length){openND(con[0].id);toast(`Đã duyệt · còn ${con.length} bài chờ bạn`)}else toast("Đã duyệt. Hết bài chờ duyệt")};
+      A.querySelector("#aFix").onclick=()=>{const v=A.querySelector("#fb").value.trim();if(!v){A.querySelector("#fb").focus();return}N.phanHoi=v;N.phanHoiLuc=Date.now();N.tt="Cần sửa (chủ)";log("Chủ tiệm","Góp ý: "+v);save();closeSheet();render();toast("Đã gửi góp ý. Bản sửa sẽ quay lại mục Hôm nay");if(sampleFn)agentProduce(N,v)};
+      A.querySelector("#aRedo").onclick=()=>{const b=A.querySelector("#aRedo");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Bấm lần nữa để làm lại từ đầu";return}const v=A.querySelector("#fb").value.trim();N.phanHoi=v?("Làm lại từ đầu: "+v):"Làm lại từ đầu với hướng mới";N.phanHoiLuc=Date.now();delete N.ban;delete N.qa;N.vong=0;N.chuaDat=false;N.tt="Chờ sản xuất";log("Chủ tiệm","Yêu cầu làm lại từ đầu");save();closeSheet();render();toast("Bài sẽ được làm lại từ đầu")}}
+    if(N.tt==="Đã duyệt"){A.innerHTML=`<label class="f">Link bài đã đăng<input id="lk" type="url" placeholder="https://www.tiktok.com/@cherie…"></label><button class="btn primary" type="button" id="aPost">Đánh dấu đã đăng</button><button class="link" type="button" id="aBack" style="align-self:flex-start">Mở lại để sửa</button>`;
+      A.querySelector("#aPost").onclick=()=>{N.link=A.querySelector("#lk").value.trim();N.tt="Đã đăng";N.dangLuc=nowIso();log("Marketing","Đã đăng");save();render();openND(id);toast("Đã đánh dấu đã đăng")};
       A.querySelector("#aBack").onclick=()=>{N.tt="Chờ duyệt cuối";save();render();openND(id)}}
     if(N.tt==="Đã đăng"){A.innerHTML=`<div class="two"><label class="f">Lượt xem<input id="xem" type="number" min="0" value="${N.xem||""}"></label><label class="f">Inbox, Zalo<input id="inb" type="number" min="0" value="${N.inbox||""}"></label></div><button class="btn" type="button" id="aStat">Lưu số liệu</button>`;
       A.querySelector("#aStat").onclick=()=>{N.xem=+A.querySelector("#xem").value||0;N.inbox=+A.querySelector("#inb").value||0;save();render();toast("Đã lưu số liệu")}}
@@ -784,11 +865,10 @@ function openBlog(){const B=(db.blog||[]).slice().sort((a,b)=>a.tg<b.tg?1:-1).sl
     root.querySelectorAll("[data-bt]").forEach(x=>x.onclick=()=>{const b=db.blog.find(y=>y.id===x.dataset.bt);if(!b)return;const len=b.tt==="Đã đăng";b.tt=len?"Ẩn":"Đã đăng";if(!len&&!b.tg)b.tg=new Date(Date.now()+252e5).toISOString().slice(0,16);b.nguoiDuyet="Chủ tiệm";CD.save();openBlog();toast(len?"Đã ẩn bài khỏi website":"Đã đăng bài lên website")})})}
 function renderKH(){
   const ps=(db.kehoach||[]).slice().sort((a,b)=>a.tu<b.tu?1:-1);
-  view.innerHTML=`<div><h1>Kế hoạch</h1><p class="sub">Agent lập, agent đánh giá, bạn duyệt rồi mới sang sản xuất</p></div>
-  ${agentNote()}
-  <div class="btns"><button class="btn primary" type="button" id="nW">Kế hoạch tuần tới</button><button class="btn" type="button" id="nM">Kế hoạch tháng 11</button></div>
+  view.innerHTML=`<div><h1>Kế hoạch</h1><p class="sub">Trợ lý lập và chấm kế hoạch. Bạn duyệt rồi mới sang làm bài.</p></div>
+  <div class="btns"><button class="btn primary" type="button" id="nW">Kế hoạch tuần tới</button><button class="btn" type="button" id="nM">Kế hoạch tháng ${new Date(new Date().getFullYear(),new Date().getMonth()+1,1).getMonth()+1}</button></div>
   <div class="list">${ps.map(P=>`<button class="row" type="button" data-plan="${P.id}"><span class="stripe ${P.tt==="Chờ chủ duyệt"?"warn":P.tt==="Đã duyệt"?"good":P.tt==="Cần làm lại"?"bad":""}"></span><span class="main"><span class="t">${esc(/^(Tháng|Tuần)/.test(P.ky||"")?P.ky:P.loai+" "+(P.ky||""))}</span><span class="s">${esc(P.giaiDoan)} · ${P.loai==="Tháng"?"Định hướng tháng"+(P.review&&P.review.diem!=null?" · AI chấm "+P.review.diem:""):(P.items||[]).length+" hạng mục"}</span></span><span class="r">${gopYPill(P,"kh")}${P.review?`<span class="score ${P.review.diem>=9?"ok":"no"}">${String(P.review.diem).replace(".",",")}</span><br>`:""}<span class="note">${esc(running[P.id]?"Agent đang chạy":P.tt)}</span></span></button>`).join("")||'<div class="empty">Chưa có kế hoạch.</div>'}</div>
-  ${(()=>{const R=(db.sotay||[]).filter(r=>r.tt!=="Đã bỏ"&&r.id!=="META");return `<section style="margin-top:18px"><h2>Sổ tay agent</h2><div class="list"><button class="row" type="button" id="stOpen"><span class="stripe good"></span><span class="main"><span class="t">${R.length} quy tắc agent phải theo</span><span class="s">Mọi agent marketing đọc sổ này trước mỗi lượt. Bạn dạy thêm ở đây; Agent Học tự ghi bài học từ góp ý của bạn mỗi giờ.</span></span><span class="r"><span class="note">Mở</span></span></button></div></section>`})()}`;
+  ${(()=>{const R=(db.sotay||[]).filter(r=>r.tt!=="Đã bỏ"&&r.id!=="META");return `<section style="margin-top:18px"><h2>Quy tắc cho trợ lý</h2><div class="list"><button class="row" type="button" id="stOpen"><span class="stripe good"></span><span class="main"><span class="t">${R.length} quy tắc trợ lý phải theo</span><span class="s">Trợ lý đọc trước mỗi lượt làm. Bạn dạy thêm ở đây; góp ý của bạn cũng tự thành quy tắc mới.</span></span><span class="r"><span class="note">Mở</span></span></button></div></section>`})()}`;
   bind(view);
   view.querySelector("#stOpen").onclick=openSoTay;
   const mk=(loai)=>{const p2=n=>String(n).padStart(2,"0"),y=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()),dd=d=>p2(d.getDate())+"/"+p2(d.getMonth()+1);const now=new Date();
@@ -862,7 +942,7 @@ function openPlan(id){nextSheet=()=>openPlan(id);const P=byId("kehoach",id);if(!
    ${(P.lichSu||[]).length?`<details class="mota"><summary>Lịch sử ${P.lichSu.length} lần sửa</summary><div class="box log">${P.lichSu.slice().reverse().map(l=>`<div>${when(l[0])} · <b>${esc(l[1])}</b> · ${esc(l[2])}</div>`).join("")}</div></details>`:""}
    <div id="actions" style="display:flex;flex-direction:column;gap:10px"></div>`,root=>{
     const A=root.querySelector("#actions");root.querySelectorAll("[data-pi]").forEach(b=>b.onclick=()=>{const i=+b.dataset.pi;if(cachLam(P.items[i])===b.dataset.v)return;P.items[i].cachLam=b.dataset.v;root.querySelectorAll(`[data-pi="${i}"]`).forEach(c=>c.setAttribute("aria-pressed",String(c===b)));save()});if(running[P.id])return;
-    if(P.tt==="Chờ chủ duyệt"){A.innerHTML=`<button class="btn primary" type="button" id="pOk">${P.loai==="Tháng"?"Duyệt định hướng tháng":"Duyệt kế hoạch tuần, chuyển sang sản xuất"}</button><label class="f">Phản hồi để agent lập lại<textarea id="fb" placeholder="Ví dụ: thêm 2 bài Instagram, bớt video ngoài trời, tập trung khách đi cưới"></textarea></label><button class="btn" type="button" id="pRedo">Gửi phản hồi, lập lại</button>`;
+    if(P.tt==="Chờ chủ duyệt"){A.innerHTML=`<button class="btn primary" type="button" id="pOk">${P.loai==="Tháng"?"Duyệt định hướng tháng":"Duyệt kế hoạch tuần, chuyển sang sản xuất"}</button><label class="f">Phản hồi để agent lập lại<textarea id="fb" placeholder="Ví dụ: thêm 2 bài Instagram, bớt video ngoài trời, nhấn mạnh mang đầm tới tận nơi"></textarea></label><button class="btn" type="button" id="pRedo">Gửi phản hồi, lập lại</button>`;
       A.querySelector("#pOk").onclick=()=>{P.tt="Đã duyệt";P.duyetLuc=nowIso();
         /* duyệt lại kế hoạch đã sửa: mục bị bỏ thì đánh dấu Đã bỏ, mục đổi nội dung thì cập nhật và cho sản xuất lại (trừ bài đã duyệt hoặc đã đăng) */
         const ids=(P.items||[]).map(x=>x.id);
