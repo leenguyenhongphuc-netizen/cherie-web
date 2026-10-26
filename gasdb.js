@@ -21,9 +21,12 @@ function call(fn,args){return new Promise(function(ok,no){var done=false,tm=setT
     jsonp();return}
   if((!window.google||!google.script||!google.script.run)&&C.api){
     /* app nội bộ ở tên miền riêng: gửi POST thân JSON (text/plain để không cần hỏi trước), nhận JSON */
-    fetch(C.api,{method:"POST",redirect:"follow",body:JSON.stringify(Object.assign({fn:fn,token:token,page:C.page},args||{}))}).then(function(r){return r.json()}).then(function(r){
+    /* mạng điện thoại hay rớt một nhịp (nhất là khi bấm quay lại trang trước): tự thử lại 4 lần trước khi báo lỗi */
+    var body=JSON.stringify(Object.assign({fn:fn,token:token,page:C.page},args||{})),lan=0,cho=[600,1500,3000,5000];
+    var thu=function(){fetch(C.api,{method:"POST",redirect:"follow",body:body}).then(function(r){return r.json()}).then(function(r){
       if(done)return;done=true;clearTimeout(tm);if(r&&r.err){var e=new Error(r.err);e.code=r.code||"error";if(e.code==="revoked")onRevoked();no(e)}else ok(r)},
-      function(){if(done)return;done=true;clearTimeout(tm);var x=new Error("Không kết nối được máy chủ Google. Kiểm tra mạng rồi thử lại.");x.code="unavailable";no(x)});return}
+      function(){if(done)return;if(lan<cho.length){setTimeout(thu,cho[lan++]);return}done=true;clearTimeout(tm);var x=new Error("Không kết nối được máy chủ Google. Kiểm tra mạng rồi thử lại.");x.code="unavailable";no(x)})};
+    thu();return}
   if(!window.google||!google.script||!google.script.run){var x=new Error("offline");x.code="unavailable";return no(x)}
   google.script.run.withSuccessHandler(function(r){if(done)return;done=true;clearTimeout(tm);if(r&&r.err){var e=new Error(r.err);e.code=r.code||"error";if(e.code==="revoked")onRevoked();no(e)}else ok(r)})
     .withFailureHandler(function(e){if(done)return;done=true;clearTimeout(tm);var x=new Error(String(e&&e.message||e));x.code="unavailable";no(x)})
@@ -31,7 +34,10 @@ function call(fn,args){return new Promise(function(ok,no){var done=false,tm=setT
 /* ---------- tự báo lỗi về máy chủ để agent kiểm tra định kỳ và báo chủ tiệm ---------- */
 var daBao={},soBao=0;
 function baoLoi(loai,ct,url){try{ct=String(ct||"").replace(/data:[^ )"']{40,}/g,"data:…").slice(0,300);var k=loai+"|"+ct;if(daBao[k]||soBao>=15||!C.api)return;daBao[k]=1;soBao++;
-  call("baoLoi",{trang:C.page||"",loai:loai,ct:ct,url:String(url||"").slice(0,300)}).catch(function(){})}catch(e){}}
+  var o={trang:C.page||"",loai:loai,ct:ct,url:String(url||"").slice(0,300)};
+  /* mất mạng thì giữ lỗi lại trên máy, có mạng gửi bù để agent kiểm lỗi vẫn thấy */
+  call("baoLoi",o).catch(function(){try{var q=JSON.parse(localStorage.getItem("cherie-loi-cho")||"[]");if(q.length<20){q.push(o);localStorage.setItem("cherie-loi-cho",JSON.stringify(q))}}catch(e){}})}catch(e){}}
+function guiLoiCho(){try{var q=JSON.parse(localStorage.getItem("cherie-loi-cho")||"[]");if(!q.length)return;localStorage.removeItem("cherie-loi-cho");q.forEach(function(o){call("baoLoi",o).catch(function(){})})}catch(e){}}
 window.addEventListener("error",function(ev){var t=ev.target;
   if(t&&t.tagName==="IMG"){var src=t.currentSrc||t.src||"";if(!src||/^data:/.test(src))return;
     /* ảnh hỏng: thử ảnh dự phòng, hết thì ẩn để hiện nền màu thay vì dấu ? */
@@ -67,7 +73,10 @@ function gate(){return new Promise(function(done){
     var go=function(){var e=g.querySelector("#gE"),b=g.querySelector("#gB");b.disabled=true;e.textContent="";
       call("login",{nv:g.querySelector("#gN").value,pin:g.querySelector("#gP").value}).then(function(x){saveAuth(x.token,x.me);closeGate();done(x.me)},function(x){e.textContent=x.message;b.disabled=false})};
     g.querySelector("#gB").onclick=go;g.querySelector("#gP").onkeydown=function(ev){if(ev.key==="Enter")go()};
-  },function(e){box('<h1>Chưa kết nối được</h1><p>'+esc(e.message)+'</p><button onclick="location.reload()">Thử lại</button>')})})}
+  },function(e){if(e&&e.code==="unavailable"&&!gate.lan){gate.lan=1;box('<p>Mạng chập chờn, đang kết nối lại…</p>');setTimeout(function(){gate().then(done)},2500);return}
+    box('<h1>Chưa kết nối được</h1><p>'+esc(e.message)+'</p><button onclick="location.reload()">Thử lại</button>')})})}
+/* quay lại trang trước (trình duyệt lấy trang từ bộ nhớ đệm): nếu đang kẹt màn lỗi thì tự tải lại */
+window.addEventListener("pageshow",function(ev){if(ev.persisted){var g=document.getElementById("gasGate");if(g&&/Chưa kết nối được|Đang tải/.test(g.textContent))location.reload()}});
 function denied(msg){box('<h1>Không mở được trang này</h1><p>'+esc(msg)+'</p><p><a href="'+esc(C.paths?C.paths.home:C.url+'?p=home')+'" target="_top">Về trang nhân sự</a></p><button id="gO">Đăng xuất</button>').querySelector("#gO").onclick=logout}
 
 /* ---------- kho dữ liệu giả lập ---------- */
@@ -101,16 +110,16 @@ var ready=null;
 function start(){
   if(ready)return ready;
   var t0=Date.now(),cham=setTimeout(function(){baoLoi("Tải dữ liệu chậm","Quá 25 giây chưa tải xong dữ liệu trang "+C.page)},25000);
-  ready=(C.pub?call("pubLoad"):(token?call("me"):Promise.reject({code:"revoked"})).catch(function(){return gate().then(function(m){return{me:m}})}).then(function(x){
+  ready=(C.pub?call("pubLoad"):(token?call("me"):Promise.reject({code:"revoked"})).catch(function(e){if(e&&e.code==="unavailable"&&token)return{me:me};return gate().then(function(m){return{me:m}})}).then(function(x){
       if(x&&x.me)me=x.me;return call("load",{page:C.page})}))
     .then(function(r){clearTimeout(cham);if(Date.now()-t0>12000)baoLoi("Tải dữ liệu chậm","Mất "+Math.round((Date.now()-t0)/1000)+" giây để tải trang "+C.page);if(r&&r.me)me=r.me;cheDo();applyRows(r.rows);lastT=r.t||0;loaded=true;Object.keys(subs).forEach(emit);
-      if(!C.pub){setInterval(poll,15000);document.addEventListener("visibilitychange",function(){if(!document.hidden)poll()})}
+      guiLoiCho();if(!C.pub){setInterval(poll,15000);document.addEventListener("visibilitychange",function(){if(!document.hidden)poll()})}
       return remote},
-    function(e){clearTimeout(cham);if(e&&e.code==="not_granted")denied(e.message);else if(!(e&&e.code==="revoked"))baoLoi("Không tải được dữ liệu",(e&&e.message)||String(e));return remote});
+    function(e){clearTimeout(cham);if(e&&e.code==="not_granted")denied(e.message);else if(!(e&&e.code==="revoked")){baoLoi("Không tải được dữ liệu",(e&&e.message)||String(e));if(e&&e.code==="unavailable"){box('<h1>Chưa kết nối được</h1><p>Mạng đang chập chờn. Tụi mình sẽ tự thử lại khi có mạng.</p><button onclick="location.reload()">Thử lại</button>');window.addEventListener("online",function(){location.reload()});setTimeout(function(){if(!document.hidden)location.reload()},15000)}}return remote});
   return ready}
 window.claude={use:function(n){return n==="db"?start():Promise.resolve(null)}};
 /* trang nhân sự: chỉ cần biết mình là ai và được mở app nào, không tải cả kho dữ liệu */
-function who(){var moi=false;return (token?call("me"):Promise.reject({code:"revoked"})).catch(function(){moi=true;return gate().then(function(){return call("me")})}).then(function(r){r.moi=moi;return r})}
+function who(){var moi=false;return (token?call("me"):Promise.reject({code:"revoked"})).catch(function(e){if(e&&e.code==="unavailable"&&token)throw e;moi=true;return gate().then(function(){return call("me")})}).then(function(r){r.moi=moi;return r})}
 window.GASDB={call:call,who:who,baoLoi:baoLoi,me:function(){return me},logout:logout,start:start,
   afterShared:function(){var CD=window.CherieData;if(!CD)return;
     /* website: giá trị đã tính sẵn ở máy chủ, không gửi giá nhập ra ngoài */

@@ -31,6 +31,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 h1,h2,h3{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;text-wrap:balance;margin:0}
 p{margin:0}
 button,input,select,textarea{font:inherit;color:inherit}
+@media (pointer:coarse){input,select,textarea{font-size:16px!important}}
 :focus-visible{outline:2px solid var(--hair);outline-offset:2px}
 .eyebrow{font:600 11px/1.4 var(--sans);letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border:1px solid var(--ink);background:none;color:var(--ink);font-weight:600;font-size:14.5px;letter-spacing:.02em;cursor:pointer;text-decoration:none;border-radius:var(--pill);transition:transform .15s var(--ease),background .2s,border-color .2s,opacity .2s}

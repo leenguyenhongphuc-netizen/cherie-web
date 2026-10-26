@@ -30,6 +30,7 @@ html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;font-variant-numeric:tabular-nums}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
 button,input,select,textarea{font:inherit;color:inherit}
+@media (pointer:coarse){input,select,textarea{font-size:16px!important}}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--wine);outline-offset:2px}
 .shell{display:flex;justify-content:center;gap:40px;min-height:100%}
@@ -228,7 +229,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=97015c43"></script><script src="/shared.js?v=51ee2ce7"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=51ee2ce7"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
