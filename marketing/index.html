@@ -255,7 +255,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=97015c43"></script><script src="/shared.js?v=c4f74353"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=97015c43"></script><script src="/shared.js?v=51ee2ce7"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -494,7 +494,7 @@ let sampleFn=null,sampleChecked=false;
 (async()=>{try{const c=window.claude;if(c&&typeof c.use==="function")sampleFn=await c.use("sample")}catch(e){sampleFn=null}sampleChecked=true;render()})();
 const running={};
 function agentBox(id){return running[id]?`<div class="agent" role="status"><span class="dot"></span><span>${esc(running[id])}</span></div>`:""}
-function agentNote(){return sampleChecked&&!sampleFn?`<p class="note">Agent marketing chạy theo lịch và ghi kết quả vào Google Sheet (tab KeHoachMKT, NoiDung).</p>`:""}
+function agentNote(){return sampleChecked&&!sampleFn?`<p class="note">Agent marketing chạy mỗi giờ: lập kế hoạch phút 05, đánh giá phút 20, sản xuất phút 35, dựng video phút 41, kiểm duyệt phút 50. Chỉ bản đạt từ 9/10 mới tới bạn.</p>`:""}
 async function ask(prompt){if(!sampleFn)throw{code:"unavailable"};return await sampleFn.json(prompt,{modelTier:"default",cache:false})}
 function errMsg(e){const c=e&&e.code;return c==="not_granted"?"Bạn chưa cho phép trang gọi Claude.":c==="rate_limited"?"Đang gọi quá nhanh, thử lại sau ít phút.":"Agent chưa chạy được, thử lại sau."}
 function kho(){return db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Sửa").map(s=>`${s.id} | ${s.ten} | ${s.loai} | size ${s.size} | ${s.mau} | ${s.gia}đ/lượt | giá trị ${window.CherieData.giaTri(s)}đ | co giãn: ${s.co||"?"} | cọc ${s.coc}đ (chỉ dùng nội bộ, không ghi vào caption)`).join("\n")}
@@ -742,8 +742,10 @@ function renderKH(){
   view.innerHTML=`<div><h1>Kế hoạch</h1><p class="sub">Agent lập, agent đánh giá, bạn duyệt rồi mới sang sản xuất</p></div>
   ${agentNote()}
   <div class="btns"><button class="btn primary" type="button" id="nW">Kế hoạch tuần tới</button><button class="btn" type="button" id="nM">Kế hoạch tháng 11</button></div>
-  <div class="list">${ps.map(P=>`<button class="row" type="button" data-plan="${P.id}"><span class="stripe ${P.tt==="Chờ chủ duyệt"?"warn":P.tt==="Đã duyệt"?"good":P.tt==="Cần làm lại"?"bad":""}"></span><span class="main"><span class="t">${esc(/^(Tháng|Tuần)/.test(P.ky||"")?P.ky:P.loai+" "+(P.ky||""))}</span><span class="s">${esc(P.giaiDoan)} · ${P.loai==="Tháng"?"Định hướng tháng"+(P.review&&P.review.diem!=null?" · AI chấm "+P.review.diem:""):(P.items||[]).length+" hạng mục"}</span></span><span class="r">${P.review?`<span class="score ${P.review.diem>=9?"ok":"no"}">${String(P.review.diem).replace(".",",")}</span><br>`:""}<span class="note">${esc(running[P.id]?"Agent đang chạy":P.tt)}</span></span></button>`).join("")||'<div class="empty">Chưa có kế hoạch.</div>'}</div>`;
+  <div class="list">${ps.map(P=>`<button class="row" type="button" data-plan="${P.id}"><span class="stripe ${P.tt==="Chờ chủ duyệt"?"warn":P.tt==="Đã duyệt"?"good":P.tt==="Cần làm lại"?"bad":""}"></span><span class="main"><span class="t">${esc(/^(Tháng|Tuần)/.test(P.ky||"")?P.ky:P.loai+" "+(P.ky||""))}</span><span class="s">${esc(P.giaiDoan)} · ${P.loai==="Tháng"?"Định hướng tháng"+(P.review&&P.review.diem!=null?" · AI chấm "+P.review.diem:""):(P.items||[]).length+" hạng mục"}</span></span><span class="r">${P.review?`<span class="score ${P.review.diem>=9?"ok":"no"}">${String(P.review.diem).replace(".",",")}</span><br>`:""}<span class="note">${esc(running[P.id]?"Agent đang chạy":P.tt)}</span></span></button>`).join("")||'<div class="empty">Chưa có kế hoạch.</div>'}</div>
+  ${(()=>{const R=(db.sotay||[]).filter(r=>r.tt!=="Đã bỏ");return `<section style="margin-top:18px"><h2>Sổ tay agent</h2><div class="list"><button class="row" type="button" id="stOpen"><span class="stripe good"></span><span class="main"><span class="t">${R.length} quy tắc agent phải theo</span><span class="s">Mọi agent marketing đọc sổ này trước mỗi lượt. Bạn dạy thêm ở đây; Agent Học tự ghi bài học từ góp ý của bạn mỗi giờ.</span></span><span class="r"><span class="note">Mở</span></span></button></div></section>`})()}`;
   bind(view);
+  view.querySelector("#stOpen").onclick=openSoTay;
   const mk=(loai)=>{const p2=n=>String(n).padStart(2,"0"),y=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()),dd=d=>p2(d.getDate())+"/"+p2(d.getMonth()+1);const now=new Date();
     let id,ky,tu,den;if(loai==="Tuần"){const mo=new Date(now);mo.setDate(mo.getDate()+((8-mo.getDay())%7||7));const su=new Date(mo);su.setDate(su.getDate()+6);const t=new Date(Date.UTC(mo.getFullYear(),mo.getMonth(),mo.getDate()+3));const w1=new Date(Date.UTC(t.getUTCFullYear(),0,4));const wk=1+Math.round(((t-w1)/864e5-3+((w1.getUTCDay()+6)%7))/7);id="KH-T"+wk;ky=dd(mo)+" – "+dd(su)+"/"+su.getFullYear();tu=y(mo);den=y(su)}
     else{const m=new Date(now.getFullYear(),now.getMonth()+1,1),e=new Date(now.getFullYear(),now.getMonth()+2,0);id="KH-M"+p2(m.getMonth()+1)+m.getFullYear();ky="Tháng "+(m.getMonth()+1)+"/"+m.getFullYear();tu=y(m);den=y(e)}
@@ -751,6 +753,17 @@ function renderKH(){
     openPlan(id);if(sampleFn&&!running[id]&&!(P.items||[]).length)agentPlan(P)};
   view.querySelector("#nW").onclick=()=>mk("Tuần");view.querySelector("#nM").onclick=()=>mk("Tháng");
 }
+function openSoTay(){
+  const AP=["Tất cả","Lập kế hoạch","Đánh giá","Sản xuất","Dựng video","Kiểm duyệt"];
+  const all=(db.sotay||[]).slice().sort((a,b)=>(a.tt==="Đã bỏ")-(b.tt==="Đã bỏ")||String(b.ngay||"").localeCompare(String(a.ngay||"")));
+  sheet("Sổ tay agent",`<p class="note" style="margin:0 0 10px">Mỗi lượt, các agent Lập kế hoạch, Đánh giá, Sản xuất, Dựng video, Kiểm duyệt đọc sổ này trước tiên. Quy tắc ở đây được ưu tiên hơn chỉ dẫn cũ.</p>
+   <section><h2>Dạy agent điều mới</h2><label class="f">Điều agent phải làm hoặc không được làm<textarea id="stTxt" placeholder="Ví dụ: video luôn có giá thuê ngay giây đầu"></textarea></label>
+   <label class="f">Áp dụng cho<select id="stAp">${AP.map(a=>`<option>${a}</option>`).join("")}</select></label><button class="btn primary" type="button" id="stAdd">Lưu vào sổ tay</button></section>
+   <section><h2>${all.filter(r=>r.tt!=="Đã bỏ").length} quy tắc đang áp dụng</h2><div class="list">${all.map(r=>`<div class="row" style="flex-wrap:wrap;${r.tt==="Đã bỏ"?"opacity:.5":""}"><span class="main"><span class="t" style="white-space:normal">${esc(r.quyTac||"")}</span><span class="s">${esc((r.apDung||[]).join(", ")||"Tất cả")} · ${esc(r.nguon||"")}${r.ngay?" · "+esc(dm(String(r.ngay).slice(0,10))):""}${r.viDuSai?`<br>Lần sai: ${esc(r.viDuSai)}`:""}</span></span><span class="r"><button class="btn" type="button" data-st="${esc(r.id)}" style="min-height:34px;padding:0 12px">${r.tt==="Đã bỏ"?"Bật lại":"Bỏ"}</button></span></div>`).join("")||'<div class="empty">Chưa có quy tắc.</div>'}</div></section>`,root=>{
+    root.querySelector("#stAdd").onclick=()=>{const t=root.querySelector("#stTxt").value.trim();if(!t){toast("Nhập điều agent cần làm");return}
+      const n=(db.sotay||[]).reduce((m,r)=>Math.max(m,+String(r.id).replace(/\D/g,"")||0),0)+1,ap=root.querySelector("#stAp").value;
+      db.sotay=db.sotay||[];db.sotay.push({id:"ST"+String(n).padStart(3,"0"),ngay:new Date(Date.now()+252e5).toISOString().slice(0,16),apDung:[ap],quyTac:t,viDuSai:"",nguon:"Chủ tiệm dạy trong app",tt:"Hiệu lực"});save();openSoTay();toast("Đã lưu. Agent áp dụng từ lượt chạy kế tiếp")};
+    root.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const r=(db.sotay||[]).find(x=>x.id===b.dataset.st);if(!r)return;r.tt=r.tt==="Đã bỏ"?"Hiệu lực":"Đã bỏ";save();openSoTay()})})}
 function dinhHuongHtml(P){const H=P.dinhHuong;if(!H)return "";const li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join("");
   const K=H.keyVisual||{};const sw=(K.mau||[]).map(c=>{const m=String(c).match(/#[0-9a-f]{6}/i);return `<span class="dh-sw"><i style="background:${m?m[0]:"var(--sunk)"}"></i>${esc(String(c))}</span>`}).join("");
   const imgs=(K.anhMau||[]).map(id=>{const L=anhMau(id);return L.length?`<img src="${esc(L[0])}" alt="${esc((byId("sp",id)||{ten:id}).ten)}" loading="lazy">`:""}).join("");

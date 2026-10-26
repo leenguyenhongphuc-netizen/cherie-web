@@ -1,7 +1,7 @@
 /* Chérie: dữ liệu dùng chung cho app Quầy và app Stylist */
 (function(){
 "use strict";
-const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb","cauhinh","km","loi"];
+const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb","cauhinh","km","loi","sotay"];
 const STORE=(window.CHERIE&&window.CHERIE.pub)?"cherie-pub-v1":"cherie-prod-v1";/* website công khai dùng bộ nhớ riêng, không lẫn với app nhân sự *//* bản chính thức: không dùng chung bộ nhớ với bản demo */
 function seed(){return gen(base())}
 function base(){return {
