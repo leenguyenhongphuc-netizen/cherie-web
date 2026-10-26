@@ -324,7 +324,7 @@ function hoanCoc(o){const d=o.don,ls=ctCuaDon(d),q=quyetToan(d,ls);ttCss();const
   const draw=()=>{const ck=h.cach!=="Tiền mặt",ok=!busy&&(ck?!hoanThieu(h)&&!!anh:dongY);
     pn.innerHTML=`<div class="hd"><h2>Hoàn cọc đơn ${hdEsc(d.id)}</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
     <p style="font-size:26px;font-weight:700;margin:4px 0">${hdMoney(q.hoan)}</p>
-    <p class="note">= cọc ${hdMoney(q.coc)} − phí trễ ${hdMoney(q.tre)} − hư, mất ${hdMoney(q.hu)}${d.yenTam?" (đơn có Gói Yên tâm)":""}. Hoàn ngay cho khách, không để qua ngày.</p>
+    <p class="note">Hoàn ngay cho khách, không để qua ngày. Cách tính:</p>${bangTien(d,ls)}
     ${hoanFields(h,"hc")}
     ${ck?`<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="cpStk" ${h.stk?"":"disabled"}>Chép STK</button><button class="btn" type="button" id="cpNd">Chép nội dung</button></div>
     <p class="note">Nội dung chuyển khoản: <b>CHERIE HOAN COC ${hdEsc(d.id)}</b></p>
@@ -431,6 +431,47 @@ function anhThumb(spId,w,h){const u=anhDau(spId);w=w||44;h=h||58;const e=hdEsc;r
 /* Tổng khách trả khi nhận đồ: tiền thuê sau giảm + Gói Yên tâm + phí đến tận nơi + cọc (cọc hoàn lại ngay khi trả đồ) */
 function tongDon(d,ls){ls=ls||ctCuaDon(d);const thue=Math.max(0,tienThue(d,ls)-(+d.giam||0)),yt=ytCuaDon(d,ls),giao=+d.phiGiao||0,coc=+d.coc||0;return {thue,yt,giao,coc,dichVu:thue+yt+giao,tong:thue+yt+giao+coc}}
 function tongHtml(d,ls){const t=tongDon(d,ls),v=vnd;return `<div style="margin-top:8px;padding:12px;border-radius:12px;background:#F3E6E8;color:#141414"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b>Khách trả khi nhận đồ</b><b style="font-size:20px">${v(t.tong)}</b></div><div style="font-size:12.5px;margin-top:4px;color:#4A4440">Thuê ${v(t.thue)}${t.yt?` + Gói Yên tâm ${v(t.yt)}`:""}${t.giao?` + phí đến tận nơi ${v(t.giao)}`:""} + cọc ${v(t.coc)}. Cọc hoàn ngay khi trả đồ, khách thực trả ${v(t.dichVu)}.</div>${d.daThu?`<div style="font-size:12.5px;margin-top:6px;color:#2F6B4F"><b>Đã thu ${v(d.daThu.so!=null?d.daThu.so:t.dichVu)}</b> tiền thuê, gói, phí giao${d.daThu.luc?` lúc ${String(d.daThu.luc).slice(11,16)} ${String(d.daThu.luc).slice(8,10)}/${String(d.daThu.luc).slice(5,7)}`:""}${d.daThu.nv?` · ${hdEsc(d.daThu.nv)}`:""}</div>`:d.tt&&d.tt!=="Đã đặt"?`<div style="font-size:12.5px;margin-top:6px;color:#B42318">Chưa ghi nhận đã thu tiền thuê</div>`:""}</div>`}
+/* ==== BẢNG TIỀN của một đơn: một mẫu duy nhất cho Quầy, Stylist, CS, Admin ====
+   1. Khách trả khi nhận đồ = phí dịch vụ (không hoàn) + cọc (hoàn lại)
+   2. Khi trả đồ: cọc − phí trễ − hư/mất = hoàn lại (hoặc khách còn nợ)
+   3. Tổng kết: khách đã đưa, đã nhận lại, chi phí thực tế */
+const BT_CSS=`.bt{border:1px solid #E2D6C6;border-radius:14px;background:#FFFDF9;color:#141414;overflow:hidden;font-size:14px}
+.bt h4{margin:0;padding:10px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:#F6F1EA;color:#6B635A;display:flex;justify-content:space-between;gap:8px}
+.bt h4 span{text-transform:none;letter-spacing:0;font-weight:600}
+.bt .r{display:flex;justify-content:space-between;gap:12px;padding:7px 14px;align-items:baseline}.bt .r>span:first-child{color:#4A4440;min-width:0}.bt .r>span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.bt .r small{display:block;color:#8A8178;font-size:12px;font-weight:400}
+.bt .sub{border-top:1px dashed #E2D6C6;font-weight:600}.bt .tot{border-top:1px solid #E2D6C6;font-weight:700;font-size:16px;background:#FBF6F0}
+.bt .tot.hoan{background:#E8F2EC;color:#1F5C3E}.bt .tot.no{background:#FCE9E7;color:#9E2A1F}
+.bt .tag{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}.bt .ok{background:#E8F2EC;color:#1F5C3E}.bt .cho{background:#FFF3DC;color:#8A5A00}
+.bt .tru>span:last-child{color:#9E2A1F}.bt .tru.free>span:last-child{color:#1F5C3E}
+.bt .gap{height:6px}`;
+function btCss(){if(!document.getElementById("bt-css")){const st=document.createElement("style");st.id="bt-css";st.textContent=BT_CSS;document.head.appendChild(st)}}
+function bangTien(d,ls,o){o=o||{};btCss();ls=ls||ctCuaDon(d);const v=vnd,e=hdEsc,spOf=id=>(db.sp||[]).find(x=>x.id===id)||{};
+  const L=luotDon(d),goc=tienThue(d,ls),giam=Math.min(goc,+d.giam||0),t=tongDon(d,ls),q=quyetToan(d,ls),daTra=d.tt==="Đã trả",coPhi=q.tre>0||q.hu>0||ls.some(c=>c.hu);
+  const row=(a,b,cls,sub)=>`<div class="r ${cls||""}"><span>${a}${sub?`<small>${sub}</small>`:""}</span><span>${b}</span></div>`;
+  const thu=d.daThu?`<span class="tag ok">Đã thu</span>`:`<span class="tag cho">Chưa thu</span>`;
+  let h=`<div class="bt"><h4>1 · Khách trả khi nhận đồ ${d.tt==="Đã đặt"||o.luonHien?"":""}</h4>`;
+  h+=row(`Tiền thuê`,v(goc),"",`${ls.length} món × ${L} lượt (${ls.map(c=>v(+c.gia||0)).join(" + ")} mỗi lượt)`);
+  if(giam)h+=row(`Giảm giá${d.kmTen?" · "+e(d.kmTen):""}`,"−"+v(giam),"tru");
+  h+=row(`Gói Yên tâm`,d.yenTam?v(t.yt):"Không mua");
+  if(t.giao)h+=row(`Phí đến tận nơi`,v(t.giao));
+  h+=row(`Phí dịch vụ (không hoàn)`,v(t.dichVu),"sub");
+  h+=row(`Tiền cọc (hoàn lại khi trả đồ)`,v(t.coc),"",d.hinhThuc?e(d.hinhThuc)+" · "+e(d.ttCoc||""):e(d.ttCoc||""));
+  h+=row(`Tổng khách trả khi nhận ${thu}`,v(t.tong),"tot");
+  if(daTra||coPhi||o.luonHien){
+    h+=`<div class="gap"></div><h4>2 · Khi trả đồ ${daTra&&d.traTT?`<span>trả lúc ${e(String(d.traTT).slice(11,16))} ${e(String(d.traTT).slice(8,10))}/${e(String(d.traTT).slice(5,7))}</span>`:""}</h4>`;
+    h+=row(`Cọc đang giữ`,v(q.coc));
+    h+=row(`Phí trả trễ`,q.tre?"−"+v(q.tre):"0đ",q.tre?"tru":"tru free",q.tre?"miễn giờ đầu, từ giờ thứ hai 20.000đ/giờ":"");
+    ls.filter(c=>c.hu||c.mat).forEach(c=>{const f=huMon(d,c),sp=spOf(c.sp);h+=row(`${c.mat?"Mất":"Hư hỏng"} · ${e(sp.ten||c.sp)}`,f?"−"+v(f):"Miễn phí",f?"tru":"tru free",`${e(String(c.moTa||mucMon(c)).slice(0,60))}${d.yenTam&&!f?" · nhờ Gói Yên tâm":d.yenTam&&f?" · có gói, đền 50% giá trị":""}`)});
+    if(!ls.some(c=>c.hu||c.mat))h+=row(`Hư hỏng, mất`,"0đ","tru free","không có");
+    if(q.conNo)h+=row(`Khách còn nợ`,v(q.conNo),"tot no",d.ttCoc==="Đã thu đủ"?"đã thu đủ":"quầy liên hệ thu");
+    else h+=row(`Hoàn lại khách ${d.hoanLuc?`<span class="tag ok">Đã hoàn</span>`:daTra?`<span class="tag cho">Chờ hoàn</span>`:""}`,v(q.hoan),"tot hoan",d.hoanLuc?`${e(String(d.hoanLuc).slice(11,16))} ${e(String(d.hoanLuc).slice(8,10))}/${e(String(d.hoanLuc).slice(5,7))}${d.hoanNv?" · "+e(d.hoanNv):""} · ${e(hoanTxt(hoanCuaDon(d)))}`:`qua ${e(hoanTxt(hoanCuaDon(d)))}`);
+    h+=`<div class="gap"></div><h4>3 · Tổng kết</h4>`;
+    h+=row(`Khách đã đưa`,v(t.tong+(q.conNo&&d.ttCoc==="Đã thu đủ"?q.conNo:0)));
+    h+=row(`Khách nhận lại`,q.conNo?"0đ":v(q.hoan));
+    h+=row(`Chi phí thực tế của khách`,v(t.dichVu+q.tre+q.hu),"sub","phí dịch vụ + phí trễ + hư, mất");
+  }
+  return h+`</div>`}
 function ghiThu(d,nv){const t=tongDon(d);d.daThu={luc:hdNow(),nv:nv||"",so:t.dichVu}}
 function anhDau(spId){const a=anhCua(spId,false)[0];if(a&&(a.th||a.src))return a.th||a.src;const sp=(db.sp||[]).find(x=>x.id===spId);return sp&&Array.isArray(sp.anhBrand)&&sp.anhBrand[0]||""}
 function anhCua(spId,congKhai){return (db.anh||[]).filter(a=>a.sp===spId&&!a.an&&(!congKhai||a.loai!=="Lookbook khách"||a.dongY)).sort((a,b)=>(HANG_ANH(a)-HANG_ANH(b))||(a.thuTu||0)-(b.thuTu||0)||(a.tao<b.tao?-1:1))}
@@ -698,7 +739,7 @@ function soAnhTinhTrang(o){ttCss();ttqKhoiDong();const el=hdLayer(),pn=el.queryS
 window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,TTQ,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
-  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,anhDau,anhThumb,tongDon,tongHtml,ghiThu,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,LY_DO_XOA,idDaXoa,xoaDon,khoiPhucDon,xoaDonUI,NGAN_HANG,hoanCuaDon,hoanThieu,hoanTxt,hoanFields,hoanDoc,hoanBind,hoanLuu,hoanAnhCua,xemAnhHoan,hoanCoc,hoanDong,hoanBindDong,suaTkHoan,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
+  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,anhDau,anhThumb,tongDon,tongHtml,ghiThu,bangTien,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,LY_DO_XOA,idDaXoa,xoaDon,khoiPhucDon,xoaDonUI,NGAN_HANG,hoanCuaDon,hoanThieu,hoanTxt,hoanFields,hoanDoc,hoanBind,hoanLuu,hoanAnhCua,xemAnhHoan,hoanCoc,hoanDong,hoanBindDong,suaTkHoan,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
   init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;setTimeout(ttqKhoiDong,2500);statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},
   reset(){/* bản chính thức: tắt nạp lại dữ liệu mẫu để không ghi đè dữ liệu thật */},

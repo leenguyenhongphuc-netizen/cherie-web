@@ -247,7 +247,7 @@ details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
   </div>
 </div>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=584b3097"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=329a76ee"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -531,7 +531,7 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
     out({body:`<section><h2>Bàn giao</h2>${checkinBlock(t)}</section>
       ${d.checkin?`<section><h2>${ids.length} món · ${new Set(lines(don).map(l=>l.mac)).size} người mặc</h2><div class="list">${lines(don).map(l=>{const s=byId("sp",l.sp);return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">Người mặc: ${esc(kh(l.mac).ten)} · <span class="mono">${s.id}</span></span></span><span class="r">${CDx.ttDu(don.id,"giao",s.id)?'<span class="pill good">4/4 ảnh</span>':`<span class="pill warn">${CDx.ttSo(don.id,"giao",s.id)}/4 ảnh</span>`}</span></div>`}).join("")}</div>
       <button class="btn ${photosOk?"":"primary"} block" type="button" id="ttG" style="margin-top:8px">${photosOk?"Xem, chụp lại ảnh tình trạng":"Chụp 4 ảnh tình trạng mỗi món"}</button><p class="note">Ảnh lưu thẳng lên Drive của tiệm, làm bằng chứng tình trạng lúc giao.</p></section>
-      <section><div class="box" style="display:flex;flex-direction:column;gap:8px"><dl class="kv"><dt>Cọc của đơn</dt><dd>${money(don.coc)} · ${esc(don.ttCoc.toLowerCase())}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd></dl>${CDx.tongHtml(don,lines(don).map(l=>l.ct))}
+      <section><div class="box" style="display:flex;flex-direction:column;gap:8px"><dl class="kv"><dt>Khách trả khi nhận</dt><dd><b>${money(CDx.tongDon(don,lines(don).map(l=>l.ct)).tong)}</b> (chi tiết ở Tiền của đơn phía trên)</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd></dl>
       ${cocChua?`<div class="banner bad">Cọc ${money(don.coc)} CHƯA về (${esc(don.ttCoc.toLowerCase())}). Chưa giao đồ khi chưa thấy tiền về tài khoản tiệm hoặc chưa nhận tiền mặt.</div>`:""}
       ${thuCan?`<label class="check"><input type="checkbox" id="thuOk2" ${d.thuOk?"checked":""}> Đã thu đủ <b>${money(CDx.tongDon(don,lines(don).map(l=>l.ct)).dichVu)}</b> tiền thuê, gói, phí giao (tiền mặt nộp quầy, hoặc thấy khách chuyển khoản về tiệm)</label>`:`<p class="note" style="color:var(--good,#2F6B4F)">Khách đã trả tiền thuê, gói, phí giao.</p>`}
       <label class="check"><input type="checkbox" id="cocOk" ${d.cocOk?"checked":""}> ${cocChua?`Đã nhận đủ cọc ${money(don.coc)} (thấy tiền về tài khoản tiệm hoặc nhận tiền mặt) và đã nhắc khách giờ trả`:"Đã nhắc khách giờ trả đồ và mức cọc đang giữ"}</label></div></section>
@@ -554,8 +554,8 @@ function donBox(t){if(!t.don)return "";const don=byId("don",t.don);if(!don)retur
   const it=ls.map(l=>{const sp=byId("sp",l.sp)||{},gt=CD.giaTri(sp),mac=l.mac&&l.mac!==don.dat?(kh(l.mac)||{}).ten:"";return `<div class="row">${sw(sp)}<span class="main"><span class="t">${esc(sp.ten||l.sp)} · ${esc(sp.size||"")}</span><span class="s mono">${esc(l.sp)}</span><span class="s">Thuê ${k(+l.ct.gia||sp.gia||0)} · giá trị ${gt?k(gt):"chưa có"}${mac?` · người mặc: ${esc(mac)}`:""}</span></span></div>`}).join("");
   return `<section><h2>Đơn hàng ${esc(don.id)}</h2>
    <div class="pills" style="margin-bottom:8px">${don.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill warn">Không mua Gói Yên tâm</span>'}<span class="pill line">${esc(don.tt||"")}</span>${don.giaoTanNoi?'<span class="pill line">Giao tận nơi</span>':""}</div>${CD.ytBanner(don)}
-   <dl class="kv box"><dt>Người đặt</dt><dd>${esc(dat.ten||don.dat)}</dd><dt>Nhận đồ</dt><dd>${dm(don.nhan)} lúc ${hm(don.nhan)}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd><dt>Tiền thuê</dt><dd>${money(CD.tienThue(don,ls.map(l=>l.ct)))}${CD.luotDon(don)>1?` · ${CD.luotDon(don)} lượt`:""}</dd><dt>Cọc</dt><dd>${money(don.coc)}${don.hinhThuc?` · ${esc(don.hinhThuc)}`:""} · ${esc((don.ttCoc||"").toLowerCase())}</dd><dt>Hoàn cọc qua</dt><dd>${CD.hoanDong(don)}</dd>${don.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(don.phiGiao)}</dd>`:""}${don.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(CD.ytCuaDon(don,ls))}</dd>`:""}</dl>
-   ${don.tt==="Đã đặt"?CD.tongHtml(don,ls.map(l=>l.ct)):""}<div class="list" style="margin-top:8px">${it}</div>${quyTacDen(don)}</section>`}
+   <dl class="kv box"><dt>Người đặt</dt><dd>${esc(dat.ten||don.dat)}</dd><dt>Nhận đồ</dt><dd>${dm(don.nhan)} lúc ${hm(don.nhan)}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd><dt>Hoàn cọc qua</dt><dd>${CD.hoanDong(don)}</dd></dl>
+   <details class="more" style="margin-top:8px" ${don.tt!=="Đang thuê"?"open":""}><summary>Tiền của đơn · khách trả khi nhận ${money(CD.tongDon(don,ls.map(l=>l.ct)).tong)}</summary><div style="padding:8px 0">${CD.bangTien(don,ls.map(l=>l.ct))}</div></details><div class="list" style="margin-top:8px">${it}</div>${quyTacDen(don)}</section>`}
 
 /* Nhận lại đồ */
 function lateFee(t,don){if(!t.d.checkin)return 0;return window.CherieData.phiTre((D(t.d.checkin)-D(don.tra))/36e5)}
