@@ -1,0 +1,102 @@
+{
+ "format": "lat-gia",
+ "hookTop": "Giá trị chiếc đầm này",
+ "hookBig": "9 triệu",
+ "hookSub": "Nàng mặc 24 giờ",
+ "chuHook": "duoi",
+ "dresses": [
+  {
+   "ten": "Noir Fleuri",
+   "loai": "Đầm midi",
+   "size": "S",
+   "gia": "870k",
+   "giaTri": "9 triệu",
+   "cau": "Hoa nổi đậu trên bờ vai nàng.",
+   "shots": [
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-16.jpg",
+     "pos": "60% 50%",
+     "scale": 1.6
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/limited_10-23-1792557073.jpg",
+     "pos": "50% 30%",
+     "scale": 1
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-24.jpg",
+     "pos": "50% 30%",
+     "scale": 1
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-16.jpg",
+     "pos": "40% 50%",
+     "scale": 1
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-16.jpg",
+     "pos": "45% 50%",
+     "scale": 1.15
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-16.jpg",
+     "pos": "55% 50%",
+     "scale": 1.3
+    }
+   ]
+  },
+  {
+   "ten": "Petit Noir",
+   "loai": "Đầm ngắn",
+   "size": "S",
+   "gia": "690k",
+   "giaTri": "7 triệu",
+   "cau": "Ngắn trên gối, bước đi nhẹ tênh.",
+   "shots": [
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/limited_10-57-1792556380.jpg",
+     "pos": "50% 30%",
+     "scale": 1
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-61.jpg",
+     "pos": "50% 30%",
+     "scale": 1
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-62.jpg",
+     "pos": "50% 30%",
+     "scale": 1
+    }
+   ]
+  },
+  {
+   "ten": "Rouge Fleur",
+   "loai": "Đầm midi",
+   "size": "S",
+   "gia": "690k",
+   "giaTri": "7 triệu",
+   "cau": "Một đoá đỏ ôm eo.",
+   "shots": [
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/limited_10-14-1792557232.jpg",
+     "pos": "0% 30%",
+     "scale": 1.12
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-15.jpg",
+     "pos": "0% 30%",
+     "scale": 1.12
+    },
+    {
+     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-13.jpg",
+     "pos": "0% 30%",
+     "scale": 1.12
+    }
+   ]
+  }
+ ],
+ "cta": "Theo dõi để chọn cùng",
+ "ctaSub": "Thứ Bảy tụi mình mở hai chiếc xoè.",
+ "nguon": "Ảnh lookbook: SIXDO"
+}
