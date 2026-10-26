@@ -230,7 +230,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=a2e857cc"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=52890b55"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -653,7 +653,7 @@ function openDon(id){nextSheet=()=>openDon(id);
   const onBanner=d.kenh==="Online"?`<div class="banner info">Đơn online do ${esc(d.nvTao||"CS")} tạo qua ${esc(d.nguonDon||"")} lúc ${when(d.taoLuc)}.${d.giaoTanNoi?` Khách muốn giao tận nơi: ${esc(d.noi)}.`:" Khách nhận tại tiệm."}${d.note?" Ghi chú: "+esc(d.note):""}</div>${d.quayDaNhan?"":'<button class="btn primary block" type="button" id="aRecv">Quầy đã nhận đơn, chuẩn bị đồ</button>'}`:"";
   
   if(d.tt==="Đã đặt"){const chuaNhan=d.kenh==="Online"&&!d.quayDaNhan,ct=CD.canThu(d,ls);
-    const thuSub=ct.tong?`Thu ${money(ct.tong)}${d.hd?"":", ký HĐ"}`:(d.hd?"Đã thu đủ":"Đã thu đủ, ký HĐ");
+    const thuSub=(t=>t.charAt(0).toUpperCase()+t.slice(1))([d.hd?"":"ký HĐ",ct.tong?`thu ${money(ct.tong)}`:"đã thu đủ"].filter(Boolean).join(" → "));
     const bQuay=`<button class="btn ${d.giaoTanNoi?"":"primary"}" type="button" id="aGiao"><b>${d.giaoTanNoi?"Khách ghé lấy":"Giao tại quầy"}</b><small>${thuSub}</small></button>`;
     const bShip=`<button class="btn ${d.giaoTanNoi?"primary":""}" type="button" id="aShip"><b>Stylist giao tận nơi</b><small>${d.giaoTanNoi&&d.noi?esc(d.noi):"Cử người, thu khi giao"}</small></button>`;
     const bCoc=ct.coc&&d.ttCoc==="Chờ chuyển khoản"?`<button class="btn" type="button" id="aCocIn"><b>Khách đã chuyển cọc</b><small>Ghi nhận kèm ảnh</small></button>`:"";
@@ -695,7 +695,9 @@ function openDon(id){nextSheet=()=>openDon(id);
     const giao0=()=>{d.tt="Đang thuê";ls.forEach(c=>byId("sp",c.sp).tt="Đang thuê");save();closeSheet();render();toast(`Đã giao đơn ${id}. Khi khách trả, mở lại đơn để nhận trả.`)};
     /* giao tại quầy: chụp đủ 4 ảnh tình trạng mỗi món trước khi giao */
     const giao=()=>ls.every(c=>window.CherieData.ttDu(d.id,"giao",c.sp))?giao0():window.CherieData.chupTinhTrang({don:d.id,phase:"giao",items:ttItems,onDone:giao0});
-    const g=root.querySelector("#aGiao");if(g)g.onclick=()=>{if(CD.canThu(d,ls).tong)return CD.thuTien({don:d,nv:nvTen(),onDone:()=>{save();if(CD.canThu(d,ls).tong)return;if(d.hd)return giao();window.CherieData.lapHopDong(hdOpts(d,()=>giao()))}});if(d.hd)return giao();window.CherieData.lapHopDong(hdOpts(d,()=>giao()))};
+    /* thứ tự giao tại quầy: 1 ký hợp đồng (kèm tài khoản hoàn cọc) → 2 thu tiền qua QR tiệm, chụp màn hình chuyển thành công → 3 chụp tình trạng → giao */
+    const thuRoiGiao=()=>{if(!CD.canThu(d,ls).tong)return giao();CD.thuTien({don:d,nv:nvTen(),onDone:()=>{save();render();if(CD.canThu(d,ls).tong){openDon(id);return toast("Chưa thu đủ, chưa giao được")}giao()}})};
+    const g=root.querySelector("#aGiao");if(g)g.onclick=()=>{if(d.hd)return thuRoiGiao();window.CherieData.lapHopDong(hdOpts(d,()=>thuRoiGiao()))};
     const hl=root.querySelector("#hdLap");if(hl)hl.onclick=()=>window.CherieData.lapHopDong(hdOpts(d));
     const hx=root.querySelector("#hdXem");if(hx)hx.onclick=()=>window.CherieData.xemHopDong(d.hd);
     root.querySelectorAll("[data-lvq]").forEach(sel=>sel.onchange=()=>{TAM(d.id).lv[sel.dataset.lvq]=sel.value;root.querySelector(`[data-mtq="${sel.dataset.lvq}"]`).hidden=sel.value<="L1"&&sel.value!=="MAT"});
