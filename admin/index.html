@@ -167,7 +167,7 @@ h2{font-size:14px;font-weight:600;margin:0}
 .pill{display:inline-flex;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--sunk)}
 .pill.new{background:var(--wine-soft);color:var(--wine)}.pill.ok{background:var(--good-soft);color:var(--good)}
 .empty{padding:20px;text-align:center;color:var(--muted)}
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(7,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
 nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 9px;font-size:11px;color:var(--muted)}
 nav.tabs svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--wine);font-weight:600}
@@ -203,12 +203,13 @@ header .homebtn{text-decoration:none;color:var(--ink)}
   <button type="button" data-tab="tq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Tổng quan</button>
   <button type="button" data-tab="pl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>P&amp;L</button>
   <button type="button" data-tab="dt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 4"/></svg>Doanh thu</button>
+  <button type="button" data-tab="don"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Đơn</button>
   <button type="button" data-tab="kho"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 4a2 2 0 0 1 1 3.7L20 13a1.5 1.5 0 0 1-.9 2.7H4.9A1.5 1.5 0 0 1 4 13l7-5.3"/></svg>Kho đồ</button>
   <button type="button" data-tab="cp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="6" width="17" height="13" rx="2"/><path d="M3.5 10h17M7 15h4"/></svg>Chi phí</button>
   <button type="button" data-tab="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Nhập liệu</button>
 </nav>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d085200"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=3a7f0943"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -372,7 +373,7 @@ function kpi(l,v,cur,prev,opt){opt=opt||{};let d="";if(prev!=null){if(!prev&&!cu
 
 /* ---------------- màn hình ---------------- */
 let tab="tq",nl="ln";
-function render(){charts=[];document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));({tq:renderTQ,pl:renderPL,dt:renderDT,kho:renderKho,cp:renderCP,nl:renderNL})[tab]()}
+function render(){charts=[];document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));({tq:renderTQ,pl:renderPL,dt:renderDT,don:renderDon,kho:renderKho,cp:renderCP,nl:renderNL})[tab]()}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();window.scrollTo(0,0)});
 
 function series(a,b,g){const ks=buckets(a,b,g);const idx={};ks.forEach((k,i)=>idx[k]=i);const r=ks.map(()=>0),c=ks.map(()=>0),n=ks.map(()=>0);
@@ -585,6 +586,26 @@ function nlCP(el){const all=[...db.chiphi].sort((x,y)=>x.ngay<y.ngay?1:-1);
 }
 function cpRow(c,dk){const lap=DK.find(x=>x[0]===(c.dinhKy||"mot"))[1];
   return `<div class="it"><span class="t">${esc(c.ten||c.note||c.nhom)}${c.canXem?' <span class="pill warn">cần xem lại</span>':""}</span><span class="s">${esc(c.nhom)}${c.tk?" · "+esc(c.tk):""} · ${dk?`${lap.toLowerCase()} từ ${dm(c.ngay)}/${c.ngay.slice(0,4)}${c.den?` đến ${dm(c.den)}/${c.den.slice(0,4)}`:""}`:`${dm(c.ngay)}/${c.ngay.slice(0,4)}`}${c.hoaDon?" · có hoá đơn":""}</span><span class="r"><b>${money(c.tien)}</b>${dk&&!c.den?`<button class="btn sm" type="button" data-stop="${c.id}">Dừng</button>`:""}<button class="btn sm" type="button" data-del="${c.id}">Xóa</button></span></div>`}
+/* ---------------- Đơn hàng: xoá có lý do, xem lại đơn đã xoá, khôi phục ---------------- */
+let donV="dang",donQ="",donLy="",donMo="";
+function meTen(){try{const m=JSON.parse(localStorage.getItem("cherie-gas-me")||"null");if(m&&m.ten)return m.ten}catch(e){}return "Admin"}
+function renderDon(){const ds=[...db.don].sort((a,b)=>String(b.nhan||"").localeCompare(String(a.nhan||""))),xs=[...(db.donxoa||[])].sort((a,b)=>String(b.luc).localeCompare(String(a.luc)));
+  const q=donQ.trim().toLowerCase(),khT=d=>((db.kh.find(k=>k.id===d.dat)||{}).ten||d.dat||"");
+  const hit=t=>!q||t.toLowerCase().includes(q);
+  const dem={};xs.forEach(x=>dem[x.lyDo]=(dem[x.lyDo]||0)+1);
+  const body=donV==="dang"?`<div class="list">${ds.filter(d=>hit(d.id+" "+khT(d))).map(d=>{const ls=lines(d);return `<div class="it"><span class="t">${esc(d.id)} · ${esc(khT(d))}${d.demo?" · demo":""}</span><span class="s">${esc(d.tt)} · cọc ${esc(d.ttCoc||"")} · nhận ${d.nhan?dm(d.nhan):"?"} · ${ls.length} món · thuê ${money(CD.tienThue(d,ls))} · ${d.yenTam?"có gói":"không gói"}</span><span class="r"><button class="btn sm" type="button" data-xoa="${esc(d.id)}">Xoá</button></span></div>`}).join("")||'<div class="it"><span class="s">Không có đơn nào.</span></div>'}</div>`
+   :`<div class="chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><button class="chip" type="button" data-ly="" aria-pressed="${!donLy}">Tất cả · ${xs.length}</button>${CD.LY_DO_XOA.map(l=>`<button class="chip" type="button" data-ly="${l}" aria-pressed="${donLy===l}">${l} · ${dem[l]||0}</button>`).join("")}</div>
+    <div class="list">${xs.filter(x=>(!donLy||x.lyDo===donLy)&&hit(x.donId+" "+((x.tom||{}).kh||"")+" "+(x.ghiChu||""))).map(x=>{const t=x.tom||{},b=x.ban||{},mo=donMo===x.id;return `<div class="it"><span class="t">${esc(x.donId)} · ${esc(t.kh||"")}</span><span class="s"><b>${esc(x.lyDo)}</b>${x.ghiChu?" · "+esc(x.ghiChu):""} · xoá ${esc(String(x.luc).replace("T"," "))} · ${esc(x.nv||"")}</span><span class="r"><button class="btn sm" type="button" data-mo="${esc(x.id)}">${mo?"Thu gọn":"Xem"}</button></span>
+      ${mo?`<div style="grid-column:1/-1;font-size:13px;display:flex;flex-direction:column;gap:6px;padding-top:6px"><span>Lúc xoá: ${esc(t.tt||"")} · cọc ${money(t.coc)} (${esc(t.ttCoc||"")}) · tiền thuê ${money(t.thue)} · ${t.soMon||0} món · nhận ${t.nhan?dm(t.nhan):"?"}, hẹn trả ${t.tra?dm(t.tra):"?"}</span><span>Món: ${(b.ct||[]).map(c=>esc(((db.sp.find(s=>s.id===c.sp)||{}).ten||c.sp)+" ("+c.sp+")")).join(", ")||"không có"}</span>${(b.trips||[]).length?`<span>Chuyến stylist: ${(b.trips||[]).map(t=>esc(t.id+" "+({giao:"giao đồ",nhan:"nhận lại đồ",thu:"thử đồ"}[t.loai]||t.loai||"")+" · "+String(t.tt||"").toLowerCase())).join(", ")}</span>`:""}${Object.keys(b.spTruoc||{}).length?`<span>Khi xoá, ${Object.keys(b.spTruoc).length} món trả về Sẵn sàng; khôi phục sẽ đưa lại trạng thái cũ.</span>`:""}<div><button class="btn sm primary" type="button" data-kp="${esc(x.id)}">Khôi phục đơn</button></div></div>`:""}</div>`}).join("")||'<div class="it"><span class="s">Chưa có đơn nào bị xoá.</span></div>'}</div>`;
+  view.innerHTML=`<div><h1>Đơn hàng</h1><p class="sub">Chỉ Admin xoá được đơn. Đơn xoá không mất: xem lại theo lý do và khôi phục khi cần.</p></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 12px"><div class="seg"><button type="button" data-v="dang" aria-pressed="${donV==="dang"}">Đang có · ${ds.length}</button><button type="button" data-v="xoa" aria-pressed="${donV==="xoa"}">Đã xoá · ${xs.length}</button></div><input id="donQ" type="search" placeholder="Tìm mã đơn, tên khách" value="${esc(donQ)}" style="flex:1;min-width:160px;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)"></div>${body}`;
+  view.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{donV=b.dataset.v;donMo="";render()});
+  const qi=view.querySelector("#donQ");qi.oninput=()=>{donQ=qi.value;const p=qi.selectionStart;render();const n=view.querySelector("#donQ");n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
+  view.querySelectorAll("[data-ly]").forEach(b=>b.onclick=()=>{donLy=b.dataset.ly;render()});
+  view.querySelectorAll("[data-mo]").forEach(b=>b.onclick=()=>{donMo=donMo===b.dataset.mo?"":b.dataset.mo;render()});
+  view.querySelectorAll("[data-xoa]").forEach(b=>b.onclick=()=>{const d=db.don.find(x=>x.id===b.dataset.xoa);if(d)CD.xoaDonUI(d,{nv:meTen(),onDone:r=>{render();toast(`Đã xoá ${r.donId} · ${r.lyDo}`)}})});
+  view.querySelectorAll("[data-kp]").forEach(b=>b.onclick=()=>{const x=(db.donxoa||[]).find(r=>r.id===b.dataset.kp);const e=CD.khoiPhucDon(x);if(e)return toast(e);CD.save();donMo="";render();toast(`Đã khôi phục ${x.donId}`)});
+}
 function renderCP(){view.innerHTML=`<div><h1>Chi phí</h1><p class="sub">Gõ chi phí như nói, hệ thống tự tách số tiền, kỳ lặp lại và mục hạch toán. Báo cáo P&amp;L lấy số từ đây.</p></div><div id="cpb"></div>`;nlCP(document.getElementById("cpb"))}
 
 const CO=["Ôm sát","Co giãn nhẹ","Dây chỉnh / suông"];

@@ -247,7 +247,7 @@ details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
   </div>
 </div>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d085200"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=3a7f0943"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -272,7 +272,7 @@ document.addEventListener("pointerup",()=>{if(pressing){pressing=false;setTimeou
 document.addEventListener("focusout",()=>setTimeout(()=>{if(dirty)onRemote()},50));
 function lines(d){return d?db.ct.filter(c=>c.don===d.id).map(c=>({sp:c.sp,mac:c.mac,ct:c})):[]}
 function mauList(c){return String(c.mau||"").toLowerCase().split(",").map(x=>x.trim()).filter(Boolean)}
-function nextId(t,p){let m=0;db[t].forEach(x=>{const n=parseInt(String(x.id).replace(/\D/g,""),10);if(n>m)m=n});return p+String(m+1).padStart(3,"0")}
+function nextId(t,p){let m=0;db[t].concat(window.CherieData.idDaXoa(t)).forEach(x=>{const n=parseInt(String(x.id).replace(/\D/g,""),10);if(n>m)m=n});return p+String(m+1).padStart(3,"0")}
 function myTrips(){return db.trips.filter(t=>t.stylist===STYLIST&&t.ngay===TODAY)}
 /* chuyến các ngày khác: còn dở từ hôm trước, và sắp tới trong 14 ngày */
 function myOther(){const end=(()=>{const d=new Date(TODAY+"T00:00");d.setDate(d.getDate()+14);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())})();

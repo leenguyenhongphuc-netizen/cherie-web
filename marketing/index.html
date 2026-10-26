@@ -256,7 +256,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d085200"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=3a7f0943"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -297,7 +297,7 @@ function hm(s){s=s?isoT(s):s;return s&&s.length>10?s.slice(11,16):""}
 function isoT(s){if(typeof s==="number"||/^\d{12,}$/.test(String(s))){const d=new Date(+s+7*36e5);return d.toISOString().slice(0,16)}return String(s)}
 function when(s){if(!s)return"";s=isoT(s);const t=s.slice(0,10);return (t===TODAY?"Hôm nay":dm(s))+(hm(s)?" "+hm(s):"")}
 function byId(t,id){return db[t].find(x=>x.id===id)}
-function nextId(t,p){let m=0;db[t].forEach(x=>{const n=parseInt(String(x.id).replace(/\D/g,""),10);if(n>m)m=n});return p+String(m+1).padStart(3,"0")}
+function nextId(t,p){let m=0;db[t].concat(window.CherieData.idDaXoa(t)).forEach(x=>{const n=parseInt(String(x.id).replace(/\D/g,""),10);if(n>m)m=n});return p+String(m+1).padStart(3,"0")}
 function normPhone(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("84")&&d.length===11)d="0"+d.slice(2);return /^0\d{9}$/.test(d)?d:""}
 function given(t){return String(t||"").trim().split(/\s+/).pop()||""}
 function lines(d){return db.ct.filter(c=>c.don===d.id)}

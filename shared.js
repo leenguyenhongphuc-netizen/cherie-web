@@ -1,7 +1,7 @@
 /* Chérie: dữ liệu dùng chung cho app Quầy và app Stylist */
 (function(){
 "use strict";
-const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb","cauhinh","km","loi","sotay"];
+const TABLES=["kh","sp","nhom","don","ct","thu","dy","trips","log","chiphi","yc","lead","kehoach","noidung","review","nhap","anh","nv","hd","cccd","blog","banner","bb","cauhinh","km","loi","sotay","donxoa"];
 const STORE=(window.CHERIE&&window.CHERIE.pub)?"cherie-pub-v1":"cherie-prod-v1";/* website công khai dùng bộ nhớ riêng, không lẫn với app nhân sự *//* bản chính thức: không dùng chung bộ nhớ với bản demo */
 function seed(){return gen(base())}
 function base(){return {
@@ -247,6 +247,39 @@ function denCss(){if(!document.getElementById("den-css")){const st=document.crea
 function kk(n){n=+n||0;const a=Math.abs(n);return a<1e6&&a%1000===0?(n<0?"−":"")+a/1000+"k":(n<0?"−":"")+a.toLocaleString("vi-VN").replace(/,/g,".")+"đ"}
 function vnd(n){return Math.round(+n||0).toLocaleString("vi-VN")+"đ"}
 function ctCuaDon(d){return (db.ct||[]).filter(c=>c.don===d.id)}
+/* ==== Xoá đơn (chỉ Admin): không mất dữ liệu, chuyển nguyên đơn, món, chuyến, nhật ký quét sang bảng donxoa kèm lý do; khôi phục được ==== */
+const LY_DO_XOA=["Khách huỷ","Tạo trùng","Nhập sai thông tin","Đơn thử nghiệm","Khác"];
+function idDaXoa(t){const out=[];(db.donxoa||[]).forEach(x=>{const b=x.ban||{};if(t==="don"&&b.don)out.push({id:b.don.id});if(t==="ct")(b.ct||[]).forEach(c=>out.push({id:c.id}));if(t==="trips")(b.trips||[]).forEach(c=>out.push({id:c.id}))});return out}
+function xoaDon(d,o){o=o||{};if(!d)return null;const ls=ctCuaDon(d),trips=(db.trips||[]).filter(t=>t.don===d.id||(t.d&&t.d.newDon===d.id)),tripIds=new Set(trips.map(t=>t.id)),log=(db.log||[]).filter(l=>tripIds.has(l.trip));
+  const conGiu=new Set();(db.don||[]).forEach(x=>{if(x.id===d.id||!(x.tt==="Đã đặt"||x.tt==="Đang thuê"))return;ctCuaDon(x).forEach(c=>conGiu.add(c.sp))});
+  const spTruoc={};ls.forEach(c=>{const s=(db.sp||[]).find(x=>x.id===c.sp);if(!s||conGiu.has(s.id))return;if(["Đang thuê","Đang mang đi","Chờ kiểm tra","Đang giặt"].includes(s.tt)){spTruoc[s.id]=s.tt;s.tt="Sẵn sàng"}});
+  const rec={id:"XD-"+d.id+"-"+Date.now().toString(36).toUpperCase(),donId:d.id,luc:hdNow(),nv:o.nv||"",lyDo:LY_DO_XOA.includes(o.lyDo)?o.lyDo:"Khác",ghiChu:String(o.ghiChu||"").trim(),
+    tom:{kh:((db.kh||[]).find(k=>k.id===d.dat)||{}).ten||d.dat,tt:d.tt,ttCoc:d.ttCoc,coc:+d.coc||0,thue:tienThue(d,ls),soMon:ls.length,nhan:d.nhan,tra:d.tra},
+    ban:{don:clone(d),ct:ls.map(clone),trips:trips.map(clone),log:log.map(clone),spTruoc}};
+  db.donxoa=db.donxoa||[];db.donxoa.push(rec);
+  db.don=db.don.filter(x=>x.id!==d.id);db.ct=db.ct.filter(c=>c.don!==d.id);db.trips=db.trips.filter(t=>!tripIds.has(t.id));db.log=db.log.filter(l=>!tripIds.has(l.trip));
+  return rec}
+function khoiPhucDon(rec){if(!rec||!rec.ban||!rec.ban.don)return "Bản ghi hỏng";const b=rec.ban;if((db.don||[]).some(x=>x.id===b.don.id))return `Đã có đơn ${b.don.id} đang dùng mã này`;
+  db.don.push(clone(b.don));(b.ct||[]).forEach(c=>{if(!db.ct.some(x=>x.id===c.id))db.ct.push(clone(c))});(b.trips||[]).forEach(t=>{if(!db.trips.some(x=>x.id===t.id))db.trips.push(clone(t))});(b.log||[]).forEach(l=>{if(!db.log.some(x=>x.id===l.id))db.log.push(clone(l))});
+  Object.keys(b.spTruoc||{}).forEach(id=>{const s=db.sp.find(x=>x.id===id);if(s&&s.tt==="Sẵn sàng")s.tt=b.spTruoc[id]});
+  db.donxoa=db.donxoa.filter(x=>x.id!==rec.id);return ""}
+/* Hộp xoá đơn: chọn lý do (bắt buộc), ghi chú (bắt buộc khi "Khác"), gõ mã đơn để xác nhận */
+function xoaDonUI(d,o){o=o||{};const el=hdLayer(),pn=el.querySelector(".pn");const close=()=>el.remove();let ly="",gc="",ma="";
+  const dangChay=d.tt==="Đang thuê"||(d.tt==="Đã trả"&&["Chờ hoàn","Đang giữ","Khách còn nợ"].includes(d.ttCoc));
+  const draw=()=>{const ok=ly&&(ly!=="Khác"||gc.trim().length>=5)&&ma.trim().toUpperCase()===d.id;
+    pn.innerHTML=`<div class="hd"><h2>Xoá đơn ${hdEsc(d.id)}</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
+    <p class="note">Đơn, các món, chuyến stylist và nhật ký quét chuyển vào mục "Đơn đã xoá" trong Admin, xem lại hoặc khôi phục được. Hợp đồng, CCCD, ảnh tình trạng vẫn giữ nguyên.</p>
+    ${dangChay?`<p class="note bad"><b>Đơn này còn đang chạy</b> (${hdEsc(d.tt)} · cọc ${hdEsc(d.ttCoc||"")}). Chỉ xoá khi chắc chắn đơn không có thật.</p>`:""}
+    <div style="display:flex;flex-direction:column;gap:8px">${LY_DO_XOA.map(x=>`<label class="ck"><input type="radio" name="ly" value="${x}" ${ly===x?"checked":""}> ${x}</label>`).join("")}</div>
+    <label class="f">Ghi chú${ly==="Khác"?" (bắt buộc)":""}<input type="text" id="gc" value="${hdEsc(gc)}" placeholder="Ví dụ: khách gọi huỷ lúc 10h"></label>
+    <label class="f">Gõ mã đơn <b>${hdEsc(d.id)}</b> để xác nhận<input type="text" id="ma" value="${hdEsc(ma)}" autocapitalize="characters" autocomplete="off"></label>
+    <div class="row"><button class="btn" type="button" data-x>Không xoá</button><button class="btn p" type="button" id="okX" ${ok?"":"disabled"}>Xoá đơn</button></div>`;
+    pn.querySelectorAll("[data-x]").forEach(b=>b.onclick=close);
+    pn.querySelectorAll('[name="ly"]').forEach(r=>r.onchange=()=>{ly=r.value;draw()});
+    const g=pn.querySelector("#gc");g.oninput=()=>{gc=g.value;pn.querySelector("#okX").disabled=!(ly&&(ly!=="Khác"||gc.trim().length>=5)&&ma.trim().toUpperCase()===d.id)};
+    const m=pn.querySelector("#ma");m.oninput=()=>{ma=m.value;pn.querySelector("#okX").disabled=!(ly&&(ly!=="Khác"||gc.trim().length>=5)&&ma.trim().toUpperCase()===d.id)};
+    pn.querySelector("#okX").onclick=()=>{const rec=xoaDon(d,{lyDo:ly,ghiChu:gc,nv:o.nv});try{CherieData.save()}catch(e){}close();o.onDone&&o.onDone(rec)}};
+  draw()}
 /* ==== Hoàn cọc: cách hoàn, tài khoản khách, ảnh chụp giao dịch. Lấy từ lúc lập hợp đồng, dùng chung mọi app ==== */
 const NGAN_HANG=["Vietcombank","VietinBank","BIDV","Agribank","Techcombank","MB Bank","ACB","VPBank","TPBank","Sacombank","VIB","HDBank","SHB","OCB","MSB","SeABank","Eximbank","LPBank","Nam A Bank","Bac A Bank","Cake by VPBank","Timo","Khác"];
 function hoanCuaDon(d){const h=(d&&d.hoan)||{},k=(db.kh||[]).find(x=>x.id===(d&&d.dat))||{};return {cach:h.cach||(d&&d.hinhThuc==="Tiền mặt"&&!k.stk?"Tiền mặt":"Chuyển khoản"),nh:h.nh||k.nganHang||"",stk:h.stk||k.stk||"",chu:h.chu||k.chuTk||""}}
@@ -603,7 +636,7 @@ function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn")
 window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
-  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,NGAN_HANG,hoanCuaDon,hoanThieu,hoanTxt,hoanFields,hoanDoc,hoanBind,hoanLuu,hoanAnhCua,xemAnhHoan,hoanCoc,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
+  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,LY_DO_XOA,idDaXoa,xoaDon,khoiPhucDon,xoaDonUI,NGAN_HANG,hoanCuaDon,hoanThieu,hoanTxt,hoanFields,hoanDoc,hoanBind,hoanLuu,hoanAnhCua,xemAnhHoan,hoanCoc,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
   init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},
   reset(){/* bản chính thức: tắt nạp lại dữ liệu mẫu để không ghi đè dữ liệu thật */},

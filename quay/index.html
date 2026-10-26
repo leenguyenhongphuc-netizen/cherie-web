@@ -229,7 +229,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d085200"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=3a7f0943"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -267,7 +267,7 @@ function hm(s){const d=D(s);return String(d.getHours()).padStart(2,"0")+":"+Stri
 function dm(s){const d=D(s);return d.getDate()+"/"+(d.getMonth()+1)}
 function when(s){if(!s)return"";const d=D(s);const t=ymd(d);const label=t===TODAY?"Hôm nay":t===ymd(addDays(NOW,1))?"Mai":WD[d.getDay()]+" "+dm(s);return label+" "+hm(s)}
 function byId(t,id){return db[t].find(x=>x.id===id)}
-function nextId(t,p){let m=0;db[t].forEach(x=>{const n=parseInt(String(x.id).replace(/\D/g,""),10);if(n>m)m=n});return p+String(m+1).padStart(3,"0")}
+function nextId(t,p){let m=0;db[t].concat(window.CherieData.idDaXoa(t)).forEach(x=>{const n=parseInt(String(x.id).replace(/\D/g,""),10);if(n>m)m=n});return p+String(m+1).padStart(3,"0")}
 
 /* ---------- derived columns (mirror the AppSheet formulas) ---------- */
 function lines(d){return db.ct.filter(c=>c.don===d.id)}
