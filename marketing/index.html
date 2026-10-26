@@ -256,7 +256,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=ac7d8a60"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=a2e857cc"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -453,7 +453,7 @@ function openOrder(pre){
    <label class="f" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="yt" style="width:22px;height:22px;min-width:22px;flex:none;margin:0"> <span><b>Gói Yên tâm (tuỳ chọn, khách muốn thì tick)</b>: 1% giá trị mỗi chiếc, tối thiểu 20.000đ: miễn phí bẩn khó, sút chỉ, rách cần thợ sửa; mất hoặc hư nặng đền 50% giá trị</span></label>
    <label class="f">Chương trình giảm giá<select id="km"></select><span class="note" id="kmNote"></span></label>
    <div class="box"><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Gói Yên tâm</dt><dd id="ytSum">Không</dd><dt>Giảm giá</dt><dd id="giamTxt">Không</dd><dt>Khách trả (thuê + phí giao)</dt><dd id="netTxt"><b>0đ</b></dd><dt>Cọc</dt><dd id="coc">0đ</dd></dl><div id="tongBox"></div></div>
-   <label class="f">Trạng thái cọc<select id="ttCoc"><option>Chờ chuyển khoản</option><option>Đang giữ</option></select></label>
+   <input type="hidden" id="ttCoc" value="Chờ chuyển khoản"><p class="note">Khách chuyển tiền xong, mở đơn bấm "Ghi nhận khách đã chuyển" và đính kèm ảnh giao dịch để kế toán đối chiếu.</p>
    <p class="note"><b>Tài khoản nhận lại cọc (bắt buộc).</b> Xin khách khi chốt đơn, để trả đồ xong quầy hoàn liền. Khách cũ đã có thì tự điền.</p>${window.CherieData.hoanFields(null,"cs")}
    <label class="f">Ghi chú cho quầy<input id="note" type="text" value="${esc(st.note)}"></label>
    <div id="err" class="err" hidden></div>
@@ -496,10 +496,10 @@ function openOrder(pre){
 }
 function openDonView(id){nextSheet=()=>openDonView(id);const d=byId("don",id);if(!d){closeSheet();return}const kh=byId("kh",d.dat)||{ten:d.dat,sdt:""};const ls=lines(d);
   sheet(`Đơn ${d.id}`,`<div class="pills"><span class="pill mem">Online · ${esc(d.nguonDon||"")}</span><span class="pill line">${esc(d.tt)}</span><span class="pill ${d.quayDaNhan?"good":"warn"}">${d.quayDaNhan?"Quầy đã nhận":"Chờ quầy nhận"}</span>${d.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill line">Không Gói Yên tâm</span>'}</div>${window.CherieData.ytBanner(d)}
-   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd><dt>Hoàn cọc qua</dt><dd>${window.CherieData.hoanDong(d)}${d.hoanLuc?` · đã hoàn ${when(d.hoanLuc)}`:""}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl><section><h2>Tiền của đơn</h2>${window.CherieData.bangTien(d,ls)}</section>${d.tt==="Đã đặt"&&!d.daThu?`<button class="btn block" type="button" id="daThuCK" style="margin-top:8px">Khách đã chuyển đủ ${money(window.CherieData.tongDon(d,ls).dichVu)} tiền thuê, gói, phí giao</button>`:""}
+   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd><dt>Hoàn cọc qua</dt><dd>${window.CherieData.hoanDong(d)}${d.hoanLuc?` · đã hoàn ${when(d.hoanLuc)}`:""}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl><section><h2>Tiền của đơn</h2>${window.CherieData.bangTien(d,ls)}</section>${d.tt==="Đã đặt"&&window.CherieData.canThu(d,ls).tong?`<button class="btn block primary" type="button" id="daThuCK" style="margin-top:8px">Ghi nhận khách đã chuyển (kèm ảnh giao dịch)</button>`:""}
    <section><h2>${ls.length} món</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id}</span></span><span class="r">${money(c.gia)}/lượt${c.hu?`<br><span class="pill bad">${c.mat?"Mất":"Hư"} ${money(window.CherieData.huMon(d,c))}</span>`:""}</span></div>`}).join("")}</div>${window.CherieData.quyTacDen(d)}</section>
    ${d.note?`<p class="note">Ghi chú cho quầy: ${esc(d.note)}</p>`:""}
-   <p class="note">Quầy chuẩn bị đồ, nhận cọc tại tiệm hoặc cử stylist giao. Trạng thái cập nhật về đây khi quầy thao tác.</p>`,root=>{bind(root);const b=root.querySelector("#daThuCK");if(b)b.onclick=()=>{window.CherieData.ghiThu(d,"CS online");save();render();openDonView(id);toast("Đã ghi khách trả tiền thuê")}})}
+   <p class="note">Quầy chuẩn bị đồ, nhận cọc tại tiệm hoặc cử stylist giao. Trạng thái cập nhật về đây khi quầy thao tác.</p>`,root=>{bind(root);const b=root.querySelector("#daThuCK");if(b)b.onclick=()=>window.CherieData.thuTien({don:d,nv:"CS online",onDone:()=>{save();render();openDonView(id);toast("Đã ghi nhận tiền khách chuyển")}})})}
 
 /* ================= AGENT AI ================= */
 let sampleFn=null,sampleChecked=false;
