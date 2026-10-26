@@ -436,8 +436,8 @@ function tongHtml(d,ls){const t=tongDon(d,ls),v=vnd;return `<div style="margin-t
 const BT_CSS=`.bt{border:1px solid #E2D6C6;border-radius:14px;background:#FFFDF9;color:#141414;overflow:hidden;font-size:14px}
 .bt h4{margin:0;padding:10px 14px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;background:#F6F1EA;color:#6B635A;display:flex;justify-content:space-between;gap:8px}
 .bt h4 span{text-transform:none;letter-spacing:0;font-weight:600}
-.bt .r{display:flex;justify-content:space-between;gap:12px;padding:7px 14px;align-items:baseline}.bt .r>span:first-child{color:#4A4440;min-width:0}.bt .r>span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
-.bt .r small{display:block;color:#8A8178;font-size:12px;font-weight:400}
+.bt .btr{display:flex;justify-content:space-between;gap:12px;padding:7px 14px;align-items:baseline}.bt .btr>span:first-child{color:#4A4440;min-width:0}.bt .btr>span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.bt .btr small{display:block;color:#8A8178;font-size:12px;font-weight:400}
 .bt .sub{border-top:1px dashed #E2D6C6;font-weight:600}.bt .tot{border-top:1px solid #E2D6C6;font-weight:700;font-size:16px;background:#FBF6F0}
 .bt .tot.hoan{background:#E8F2EC;color:#1F5C3E}.bt .tot.no{background:#FCE9E7;color:#9E2A1F}
 .bt .tag{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}.bt .ok{background:#E8F2EC;color:#1F5C3E}.bt .cho{background:#FFF3DC;color:#8A5A00}
@@ -446,7 +446,7 @@ const BT_CSS=`.bt{border:1px solid #E2D6C6;border-radius:14px;background:#FFFDF9
 function btCss(){if(!document.getElementById("bt-css")){const st=document.createElement("style");st.id="bt-css";st.textContent=BT_CSS;document.head.appendChild(st)}}
 function bangTien(d,ls,o){o=o||{};btCss();ls=ls||ctCuaDon(d);const v=vnd,e=hdEsc,spOf=id=>(db.sp||[]).find(x=>x.id===id)||{};
   const L=luotDon(d),goc=tienThue(d,ls),giam=Math.min(goc,+d.giam||0),t=tongDon(d,ls),q=quyetToan(d,ls),daTra=d.tt==="Đã trả",coPhi=q.tre>0||q.hu>0||ls.some(c=>c.hu);
-  const row=(a,b,cls,sub)=>`<div class="r ${cls||""}"><span>${a}${sub?`<small>${sub}</small>`:""}</span><span>${b}</span></div>`;
+  const row=(a,b,cls,sub)=>`<div class="btr ${cls||""}"><span>${a}${sub?`<small>${sub}</small>`:""}</span><span>${b}</span></div>`;
   const thu=d.daThu?`<span class="tag ok">Đã thu</span>`:`<span class="tag cho">Chưa thu</span>`;
   let h=`<div class="bt"><h4>1 · Khách trả khi nhận đồ ${d.tt==="Đã đặt"||o.luonHien?"":""}</h4>`;
   h+=row(`Tiền thuê`,v(goc),"",`${ls.length} món × ${L} lượt (${ls.map(c=>v(+c.gia||0)).join(" + ")} mỗi lượt)`);
