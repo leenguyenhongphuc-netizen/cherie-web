@@ -266,18 +266,16 @@ function khoiPhucDon(rec){if(!rec||!rec.ban||!rec.ban.don)return "Bản ghi hỏ
 /* Hộp xoá đơn: chọn lý do (bắt buộc), ghi chú (bắt buộc khi "Khác"), gõ mã đơn để xác nhận */
 function xoaDonUI(d,o){o=o||{};const el=hdLayer(),pn=el.querySelector(".pn");const close=()=>el.remove();let ly="",gc="",ma="";
   const dangChay=d.tt==="Đang thuê"||(d.tt==="Đã trả"&&["Chờ hoàn","Đang giữ","Khách còn nợ"].includes(d.ttCoc));
-  const draw=()=>{const ok=ly&&(ly!=="Khác"||gc.trim().length>=5)&&ma.trim().toUpperCase()===d.id;
+  const draw=()=>{const ok=ly&&(ly!=="Khác"||gc.trim().length>=5);
     pn.innerHTML=`<div class="hd"><h2>Xoá đơn ${hdEsc(d.id)}</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
     <p class="note">Đơn, các món, chuyến stylist và nhật ký quét chuyển vào mục "Đơn đã xoá" trong Admin, xem lại hoặc khôi phục được. Hợp đồng, CCCD, ảnh tình trạng vẫn giữ nguyên.</p>
     ${dangChay?`<p class="note bad"><b>Đơn này còn đang chạy</b> (${hdEsc(d.tt)} · cọc ${hdEsc(d.ttCoc||"")}). Chỉ xoá khi chắc chắn đơn không có thật.</p>`:""}
     <div style="display:flex;flex-direction:column;gap:8px">${LY_DO_XOA.map(x=>`<label class="ck"><input type="radio" name="ly" value="${x}" ${ly===x?"checked":""}> ${x}</label>`).join("")}</div>
     <label class="f">Ghi chú${ly==="Khác"?" (bắt buộc)":""}<input type="text" id="gc" value="${hdEsc(gc)}" placeholder="Ví dụ: khách gọi huỷ lúc 10h"></label>
-    <label class="f">Gõ mã đơn <b>${hdEsc(d.id)}</b> để xác nhận<input type="text" id="ma" value="${hdEsc(ma)}" autocapitalize="characters" autocomplete="off"></label>
-    <div class="row"><button class="btn" type="button" data-x>Không xoá</button><button class="btn p" type="button" id="okX" ${ok?"":"disabled"}>Xoá đơn</button></div>`;
+    <div class="row"><button class="btn" type="button" data-x>Không xoá</button><button class="btn p" type="button" id="okX" ${ok?"":"disabled"}>${ly?`Xoá đơn ${hdEsc(d.id)}`:"Chọn lý do để xoá"}</button></div>`;
     pn.querySelectorAll("[data-x]").forEach(b=>b.onclick=close);
     pn.querySelectorAll('[name="ly"]').forEach(r=>r.onchange=()=>{ly=r.value;draw()});
-    const g=pn.querySelector("#gc");g.oninput=()=>{gc=g.value;pn.querySelector("#okX").disabled=!(ly&&(ly!=="Khác"||gc.trim().length>=5)&&ma.trim().toUpperCase()===d.id)};
-    const m=pn.querySelector("#ma");m.oninput=()=>{ma=m.value;pn.querySelector("#okX").disabled=!(ly&&(ly!=="Khác"||gc.trim().length>=5)&&ma.trim().toUpperCase()===d.id)};
+    const g=pn.querySelector("#gc");g.oninput=()=>{gc=g.value;pn.querySelector("#okX").disabled=!(ly&&(ly!=="Khác"||gc.trim().length>=5))};
     pn.querySelector("#okX").onclick=()=>{const rec=xoaDon(d,{lyDo:ly,ghiChu:gc,nv:o.nv});try{CherieData.save()}catch(e){}close();o.onDone&&o.onDone(rec)}};
   draw()}
 /* ==== Hoàn cọc: cách hoàn, tài khoản khách, ảnh chụp giao dịch. Lấy từ lúc lập hợp đồng, dùng chung mọi app ==== */
