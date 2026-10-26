@@ -288,7 +288,7 @@ function hoanFields(h,p){h=h||{cach:"Chuyển khoản"};const e=hdEsc;return `<d
  <div data-hck style="display:${h.cach==="Tiền mặt"?"none":"flex"};flex-direction:column;gap:8px">
  <label class="f">Ngân hàng của khách<input type="text" data-h="nh" list="nh-${p}" value="${e(h.nh||"")}" placeholder="Ví dụ: Vietcombank" autocomplete="off"><datalist id="nh-${p}">${NGAN_HANG.map(x=>`<option value="${x}">`).join("")}</datalist></label>
  <label class="f">Số tài khoản<input type="tel" data-h="stk" inputmode="numeric" value="${e(h.stk||"")}" placeholder="Chỉ số, 6–19 chữ số"></label>
- <label class="f">Tên chủ tài khoản<input type="text" data-h="chu" value="${e(h.chu||"")}" placeholder="Viết hoa không dấu như trên app ngân hàng" style="text-transform:uppercase"></label></div></div>`}
+ <label class="f">Tên chủ tài khoản<input type="text" data-h="chu" value="${e(h.chu||"")}" placeholder="VIẾT HOA, KHÔNG DẤU" style="text-transform:uppercase"></label></div></div>`}
 function hoanDoc(root,p){const w=root.querySelector(`[data-hoanf="${p}"]`);if(!w)return null;const g=k=>(w.querySelector(`[data-h="${k}"]`)||{}).value||"";
   const h={cach:g("cach"),nh:g("nh").trim(),stk:g("stk").replace(/\D/g,""),chu:g("chu").trim().toUpperCase()};return h.cach==="Tiền mặt"?{cach:"Tiền mặt"}:h}
 function hoanBind(root,p,cb){const w=root.querySelector(`[data-hoanf="${p}"]`);if(!w)return;const s=w.querySelector('[data-h="cach"]');s.onchange=()=>{w.querySelector("[data-hck]").style.display=s.value==="Tiền mặt"?"none":"flex";cb&&cb()};w.querySelectorAll("input").forEach(i=>i.oninput=()=>cb&&cb())}
@@ -296,7 +296,7 @@ function hoanLuu(d,h){if(!d||!h)return;d.hoan=h;const k=(db.kh||[]).find(x=>x.id
 /* Một dòng "Hoàn cọc qua" dùng chung mọi app: hiện ngân hàng, STK, tên chủ TK, nút chép nhanh; thiếu thì có nút nhập ngay */
 function hoanDong(d){const h=hoanCuaDon(d),e=hdEsc;if(hoanThieu(h))return `<span style="color:#B42318">Chưa có tài khoản khách</span> <button class="link" type="button" data-hoan-sua="${e(d.id)}">Nhập ngay</button>`;
   if(h.cach==="Tiền mặt")return `Tiền mặt <button class="link" type="button" data-hoan-sua="${e(d.id)}">Đổi</button>`;
-  return `${e(h.nh)} · <b class="mono" style="user-select:all;-webkit-user-select:all">${e(h.stk)}</b> · ${e(h.chu)}<br><button class="link" type="button" data-hoan-cp="${e(d.id)}">Chép STK</button> · <button class="link" type="button" data-hoan-cpall="${e(d.id)}">Chép cả ngân hàng, tên</button> · <button class="link" type="button" data-hoan-sua="${e(d.id)}">Sửa</button>`}
+  return `${e(h.nh)} · <b class="mono" style="user-select:all;-webkit-user-select:all">${e(h.stk)}</b> · ${e(h.chu)}<br><span class="hoanlinks" style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0 16px"><button class="link" type="button" data-hoan-cp="${e(d.id)}">Chép STK</button><button class="link" type="button" data-hoan-cpall="${e(d.id)}">Chép cả ngân hàng, tên</button><button class="link" type="button" data-hoan-sua="${e(d.id)}">Sửa</button></span>`}
 function hoanBindDong(root,onDone,toast){const tim=id=>(db.don||[]).find(x=>x.id===id);const bao=m=>{try{toast?toast(m):0}catch(e){}};
   const chep=(t,b)=>{try{navigator.clipboard.writeText(t).then(()=>{b.textContent="Đã chép";bao("Đã chép")},()=>{bao("Không chép được, giữ ngón tay vào số để chép")})}catch(e){bao("Giữ ngón tay vào số để chép")}};
   root.querySelectorAll("[data-hoan-cp]").forEach(b=>b.onclick=()=>{const d=tim(b.dataset.hoanCp);if(d)chep(hoanCuaDon(d).stk,b)});

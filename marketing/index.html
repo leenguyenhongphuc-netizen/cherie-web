@@ -383,7 +383,15 @@ label.f input:focus,label.f select:focus,label.f textarea:focus,textarea:focus,.
 .demo.sync:has(.syncchip.live){display:none}
 :root{font-variant-numeric:lining-nums tabular-nums}
 h1,h2,h3,.stat .n,.hn-n,.funnel b,.sheet-head h3,.pp-kpi b,.pp-h,.pp-card b,.pp-dr b,.hn-done b{font-variant-numeric:lining-nums}
-.chip,.btn.sm,.x,.homebtn{min-height:40px;min-width:40px}
+.chip,.btn.sm,.x,.homebtn{min-height:40px}.x,.homebtn{min-width:40px}
+.chips>.chip,.seg2>.chip,.flow>span{flex:none}
+.btn{min-height:40px}
+.ndbar .btn{white-space:nowrap}
+.sheet:has(.ndbar:not([hidden])){padding-bottom:0}
+.ndbar{bottom:0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.funnel div{align-items:center}.funnel b{line-height:1}
+.check input[type=checkbox]{width:22px;height:22px;flex:none;margin:0}.check{align-items:center}
+.hoanlinks{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0 16px}
 .homebtn,.x{width:40px;height:40px}
 .link.tap,.kv .link{min-height:40px;display:inline-flex;align-items:center}
 details>summary{min-height:44px;display:flex;align-items:center;gap:6px}
@@ -392,8 +400,8 @@ details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-
 .sheet-body>p.note,#f p.note,.sheet-body>p.sub{margin:0}
 .row .t{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .mono{font-family:var(--body);font-variant-numeric:tabular-nums;font-size:inherit;letter-spacing:.01em}
-.pp-cover .ov{background:linear-gradient(to top,rgba(20,20,20,.94) 0,rgba(20,20,20,.8) 62%,rgba(20,20,20,0))}
-.pp-cover .pp-k{color:#E8D6BC}
+.pp-cover .ov{background:rgba(20,20,20,.86);padding-top:22px}
+.pp-pg.pp-cover .pp-k{color:#E8D6BC}
 .pp-dr b{color:#141414}
 :root{--gold:#7A5C33}
 .ndbar>[hidden]{display:none!important}
@@ -445,7 +453,7 @@ details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=fcba9d79"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=21e46119"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -872,6 +880,8 @@ function reelPlayer(root,N){const sp=reelSpec(N);const wrap=root.querySelector("
 }
 /* Cách làm từng nội dung: "AI dựng" (agent dựng hình, video từ ảnh mẫu đầm) hoặc "Tự quay" (team quay dựng, agent dựng storyboard để duyệt) */
 function cachLam(x){return x.cachLam||"AI dựng"}
+const TRUONG={bigIdea:"Ý tưởng lớn",thongDiep:"Thông điệp",keyVisual:"Hình chủ đạo",khuyenMai:"Khuyến mãi",mucTieuKinhDoanh:"Mục tiêu",nganSach:"Ngân sách",ruiRo:"Rủi ro",anhMau:"Ảnh mẫu",tuan:"Nhịp tuần",kpi:"Chỉ số",thu4:"bài thứ 4",viecNoiBo:"việc nội bộ",dinhDangVideo:"định dạng video",chuLuc:"chủ lực",hook:"câu mở đầu",Hook:"Câu mở đầu",KPI:"chỉ số",caption:"lời đăng",CTA:"lời mời"};
+function chuDe(t){return dinhDangTxt(String(t||"").replace(/\b(bigIdea|thongDiep|keyVisual|khuyenMai|mucTieuKinhDoanh|nganSach|ruiRo|anhMau|tuan|kpi|thu4|viecNoiBo|dinhDangVideo|chuLuc|hook|Hook|KPI|caption|CTA)\b/g,m=>TRUONG[m]))}
 const DD_TXT={"lat-gia":"lật giá","chon-1":"chọn 1","can-canh":"cận cảnh","tu-quay":"tự quay"};function dinhDangTxt(t){return String(t||"").replace(/\b(lat-gia|chon-1|can-canh|tu-quay)\b/g,m=>DD_TXT[m])}
 function canVideo(N){return cachLam(N)==="AI dựng"&&/tiktok|reels|shorts|video/i.test((N.kenh||"")+" "+(N.dinhDang||""))}
 function coVideo(N){return !!(N.video&&/^https:\/\//.test(N.video.url||""))}
@@ -903,7 +913,7 @@ function gopYPill(X,kind){const st=gopYState(X,kind);return st==="xong"&&!daXem(
 function ndRow(N){const vd=coVideo(N)?N.video.qa&&N.video.qa.diem:null,f=x=>String(x).replace(".",",");const q=coVideo(N)?(vd!=null?`<span class="score ${vd>=9?"ok":"no"}" title="Điểm video">Video ${f(vd)}</span>`:`<span class="score">Video</span>`):canVideo(N)?`<span class="score no">Chưa có video</span>`:N.qa?`<span class="score ${N.qa.diem>=9?"ok":"no"}" title="Điểm kịch bản">${f(N.qa.diem)}</span>`:"";
   const st=N.tt==="Chờ duyệt cuối"?"warn":N.tt==="Đã duyệt"||N.tt==="Đã đăng"?"good":N.tt.startsWith("Cần sửa")?"bad":"";
   const th=(N.asset||[]).find(a=>a.poster||a.loai==="anh")||(()=>{const u=(N.mau||[]).map(anhMau).find(L=>L.length);return u?{url:u[0]}:null})();
-  return `<button class="row" type="button" data-nd="${N.id}"><span class="stripe ${st}"></span>${th?`<img class="ndth" src="${esc(th.poster||th.url)}" alt="" loading="lazy">`:""}<span class="main"><span class="t">${esc(tenNgan(N.chuDe))}</span><span class="s">${cachLam(N)} · ${(N.asset||[]).length?`${(N.asset||[]).length} file dựng · `:""}${esc(N.kenh)} · quay ${dm(N.ngay)}${N.dang?` · đăng ${dm(N.dang)}`:""}</span></span><span class="r">${gopYPill(N,"nd")}${q}<br><span class="note">${esc(running[N.id]?"Agent đang chạy":N.tt)}</span></span></button>`}
+  return `<button class="row" type="button" data-nd="${N.id}"><span class="stripe ${st}"></span>${th?`<img class="ndth" src="${esc(th.poster||th.url)}" alt="" loading="lazy">`:""}<span class="main"><span class="t">${esc(tenNgan(N.chuDe))}</span><span class="s">${cachLam(N)} · ${(N.asset||[]).length?`${(N.asset||[]).length} file dựng · `:""}${esc(N.kenh)} · quay ${dm(N.ngay)}${N.dang?` · đăng ${dm(N.dang)}`:""}</span></span><span class="r">${(()=>{const g=gopYPill(N,"nd");return g?g.replace(/<br>$/,""):q?q:`<span class="note">${esc(running[N.id]?"Trợ lý đang làm":N.tt==="Chờ duyệt cuối"?"Chờ bạn duyệt":N.tt)}</span>`})()}</span></button>`}
 function renderND(){
   const all=(db.noidung||[]).filter(n=>n.tt!=="Đã bỏ");const cnt=s=>all.filter(n=>(running[n.id]?"Agent đang chạy":n.tt)===s).length;
   const tabs=["Tất cả","Chờ duyệt cuối","Chờ sản xuất","Cần sửa","Đã duyệt","Đã đăng"];
@@ -911,7 +921,7 @@ function renderND(){
   const waiting=all.filter(n=>n.tt==="Chờ sản xuất");
   view.innerHTML=`<div><h1>Nội dung</h1><p class="sub">Trợ lý viết, dựng và chấm. Bạn chỉ duyệt bản đạt 9/10.</p></div>
   <div class="stats"><div class="stat ${all.filter(ndReady).length?"alert":""}"><div class="n">${all.filter(ndReady).length}</div><div class="l">Chờ bạn duyệt</div></div><div class="stat"><div class="n">${cnt("Chờ sản xuất")}</div><div class="l">Chờ sản xuất</div></div><div class="stat"><div class="n">${all.filter(n=>n.tt.startsWith("Cần sửa")).length}</div><div class="l">Cần sửa</div></div><div class="stat"><div class="n">${cnt("Đã duyệt")+cnt("Đã đăng")}</div><div class="l">Đã duyệt</div></div></div>
-  ${waiting.length&&sampleFn?`<button class="btn primary block" type="button" id="runAll">Cho agent sản xuất ${waiting.length} mục đang chờ</button>`:""}
+  ${waiting.length&&sampleFn?`<button class="btn primary block" type="button" id="runAll">Cho trợ lý làm ${waiting.length} bài đang chờ</button>`:""}
   ${(()=>{const B=db.blog||[],hom=CD.today(),d=B.filter(b=>b.tt==="Đã đăng").length,h=B.filter(b=>b.tt==="Đã đăng"&&(b.tg||"").slice(0,10)===hom).length,n=B.filter(b=>b.tt==="Nháp").length;return `<div class="list qlinks"><button class="row" type="button" id="openAnh"><span class="main"><span class="t">Ảnh lookbook</span><span class="s">Thêm ảnh tự chụp hoặc ảnh khách cho từng mẫu</span></span><span class="r">›</span></button><button class="row" type="button" id="openBlog"><span class="main"><span class="t">Blog website</span><span class="s">${d} bài đã đăng${h?`, ${h} bài hôm nay`:""}${n?`, ${n} nháp chờ bạn`:""}</span></span><span class="r">›</span></button></div>`})()}
   <div class="chips" role="group" aria-label="Lọc">${tabs.map(t=>`<button class="chip" type="button" data-f="${t}" aria-pressed="${t===ndFilter}">${t}</button>`).join("")}</div>
   <div class="list">${list.map(ndRow).join("")||'<div class="empty">Không có nội dung ở trạng thái này. Duyệt kế hoạch để tạo các mục nội dung.</div>'}</div>`;
@@ -1005,7 +1015,7 @@ function openBlog(){const B=(db.blog||[]).slice().sort((a,b)=>a.tg<b.tg?1:-1).sl
   sheet("Blog website",`<p class="sub" style="margin-bottom:10px">Trợ lý viết 3 bài mỗi ngày (7:00, 12:00, 19:00) và tự đăng bài đạt từ 8/10. Bài dưới 8 điểm nằm ở Nháp chờ bạn xem.</p>
    <div class="list">${B.map(b=>`<div class="row" style="flex-wrap:wrap"><div style="flex:1;min-width:0"><b style="display:block">${esc(b.tieuDe||b.id)}</b><small style="color:var(--muted)">${esc(b.chuDe||"")} · ${b.tg?esc(when(b.tg)):""}${b.diem?` · ${String(b.diem).replace(".",",")}/10`:""}</small>${b.ghiChuAI?`<small style="display:block;color:var(--muted)">${esc(b.ghiChuAI)}</small>`:""}</div>
      <span class="pill">${esc(b.tt||"")}</span>
-     <span style="display:flex;gap:8px;width:100%;justify-content:flex-end">${b.tt==="Đã đăng"&&base?`<a class="link" href="${esc(base)}?bai=${encodeURIComponent(b.id)}" target="_blank" rel="noopener">Xem</a>`:""}<button class="btn" type="button" data-bt="${esc(b.id)}" style="min-height:36px;padding:0 14px">${b.tt==="Đã đăng"?"Ẩn bài":"Đăng"}</button></span></div>`).join("")||'<div class="empty">Chưa có bài nào. Trợ lý viết bài đầu tiên lúc 7:00 sáng mai.</div>'}</div>`,root=>{
+     <span style="display:flex;gap:8px;width:100%;justify-content:flex-end">${base?`<a class="btn ghost" href="${esc(base)}?bai=${encodeURIComponent(b.id)}${b.tt==="Đã đăng"?"":"&nhap=1"}" target="_blank" rel="noopener">${b.tt==="Đã đăng"?"Xem":"Xem trước"}</a>`:""}<button class="btn" type="button" data-bt="${esc(b.id)}" >${b.tt==="Đã đăng"?"Ẩn bài":"Đăng"}</button></span></div>`).join("")||'<div class="empty">Chưa có bài nào. Trợ lý viết bài đầu tiên lúc 7:00 sáng mai.</div>'}</div>`,root=>{
     root.querySelectorAll("[data-bt]").forEach(x=>x.onclick=()=>{const b=db.blog.find(y=>y.id===x.dataset.bt);if(!b)return;const len=b.tt==="Đã đăng";if(x.dataset.armed!=="1"){x.dataset.armed="1";x.textContent=len?"Bấm lần nữa để ẩn":"Bấm lần nữa để đăng";return}b.tt=len?"Ẩn":"Đã đăng";if(!len&&!b.tg)b.tg=new Date(Date.now()+252e5).toISOString().slice(0,16);b.nguoiDuyet="Chủ tiệm";CD.save();openBlog();toast(len?"Đã ẩn bài khỏi website":"Đã đăng bài lên website")})})}
 function renderKH(){
   const ps=(db.kehoach||[]).slice().sort((a,b)=>a.tu<b.tu?1:-1);
@@ -1081,14 +1091,14 @@ function openPlan(id){nextSheet=()=>openPlan(id);const P=byId("kehoach",id);if(!
    ${gopYHtml(P,"kh",dsach(P.review&&P.review.sua))}
    ${P.loai==="Tháng"&&P.dinhHuong?proposalHtml(P):""}
    ${P.loai!=="Tháng"&&(P.mucTieu||[]).length?`<section><h2>Mục tiêu</h2><div class="box"><ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px">${P.mucTieu.map(m=>`<li>${esc(m)}</li>`).join("")}</ol></div></section>`:""}
-   ${R?`<section><h2>Trợ lý chấm <span class="score ${R.diem>=9?"ok":"no"}">${String(R.diem).replace(".",",")}/10</span></h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:6px">${dsach(R.nhanXet).map(x=>`<span>${esc(x)}</span>`).join("")}${dsach(R.sua).length?`<span class="note"><b>Đã sửa:</b> ${dsach(R.sua).map(esc).join(" · ")}</span>`:""}</div></section>`:""}
-   ${P.loai==="Tháng"&&!P.dinhHuong?dinhHuongHtml(P):""}${P.loai==="Tháng"&&!(P.items||[]).length?"":`<section><h2>${(P.items||[]).length} hạng mục</h2>${P.tt==="Chờ chủ duyệt"?'<p class="note" style="margin:0 0 8px">Chọn từng mục: AI dựng (agent làm luôn hình, video) hay Tự quay (team quay dựng).</p>':""}<div class="list">${(P.items||[]).map((x,i)=>`<div class="row" style="flex-wrap:wrap"><span class="main"><span class="t">${dm(x.ngay)} · ${esc(x.chuDe)}</span><span class="s">${esc(x.kenh)} · ${esc(dinhDangTxt(x.dinhDang))} · ${esc(x.angle||"")}${(x.mau||[]).length?" · "+x.mau.map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", "):""}</span></span>${P.tt==="Chờ chủ duyệt"?`<span class="seg2" style="width:100%">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-pi="${i}" data-v="${v}" aria-pressed="${cachLam(x)===v}">${v}</button>`).join("")}</span>`:`<span class="r"><span class="note">${cachLam(x)}</span></span>`}</div>`).join("")||'<div class="empty">Agent chưa lập.</div>'}</div></section>`}
+   ${R?`<section><h2>Trợ lý chấm <span class="score ${R.diem>=9?"ok":"no"}">${String(R.diem).replace(".",",")}/10</span></h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:6px">${dsach(R.nhanXet).map(x=>`<span>${esc(x)}</span>`).join("")}${dsach(R.sua).length?`<details class="mota"><summary>Trợ lý đã sửa ${dsach(R.sua).length} chỗ</summary><ul style="margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px">${dsach(R.sua).map(x=>`<li>${esc(chuDe(x))}</li>`).join("")}</ul></details>`:""}</div></section>`:""}
+   ${P.loai==="Tháng"&&!P.dinhHuong?dinhHuongHtml(P):""}${P.loai==="Tháng"&&!(P.items||[]).length?"":`<section><h2>${(P.items||[]).length} hạng mục</h2>${P.tt==="Chờ chủ duyệt"?'<p class="note" style="margin:0 0 8px">Chọn từng mục: AI dựng (trợ lý dựng hình, video) hay Tự quay (team tự quay).</p>':""}<div class="list">${(P.items||[]).map((x,i)=>`<div class="row" style="flex-wrap:wrap"><span class="main"><span class="t">${dm(x.ngay)} · ${esc(x.chuDe)}</span><span class="s">${esc(x.kenh)} · ${esc(dinhDangTxt(x.dinhDang))} · ${esc(x.angle||"")}${(x.mau||[]).length?" · "+x.mau.map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", "):""}</span></span>${P.tt==="Chờ chủ duyệt"?`<span class="seg2" style="width:100%">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-pi="${i}" data-v="${v}" aria-pressed="${cachLam(x)===v}">${v}</button>`).join("")}</span>`:`<span class="r"><span class="note">${cachLam(x)}</span></span>`}</div>`).join("")||'<div class="empty">Agent chưa lập.</div>'}</div></section>`}
    ${(P.lichSu||[]).length?`<details class="mota"><summary>Lịch sử ${P.lichSu.length} lần sửa</summary><div class="box log">${P.lichSu.slice().reverse().map(l=>`<div>${when(l[0])} · <b>${esc(l[1])}</b> · ${esc(l[2])}</div>`).join("")}</div></details>`:""}
    <div id="actions" style="display:flex;flex-direction:column;gap:10px"></div>
    <div class="ndbar" id="ndbar" hidden></div>`,root=>{
     const A=root.querySelector("#actions"),bar=root.querySelector("#ndbar");root.querySelectorAll("[data-pi]").forEach(b=>b.onclick=()=>{const i=+b.dataset.pi;if(cachLam(P.items[i])===b.dataset.v)return;P.items[i].cachLam=b.dataset.v;root.querySelectorAll(`[data-pi="${i}"]`).forEach(c=>c.setAttribute("aria-pressed",String(c===b)));save()});if(running[P.id])return;
     if(P.tt==="Chờ chủ duyệt"){A.innerHTML=`<div id="fbBox" hidden style="display:flex;flex-direction:column;gap:8px"><label class="f">Góp ý để trợ lý lập lại<textarea id="fb" placeholder="Ví dụ: thêm 2 bài Instagram, bớt video ngoài trời, nhấn mạnh mang đầm tới tận nơi"></textarea></label></div>`;
-      bar.hidden=false;bar.innerHTML=`<button class="btn" type="button" id="pFb">Góp ý</button><button class="btn primary" type="button" id="pOk">${P.loai==="Tháng"?"Duyệt kế hoạch tháng":"Duyệt, chuyển sang làm bài"}</button><button class="btn" type="button" id="pHuy" hidden>Huỷ</button><button class="btn primary" type="button" id="pRedo" hidden>Gửi góp ý</button>`;
+      bar.hidden=false;bar.innerHTML=`<button class="btn" type="button" id="pFb">Góp ý</button><button class="btn primary" type="button" id="pOk">Duyệt</button><button class="btn" type="button" id="pHuy" hidden>Huỷ</button><button class="btn primary" type="button" id="pRedo" hidden>Gửi góp ý</button>`;
       const fbMode=on=>{A.querySelector("#fbBox").hidden=!on;["#pFb","#pOk"].forEach(q=>bar.querySelector(q).hidden=on);["#pHuy","#pRedo"].forEach(q=>bar.querySelector(q).hidden=!on);if(on){A.querySelector("#fbBox").scrollIntoView({block:"center",behavior:"smooth"});setTimeout(()=>A.querySelector("#fb").focus(),250)}};
       bar.querySelector("#pFb").onclick=()=>fbMode(true);bar.querySelector("#pHuy").onclick=()=>fbMode(false);
       bar.querySelector("#pOk").onclick=()=>{P.tt="Đã duyệt";P.duyetLuc=nowIso();
@@ -1104,7 +1114,7 @@ function openPlan(id){nextSheet=()=>openPlan(id);const P=byId("kehoach",id);if(!
           if(x.itemThang&&(db.noidung||[]).some(n=>n.item===x.itemThang&&n.kh!==P.id&&n.tt!=="Đã bỏ"&&(byId("kehoach",n.kh)||{}).loai==="Tháng"))return;db.noidung.push({id:nextId("noidung","ND"),kh:P.id,item:x.id,ngay:x.ngay,dang:"",kenh:x.kenh,dinhDang:x.dinhDang,chuDe:x.chuDe,angle:x.angle,mau:x.mau||[],cachLam:cachLam(x),tt:"Chờ sản xuất",vong:0,phanHoi:"",lichSu:[[nowIso(),"Chủ tiệm","Duyệt kế hoạch "+P.id]]})});
         save();render();openPlan(id);toast(P.loai==="Tháng"?"Đã duyệt kế hoạch tháng. Bài cụ thể được tạo khi bạn duyệt kế hoạch từng tuần":"Đã tạo các mục nội dung chờ sản xuất")};
       bar.querySelector("#pRedo").onclick=()=>{const v=A.querySelector("#fb").value.trim();if(!v){A.querySelector("#fb").focus();return}P.phanHoi=v;P.phanHoiLuc=Date.now();P.tt="Cần làm lại";(P.lichSu=P.lichSu||[]).push([nowIso(),"Chủ tiệm","Góp ý: "+v]);save();render();openPlan(id);if(sampleFn)agentPlan(P)}}
-    else if(P.tt==="Đang lập"||P.tt==="Cần làm lại"){A.innerHTML=sampleFn?`<button class="btn primary" type="button" id="pRun">Cho agent ${(P.items||[]).length?"lập lại":"lập kế hoạch"}</button>`:agentNote();const r=A.querySelector("#pRun");if(r)r.onclick=()=>agentPlan(P)}
+    else if(P.tt==="Đang lập"||P.tt==="Cần làm lại"){A.innerHTML=sampleFn?`<button class="btn primary" type="button" id="pRun">Cho trợ lý ${(P.items||[]).length?"lập lại":"lập kế hoạch"}</button>`:agentNote();const r=A.querySelector("#pRun");if(r)r.onclick=()=>agentPlan(P)}
     else if(P.tt==="Đã duyệt"){A.innerHTML=`<button class="btn" type="button" id="pGo">Xem các mục nội dung</button>`;A.querySelector("#pGo").onclick=()=>{closeSheet();tab="nd";ndFilter="Tất cả";render()}}
   });
 }
