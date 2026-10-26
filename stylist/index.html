@@ -419,6 +419,8 @@ function renderTrip(){
   if(closed){body=summary(t)}
   else ({thu:thuStep,giao:giaoStep,nhan:nhanStep})[t.loai](t,c,step,o=>{body=o.body;foot=o.foot||"";bind=o.bind||(()=>{})});
   if(!t.d.checkin&&body.includes('id="checkin"'))foot="";
+  /* luôn có đường quay lại bước trước (dữ liệu đã nhập ở các bước được giữ nguyên) */
+  if(!closed&&step>0&&!foot.includes('id="prevStep"'))foot=`<button class="btn ghost" type="button" id="prevStep">← Quay lại bước ${step}</button>`+foot;
   view.innerHTML=head+body+(foot?`<div class="footbar">${foot}</div>`:"");
   view.querySelector("#back").onclick=()=>{openTrip=null;render();window.scrollTo(0,0)};
   view.querySelector("#copyPhone").onclick=()=>{const v=c.sdt;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(()=>toast("Đã chép số điện thoại"),()=>toast("Chọn số để chép thủ công"))}else toast("Chọn số để chép thủ công")};
@@ -442,7 +444,7 @@ function thuStep(t,c,step,out){const d=t.d;
     out({body:`<section><h2>Bước 1 · Chọn 3–5 bộ mang theo</h2><p class="note">Hệ thống gợi ý trước các bộ đúng size, đang ở tiệm và trống lịch ${dm(t.dungNhan)} (tính cả ngày giặt). Stylist duyệt lại.</p>
       <div class="list">${rows.map(r=>{const s=r.s,on=sel.includes(s.id);return `<label class="row ${r.why?"off":""}">${sw(s)}<input type="checkbox" data-pick="${s.id}" ${on?"checked":""} ${r.why?"disabled":""}><span class="main"><span class="t">${esc(s.ten)} · ${s.size}${s.size!==c.size?" (khác size)":""}</span><span class="s"><span class="mono">${s.id}</span> · ${esc(s.mo)} · ${k(s.gia)}</span>${r.why?`<span class="s err">${esc(r.why)}</span>`:""}</span></label>`}).join("")}</div></section>`,
       foot:nextBtn(sel.length>=1&&sel.length<=6,`Lập phiếu xuất ${sel.length} món`,sel.length?"Tối đa 6 món một phiếu":"Chọn ít nhất 1 món"),
-      bind:()=>{view.querySelectorAll("[data-pick]").forEach(cb=>cb.onchange=()=>{const id=cb.dataset.pick;d.pick=cb.checked?[...d.pick,id]:d.pick.filter(x=>x!==id);save();render()});goNext(t,()=>{d.out={}})}});
+      bind:()=>{view.querySelectorAll("[data-pick]").forEach(cb=>cb.onchange=()=>{const id=cb.dataset.pick;d.pick=cb.checked?[...d.pick,id]:d.pick.filter(x=>x!==id);save();render()});goNext(t,()=>{d.out=d.out||{}})}});
   }
   else if(step===1){
     const ids=d.pick,done=d.out||(d.out={});const all=ids.every(i=>done[i]);
@@ -537,7 +539,7 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
   if(step===0){
     out({body:`<section><h2>Bước 1 · Đến nơi</h2><dl class="kv box"><dt>Hạn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd><dt>Số món</dt><dd>${ids.length}</dd></dl>${checkinBlock(t)}
       ${d.checkin&&lateHours(t,don)?`<div class="banner warn">Trễ ${lateHours(t,don)} giờ so với hẹn. Phí trễ đề xuất ${money(lateFee(t,don))}.</div>`:""}</section>`,
-      foot:nextBtn(!!d.checkin,"Bắt đầu nhận đồ","Bấm đã đến nơi"),bind:()=>{bindCheckin(t);goNext(t,()=>{d.in={};d.lv={};d.mota={}})}});
+      foot:nextBtn(!!d.checkin,"Bắt đầu nhận đồ","Bấm đã đến nơi"),bind:()=>{bindCheckin(t);goNext(t,()=>{d.in=d.in||{};d.lv=d.lv||{};d.mota=d.mota||{}})}});
   } else if(step===1){
     const done=d.in||(d.in={});d.lv=d.lv||{};d.mota=d.mota||{};const CDx=window.CherieData;
     const lvSel=(i,cur)=>`<label class="f full" for="lv-${i}">Mức tình trạng<select id="lv-${i}" data-lv="${i}">${LEVELS.map(L=>`<option value="${L[0]}" ${L[0]===cur?"selected":""}>${L[0]} · ${L[0]==="L4"?"Hư nặng không sửa được":L[1]}${L[2]==null?" · đền theo giá trị đầm":L[2]?" · "+k(L[2]):""}${curDon&&curDon.yenTam&&L[0]>"L1"?" · có Gói Yên tâm":""}</option>`).join("")}<option value="MAT" ${cur==="MAT"?"selected":""}>Mất · khách làm mất, không cần chụp ảnh</option></select></label>`;d.mat=d.mat||{};const anhOk=i=>d.mat[i]?!!(d.mota[i]||"").trim():CDx.ttDu(don.id,"nhan",i)&&((d.lv[i]||"L0")<="L1"||((CDx.bbOf(don.id,"nhan")||{mon:{}}).mon[i]||{them:[]}).them.some(Boolean));
