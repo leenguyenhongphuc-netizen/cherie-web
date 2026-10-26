@@ -23,3 +23,9 @@ Luật nội dung (số tiền chính xác, cọc, Gói Yên tâm, giọng văn,
 
 Props có trường `format` thì dùng khuôn v2. Ảnh có thể là URL https (script tự tải về). Đầu ra trong `out/`: bản không nhạc, bản có nhạc tự soạn (`nhac2.wav`, -14 LUFS), tấm ghép 4 khung mỗi giây để kiểm duyệt.
 Agent theo lịch không chạy script này: chỉ đẩy `jobs/<id>.json`, GitHub Actions (workflow "Dựng video") dựng và lưu vào `media/reel/`.
+
+## Key visual tháng (từ 27/10/2026)
+
+Ba ảnh tĩnh `KvPost` (4:5), `KvStory` (9:16), `KvCover` (bìa video 9:16), file `src/KeyVisual.tsx`.
+Props có trường `tenY` thì `render.sh` dựng 3 ảnh thay cho video. Xem `vi-du-key-visual.json`.
+Agent Lập kế hoạch đẩy `jobs/<id kế hoạch viết thường>.json` (ví dụ `kh-m122026.json`); GitHub Actions lưu `media/kv/<id>-post.jpg`, `-story.jpg`, `-cover.jpg`. App Marketing tự hiện 3 ảnh này trong trang proposal của kế hoạch tháng.

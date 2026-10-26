@@ -12,6 +12,16 @@ export npm_config_noproxy=localhost,127.0.0.1 NO_PROXY=localhost,127.0.0.1 no_pr
 CH="${CHROME:-$(cd /tmp && node -e "try{console.log(require('playwright').chromium.executablePath())}catch(e){console.log('')}")}"
 mkdir -p public/dl out
 node prep.mjs "$PROPS" out/props.json
+# Key visual tháng: props có "tenY" → dựng 3 ảnh tĩnh, không dựng video
+if grep -q '"tenY"' out/props.json; then
+  SA=(--props=out/props.json --image-format=jpeg --jpeg-quality=90)
+  [ -n "$CH" ] && SA+=(--browser-executable="$CH")
+  for c in Post Story Cover; do
+    l=$(echo "$c" | tr 'A-Z' 'a-z')
+    npx remotion still src/index.ts "Kv$c" "out/$NAME-$l.jpg" "${SA[@]}" >>out/render.log 2>&1 || { tail -30 out/render.log; exit 1; }
+  done
+  ls -la "out/$NAME"-*.jpg; exit 0
+fi
 COMP=CherieReel; NHAC=public/nhac.wav
 if grep -q '"format"' out/props.json; then COMP=CherieReel2; NHAC=public/nhac2.wav; fi
 ARGS=(--props=out/props.json --codec=h264 --crf=20 --concurrency="$(nproc)")

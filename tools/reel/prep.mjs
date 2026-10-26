@@ -22,8 +22,8 @@ const local = (u) => {
 if (p.hookImg) p.hookImg = local(p.hookImg);
 if (p.serviceImg) p.serviceImg = local(p.serviceImg);
 p.dresses = (p.dresses || []).map((d) =>
-  d.shots ? { ...d, shots: d.shots.map((s) => ({ ...s, src: local(s.src) })) } : { ...d, a: local(d.a), b: local(d.b) }
+  d.shots ? { ...d, shots: d.shots.map((s) => ({ ...s, src: local(s.src) })) } : d.img ? { ...d, img: local(d.img) } : { ...d, a: local(d.a), b: local(d.b) }
 );
 p.nhac = false;
 writeFileSync(outp, JSON.stringify(p));
-console.log("props ok:", p.format || "khuôn cũ", p.dresses.length, "mẫu");
+console.log("props ok:", p.tenY ? "key visual" : p.format || "khuôn cũ", p.dresses.length, "mẫu");

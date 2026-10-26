@@ -1,5 +1,6 @@
 import React from "react";
-import { Composition } from "remotion";
+import { Composition, Still } from "remotion";
+import { KvPost, KvStory, KvCover, kvDefaults } from "./KeyVisual";
 import { Reel, durationOf, reelDefaults, ReelProps } from "./Reel";
 import { Reel2, duration2, reel2Defaults, Reel2Props } from "./Reel2";
 
@@ -25,5 +26,8 @@ export const RemotionRoot: React.FC = () => (
       defaultProps={reel2Defaults as unknown as Record<string, unknown>}
       calculateMetadata={({ props }) => ({ durationInFrames: duration2(props as unknown as Reel2Props) })}
     />
+    <Still id="KvPost" component={KvPost as unknown as React.FC<Record<string, unknown>>} width={1080} height={1350} defaultProps={kvDefaults as unknown as Record<string, unknown>} />
+    <Still id="KvStory" component={KvStory as unknown as React.FC<Record<string, unknown>>} width={1080} height={1920} defaultProps={kvDefaults as unknown as Record<string, unknown>} />
+    <Still id="KvCover" component={KvCover as unknown as React.FC<Record<string, unknown>>} width={1080} height={1920} defaultProps={kvDefaults as unknown as Record<string, unknown>} />
   </>
 );
