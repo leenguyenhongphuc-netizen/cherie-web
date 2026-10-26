@@ -247,7 +247,7 @@ details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
   </div>
 </div>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=8755e4df"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=ed94450b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -533,10 +533,7 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
 
 
 /* ---------- thông tin đơn: ai thuê, thuê gì, có Gói Yên tâm không, quy tắc đền ---------- */
-function ytBanner(don){if(!don)return "";const CD=window.CherieData;return don.yenTam?`<div class="banner good"><b>Đơn này CÓ Gói Yên tâm</b> (khách đã trả ${money(CD.ytCuaDon(don,lines(don)))}). Vết bẩn khó, sút chỉ, rách nhỏ: miễn phí. Mất hoặc hư nặng: khách đền 50% giá trị chiếc đầm.</div>`:`<div class="banner warn"><b>Đơn này KHÔNG mua Gói Yên tâm.</b> Vết bẩn khó, sút chỉ: 100k. Rách cần thợ: 300k. Mất hoặc hư nặng: khách đền 100% giá trị chiếc đầm.</div>`}
-function quyTacDen(don){const yt=!!(don&&don.yenTam),CD=window.CherieData,M=CD.MUC_HU;const ten={L0:"Như mới",L1:"Bẩn nhẹ, giặt thường",L2:"Vết bẩn khó, sút chỉ",L3:"Rách, hỏng cần thợ",L4:"Hư nặng hoặc mất"};
-  const o=(L,co)=>L[0]==="L4"?(co?"50% giá trị":"100% giá trị"):co&&L[0]!=="L0"&&L[0]!=="L1"?"Miễn phí":L[2]?k(L[2]):"Miễn phí";
-  return `<details class="rules"><summary>Quy tắc đền khi hư, mất</summary><div class="tblw"><table class="tbl"><tr><th>Mức</th><th>Tình trạng</th><th${yt?"":' class="on"'}>Không có gói</th><th${yt?' class="on"':""}>Có Gói Yên tâm</th></tr>${M.map(L=>`<tr><td>${L[0]}</td><td>${ten[L[0]]}</td><td${yt?"":' class="on"'}>${o(L,false)}</td><td${yt?' class="on"':""}>${o(L,true)}</td></tr>`).join("")}</table></div><p class="note">Cột tô màu là cột áp dụng cho đơn này. Trả trễ: từ giờ thứ hai 20.000đ mỗi giờ, có gói hay không đều tính.</p></details>`}
+const ytBanner=d=>window.CherieData.ytBanner(d),quyTacDen=d=>window.CherieData.quyTacDen(d);
 function donBox(t){if(!t.don)return "";const don=byId("don",t.don);if(!don)return "";const CD=window.CherieData,ls=lines(don),dat=kh(don.dat)||{};
   const it=ls.map(l=>{const sp=byId("sp",l.sp)||{},gt=CD.giaTri(sp),mac=l.mac&&l.mac!==don.dat?(kh(l.mac)||{}).ten:"";return `<div class="row">${sw(sp)}<span class="main"><span class="t">${esc(sp.ten||l.sp)} · ${esc(sp.size||"")}</span><span class="s mono">${esc(l.sp)}</span><span class="s">Thuê ${k(+l.ct.gia||sp.gia||0)} · giá trị ${gt?k(gt):"chưa có"}${don.yenTam?` · gói ${k(CD.phiYenTam(sp))}`:""}${mac?` · người mặc: ${esc(mac)}`:""}</span></span></div>`}).join("");
   return `<section><h2>Đơn hàng ${esc(don.id)}</h2>

@@ -229,7 +229,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=8755e4df"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=ed94450b"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -662,10 +662,11 @@ function openDon(id){nextSheet=()=>openDon(id);
   sheet(`Đơn ${d.id}`,`
    <div class="pills">${ttPill(d)}<span class="pill line">${esc(d.dip)}</span>${d.yenTam?'<span class="pill good">Có Yên tâm</span>':'<span class="pill line">Không Yên tâm</span>'}${d.nhom?`<span class="pill mem">${esc(byId("nhom",d.nhom).ten)}</span>`:""}${daTre(d)?'<span class="pill bad">Đã trả trễ</span>':""}</div>
    ${act?`<div class="nextbox"><h2>Việc cần làm</h2>${act}</div>`:""}
+   ${CD.ytBanner(d)}
    <button class="row box" type="button" data-kh="${kh.id}" style="border:1px solid var(--line)"><span class="main"><span class="t">${esc(kh.ten)}</span><span class="s">Người đặt · ${esc(kh.sdt||kh.email)}</span></span><span class="r">${segPill(kh.id)}</span></button>
-   <dl class="kv box"><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Hẹn trả</dt><dd>${when(d.tra)}</dd>${d.traTT?`<dt>Trả thực tế</dt><dd>${when(d.traTT)}</dd>`:""}<dt>Tiền thuê</dt><dd>${money(tienGoc(d))}</dd>${d.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(CD.ytCuaDon(d,lines(d)))}</dd>`:""}${d.giam?`<dt>Giảm giá</dt><dd>−${money(d.giam)}${d.kmTen?" · "+esc(d.kmTen):""}</dd><dt>Thuê sau giảm</dt><dd><b>${money(tongThue(d))}</b></dd>`:""}<dt>Gói Yên tâm</dt><dd>${d.yenTam?"Có · "+money(window.CherieData.YEN_TAM.phi*lines(d).length):"Không"}</dd><dt>Cọc</dt><dd>${money(d.coc)}${d.hinhThuc?" · "+esc(d.hinhThuc):""}</dd><dt>Trạng thái cọc</dt><dd>${esc(d.ttCoc)}</dd>${d.phi?`<dt>Phí phát sinh</dt><dd>${money(d.phi)}</dd>`:""}${tongHu(d)?`<dt>Phí hư hỏng</dt><dd>${money(tongHu(d))}</dd>`:""}</dl>
+   <dl class="kv box"><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Hẹn trả</dt><dd>${when(d.tra)}</dd>${d.traTT?`<dt>Trả thực tế</dt><dd>${when(d.traTT)}</dd>`:""}<dt>Tiền thuê</dt><dd>${money(tienGoc(d))}</dd>${d.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(CD.ytCuaDon(d,lines(d)))}</dd>`:""}${d.giam?`<dt>Giảm giá</dt><dd>−${money(d.giam)}${d.kmTen?" · "+esc(d.kmTen):""}</dd><dt>Thuê sau giảm</dt><dd><b>${money(tongThue(d))}</b></dd>`:""}<dt>Cọc</dt><dd>${money(d.coc)}${d.hinhThuc?" · "+esc(d.hinhThuc):""}</dd><dt>Trạng thái cọc</dt><dd>${esc(d.ttCoc)}</dd>${d.phi?`<dt>Phí phát sinh</dt><dd>${money(d.phi)}</dd>`:""}${tongHu(d)?`<dt>Phí hư hỏng</dt><dd>${money(tongHu(d))}</dd>`:""}</dl>
    ${d.hd?`<button class="row box" type="button" id="hdXem" style="border:1px solid var(--line)"><span class="main"><span class="t">Hợp đồng ${esc(d.hd)}</span><span class="s">Khách đã ký · CCCD đã lưu</span></span><span class="r"><span class="pill good">Đã ký</span></span></button>`:(d.tt==="Đã đặt"||d.tt==="Đang thuê"?`<div class="banner warn">Chưa ký hợp đồng thuê. Chụp CCCD và để khách ký trước khi giao đồ. <button class="link" type="button" id="hdLap">Lập hợp đồng</button></div>`:"")}
-   <section><h2>${ls.length} món · ${soNguoiMac(d)} người mặc</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp),m=byId("kh",c.mac);return `<button class="row" type="button" data-sp="${s.id}"><span class="stripe" style="background:${SWATCH[s.mau]}"></span><span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${esc(m.ten)}${c.hu?" · "+esc(c.moTa):""}</span></span><span class="r">${money(c.gia)}${c.hu?`<br><span class="pill bad">Hư ${k(c.phiHu)}</span>`:""}</span></button>`}).join("")}</div></section>
+   <section><h2>${ls.length} món · ${soNguoiMac(d)} người mặc</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp),m=byId("kh",c.mac);return `<button class="row" type="button" data-sp="${s.id}"><span class="stripe" style="background:${SWATCH[s.mau]}"></span><span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${esc(m.ten)}${c.hu?" · "+esc(c.moTa):""}</span></span><span class="r">${money(c.gia)}${c.hu?`<br><span class="pill bad">Hư ${k(c.phiHu)}</span>`:""}</span></button>`}).join("")}</div>${CD.quyTacDen(d)}</section>
    ${tripsOfDon(d.id).length?`<section><h2>Chuyến stylist</h2><div class="list">${tripsOfDon(d.id).map(t=>tripRow(t)).join("")}</div></section>`:""}
    ${d.note?`<p class="note">${esc(d.note)}</p>`:""}`,root=>{
     bindRows(root);
