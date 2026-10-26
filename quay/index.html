@@ -229,7 +229,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=149e370f"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=584b3097"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -311,12 +311,16 @@ function conflict(spId,nhan,tra,ignoreDon){
 }
 
 /* ---------- UI plumbing ---------- */
+/* lịch sử màn: mở đơn → khách → đầm vẫn quay lại được; chạm ra ngoài không đóng màn đang có form */
+let sheetHist=[],sheetBack=false;
+function sheetTruoc(title){const o=layer.querySelector(".sheet"),t=o&&o.getAttribute("aria-label");if(!sheetBack&&o&&curSheet&&t!==String(title))sheetHist.push(curSheet);sheetBack=false}
+
 let tab="today", khoFilter="Tất cả", khachQ="", calStart=addDays(NOW,-2), calMode="sp";
 const view=document.getElementById("view"), layer=document.getElementById("layer");
 function toast(msg){const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-function sheet(title,html,onMount){curSheet=nextSheet;nextSheet=null;layer.innerHTML=`<div class="scrim" data-close><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sheet-head gut"><h3>${esc(title)}</h3><button class="x" type="button" data-close aria-label="Đóng">×</button></div><div class="sheet-body gut">${html}</div></div></div>`;
-  const sc=layer.querySelector(".scrim");sc.addEventListener("click",e=>{if(e.target.hasAttribute("data-close"))closeSheet()});if(onMount)onMount(layer.querySelector(".sheet-body"))}
-function closeSheet(){layer.innerHTML="";curSheet=null}
+function sheet(title,html,onMount){sheetTruoc(title);curSheet=nextSheet;nextSheet=null;layer.innerHTML=`<div class="scrim" data-close><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sheet-head gut">${sheetHist.length?'<button class="x" type="button" data-back aria-label="Quay lại" style="font-size:20px">‹</button>':""}<h3 style="flex:1">${esc(title)}</h3><button class="x" type="button" data-close aria-label="Đóng">×</button></div><div class="sheet-body gut">${html}</div></div></div>`;
+  layer.querySelector(".scrim").addEventListener("click",e=>{if(e.target.classList.contains("scrim")&&layer.querySelector(".sheet form"))return toast("Đang nhập dở. Bấm × để đóng.");if(e.target.hasAttribute("data-close"))closeSheet()});{const bk=layer.querySelector("[data-back]");if(bk)bk.onclick=()=>{const f=sheetHist.pop();if(f){sheetBack=true;f()}}}if(onMount)onMount(layer.querySelector(".sheet-body"))}
+function closeSheet(){layer.innerHTML="";curSheet=null;sheetHist=[]}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
 function go(t){tab=t;render();window.scrollTo(0,0)}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.tab==="add")return openCreate();go(b.dataset.tab)}));
@@ -649,7 +653,7 @@ function openDon(id){nextSheet=()=>openDon(id);
   const cocBtn=d.ttCoc==="Chờ chuyển khoản"?'<button class="btn block" type="button" id="aCocIn">Đã nhận cọc chuyển khoản</button>':"";
   if(d.tt==="Đã đặt"){const chuaNhan=d.kenh==="Online"&&!d.quayDaNhan,chuaCoc=d.ttCoc==="Chờ chuyển khoản";
     act=chuaNhan?onBanner:chuaCoc?(d.kenh==="Online"?onBanner:"")+`<p class="note" style="margin:0 0 8px">Bước tiếp: kiểm tiền cọc ${money(d.coc)} đã về tài khoản tiệm chưa.</p>`+cocBtn.replace('class="btn block"','class="btn primary block"')
-     :(ot&&ot.loai==="giao"?tripBanner:(d.giaoTanNoi?`<div class="btns"><button class="btn primary" type="button" id="aShip">Cử stylist giao tận nơi</button><button class="btn" type="button" id="aGiao">${d.hd?"Khách ghé lấy tại quầy":"Khách ghé: ký hợp đồng và giao"}</button></div>`:`<div class="btns"><button class="btn primary" type="button" id="aGiao">${d.hd?"Giao tại quầy":"Ký hợp đồng và giao tại quầy"}</button><button class="btn" type="button" id="aShip">Cử stylist giao tận nơi</button></div>`))}
+     :(ot&&ot.loai==="giao"?tripBanner:(d.daThu?"":`<label class="check" style="margin-bottom:8px"><input type="checkbox" id="thuOk"> Đã thu đủ <b>${money(CD.tongDon(d,ls).dichVu)}</b> (thuê, gói, phí giao). Giao tại quầy thì bắt buộc tick.</label>`)+(d.giaoTanNoi?`<div class="btns"><button class="btn primary" type="button" id="aShip">Cử stylist giao tận nơi</button><button class="btn" type="button" id="aGiao">${d.hd?"Khách ghé lấy tại quầy":"Khách ghé: ký hợp đồng và giao"}</button></div>`:`<div class="btns"><button class="btn primary" type="button" id="aGiao">${d.hd?"Giao tại quầy":"Ký hợp đồng và giao tại quầy"}</button><button class="btn" type="button" id="aShip">Cử stylist giao tận nơi</button></div>`))}
   if(d.tt==="Đang thuê")act=`<p class="note" style="margin:0 0 8px">Khách đang thuê, hẹn trả ${when(d.tra)}.${late?` <b style="color:var(--neg,#b42318)">Đã trễ ${lateH} giờ.</b>`:""}</p>`+(ot&&ot.loai==="nhan"?tripBanner:`<button class="btn block" type="button" id="aPick">Cử stylist đi nhận lại</button>`)+'<details class="more"'+(late?" open":"")+'><summary>Khách mang trả tại quầy: bấm để nhận trả</summary><div style="padding:0 12px 12px">'+`<section><div class="box" style="display:flex;flex-direction:column;gap:10px">${late?`<div class="banner bad">Trễ ${lateH} giờ so với hẹn ${when(d.tra)}.</div>`:""}
     <p class="note">${d.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách cần thợ sửa miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: phí theo mức tình trạng."} Chụp 4 ảnh lúc nhận cho mỗi món khách mang trả (món báo mất không cần ảnh).</p>
     ${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="line-item"><label class="f">${esc(s.ten)} (${s.id}) · tình trạng<select data-lvq="${c.id}">${optMuc(s,!!d.yenTam,TAM(d.id).lv[c.id]||"L0")}</select></label><label class="f" data-mtq="${c.id}" ${(TAM(d.id).lv[c.id]||"L0")>"L1"?"":"hidden"}>Mô tả vết, vị trí<input type="text" id="m-${c.id}" value="${esc(TAM(d.id).mt[c.id]||"")}"></label><span class="note">Ảnh lúc nhận: ${window.CherieData.ttSo(d.id,"nhan",c.sp)}/4</span></div>`}).join("")}
@@ -686,7 +690,7 @@ function openDon(id){nextSheet=()=>openDon(id);
     const giao0=()=>{d.tt="Đang thuê";ls.forEach(c=>byId("sp",c.sp).tt="Đang thuê");save();closeSheet();render();toast(`Đã giao đơn ${id}. Khi khách trả, mở lại đơn để nhận trả.`)};
     /* giao tại quầy: chụp đủ 4 ảnh tình trạng mỗi món trước khi giao */
     const giao=()=>ls.every(c=>window.CherieData.ttDu(d.id,"giao",c.sp))?giao0():window.CherieData.chupTinhTrang({don:d.id,phase:"giao",items:ttItems,onDone:giao0});
-    const g=root.querySelector("#aGiao");if(g)g.onclick=()=>{if(d.hd)return giao();window.CherieData.lapHopDong(hdOpts(d,()=>giao()))};
+    const g=root.querySelector("#aGiao");if(g)g.onclick=()=>{if(!d.daThu){const tk=root.querySelector("#thuOk");if(!tk||!tk.checked)return toast(`Thu đủ ${money(CD.tongDon(d,ls).dichVu)} rồi tick "Đã thu đủ" trước khi giao`);CD.ghiThu(d,nvTen());save()}if(d.hd)return giao();window.CherieData.lapHopDong(hdOpts(d,()=>giao()))};
     const hl=root.querySelector("#hdLap");if(hl)hl.onclick=()=>window.CherieData.lapHopDong(hdOpts(d));
     const hx=root.querySelector("#hdXem");if(hx)hx.onclick=()=>window.CherieData.xemHopDong(d.hd);
     root.querySelectorAll("[data-lvq]").forEach(sel=>sel.onchange=()=>{TAM(d.id).lv[sel.dataset.lvq]=sel.value;root.querySelector(`[data-mtq="${sel.dataset.lvq}"]`).hidden=sel.value<="L1"&&sel.value!=="MAT"});

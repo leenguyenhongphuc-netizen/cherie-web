@@ -247,7 +247,7 @@ details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
   </div>
 </div>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=149e370f"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=584b3097"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -384,6 +384,9 @@ function scanBox(ids,doneMap,label,lost){
    <p class="note" style="margin:0">${Object.keys(doneMap).filter(x=>ids.includes(x)).length}/${ids.length} món đã quét</p></div>
    <div class="list">${ids.map(id=>{const s=byId("sp",id);const ok=doneMap[id];return `<div class="row">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s mono">${id}</span></span><span class="r">${lost&&lost[id]?`<span class="pill bad">Khách báo mất</span><button class="btn sm ghost" type="button" data-unmat="${id}">Huỷ</button>`:ok?`<span class="pill good">Đã quét ${hm(ok)}</span>`:`<button class="btn sm ghost" type="button" data-sim="${id}">Chọn tay</button>${lost?`<button class="btn sm ghost" type="button" data-mat="${id}">Báo mất</button>`:""}`}</span></div>`}).join("")}</div>`;
 }
+/* Không tìm thấy món khi xuất kho: bỏ món (chạm 2 lần để chắc), không kẹt chuyến */
+function boBox(ids,done,ghi){const con=ids.filter(i=>!done[i]);if(!con.length)return "";return `<details class="more" style="margin-top:8px"><summary>Không tìm thấy món trong kho?</summary><div class="list" style="margin:8px 0">${con.map(i=>{const s=byId("sp",i)||{};return `<div class="row">${sw(s)}<span class="main"><span class="t">${esc(s.ten||i)} · ${esc(s.size||"")}</span><span class="s mono">${i}</span></span><span class="r"><button class="btn" type="button" data-bo="${i}">Bỏ món</button></span></div>`}).join("")}</div><p class="note">${ghi}</p></details>`}
+function bindBo(onBo){view.querySelectorAll("[data-bo]").forEach(b=>b.onclick=()=>{if(b.dataset.ok!=="1"){b.dataset.ok="1";b.textContent="Chạm lần nữa để bỏ";b.classList.add("primary");return}onBo(b.dataset.bo)})}
 function bindScan(ids,doneMap,onOk){
   const inp=view.querySelector("#scanIn"),msg=view.querySelector("#scanMsg");
   const go=(code,fromInput)=>{code=(code||"").trim().toUpperCase();if(!code)return;
@@ -452,9 +455,10 @@ function thuStep(t,c,step,out){const d=t.d;
   }
   else if(step===1){
     const ids=d.pick,done=d.out||(d.out={});const all=ids.every(i=>done[i]);
-    out({body:`<section><h2>Quét xuất kho</h2>${scanBox(ids,done,"Quét từng món trước khi rời tiệm")}</section>`,
+    out({body:`<section><h2>Quét xuất kho</h2>${scanBox(ids,done,"Quét từng món trước khi rời tiệm")}${boBox(ids,done,"Bỏ món khỏi phiếu thử, mang các món còn lại đi.")}</section>`,
       foot:`<button class="btn ghost" type="button" id="prevStep" ${Object.keys(done).length?"disabled":""}>Chọn lại</button>`+nextBtn(all,"Rời tiệm, đi đến khách","Quét đủ các món để đi"),
-      bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Xuất kho",t.id,SHOP,"Đang mang đi");done[id]=db.clock});goNext(t)}});
+      bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Xuất kho",t.id,SHOP,"Đang mang đi");done[id]=db.clock});
+        bindBo(id=>{if(d.pick.length<=1)return toast("Phiếu chỉ còn 1 món. Chọn lại hoặc báo quầy.");d.pick=d.pick.filter(x=>x!==id);(d.bo=d.bo||[]).push(id);t.note=(t.note?t.note+" · ":"")+`Không tìm thấy ${id} lúc xuất kho`;save();render();toast("Đã bỏ món khỏi phiếu")});goNext(t)}});
   }
   else if(step===2){
     d.kq=d.kq||{};d.photo=d.photo||{};d.coc=d.coc||{hinhThuc:"Chuyển khoản",nhan:false};
@@ -471,7 +475,7 @@ function thuStep(t,c,step,out){const d=t.d;
        <dl class="kv"><dt>Tiền thuê</dt><dd>${money(thue)}${luotThu(t)>1?` · ${luotThu(t)} lượt`:""}</dd>${g?`<dt>Giảm giá</dt><dd>−${money(g)}</dd><dt>Khách trả tiền thuê</dt><dd><b>${money(thue-g)}</b></dd>`:""}<dt>Cọc đề xuất</dt><dd>${money(cocDx)}</dd></dl>${CDk.tongHtml({luot:luotThu(t),giam:g,yenTam:!!d.yt,phiYenTam:d.yt?CDk.phiYenTamDs(rent.map(i=>byId("sp",i))):0,coc:d.coc.so!=null?d.coc.so:cocDx},rent.map(i=>({gia:byId("sp",i).gia})))}
        <label class="check"><input type="checkbox" id="ytT" ${d.yt?"checked":""}> Khách mua Gói Yên tâm: ${money(CDk.phiYenTamDs(rent.map(i=>byId("sp",i))))} (1% giá trị mỗi chiếc, tối thiểu 20.000đ). Bẩn khó, sút chỉ, rách cần thợ sửa miễn phí; mất hoặc hư nặng đền 50% thay vì 100%.</label>`})()}
        <div class="two"><label class="f" for="cocSo">Cọc thu (đ)<input id="cocSo" type="number" min="0" step="50000" value="${d.coc.so!=null?d.coc.so:cocDx}"></label><label class="f" for="cocHt">Hình thức<select id="cocHt"><option ${d.coc.hinhThuc==="Chuyển khoản"?"selected":""}>Chuyển khoản</option><option ${d.coc.hinhThuc==="Tiền mặt"?"selected":""}>Tiền mặt</option></select></label></div>
-       <label class="check"><input type="checkbox" id="cocOk" ${d.coc.nhan?"checked":""}> Đã nhận đủ cọc (chuyển khoản: xem tiền về tài khoản tiệm). Không giữ CCCD bản cứng.</label></div></section>
+       <label class="check"><input type="checkbox" id="cocOk" ${d.coc.nhan?"checked":""}> Đã thu đủ số tiền ở khung tổng (thuê, gói và cọc; chuyển khoản thì xem tiền về tài khoản tiệm). Không giữ CCCD bản cứng.</label></div></section>
        <section>${hdBlock(hdOk?d.hdId:"","hdT")}</section>`:""}`:""}`,
       foot:nextBtn(ok,rent.length?`Giao ${rent.length} món, quét phần mang về`:"Khách không thuê, quét đồ mang về",why),
       bind:()=>{bindCheckin(t);
@@ -491,7 +495,7 @@ function thuStep(t,c,step,out){const d=t.d;
           if(r.length){const id=nextId("don","D");const coc=d.coc.so!=null?d.coc.so:r.reduce((a,i)=>a+byId("sp",i).coc,0);
             const traD=t.dungTra||window.CherieData.hanTra(db.clock,1);
             db.don.push({id,dat:t.kh,nhom:"",dip:t.dip||"Khác",nhan:db.clock,tra:traD,luot:window.CherieData.soLuot(db.clock,traD),yenTam:!!d.yt,phiYenTam:d.yt?window.CherieData.phiYenTamDs(r.map(i=>byId("sp",i))):0,traTT:"",tt:"Đang thuê",coc,hinhThuc:d.coc.hinhThuc,ttCoc:coc>0?"Đang giữ":"Chưa cọc",phi:0,note:`Tạo từ chuyến thử ${t.id} của stylist ${STYLIST}`,...(()=>{const m=(db.km||[]).find(x=>x.id===d.km),g=window.CherieData.kmGiam(m,r.reduce((a,i)=>a+byId("sp",i).gia,0)*luotThu(t));return g?{km:m.id,kmTen:m.ten,giam:g}:{}})()});
-            r.forEach(i=>db.ct.push({id:nextId("ct","CT"),don:id,mac:t.kh,sp:i,gia:byId("sp",i).gia,hu:false,moTa:"",phiHu:0}));d.newDon=id;
+            r.forEach(i=>db.ct.push({id:nextId("ct","CT"),don:id,mac:t.kh,sp:i,gia:byId("sp",i).gia,hu:false,moTa:"",phiHu:0}));d.newDon=id;{const dn=byId("don",id);if(dn)window.CherieData.ghiThu(dn,STYLIST)}
             if(d.hdId){const dn=byId("don",id);if(dn)dn.hd=d.hdId;const h=(db.hd||[]).find(x=>x.id===d.hdId);if(h){h.don=id;if(dn&&h.hoan)window.CherieData.hoanLuu(dn,h.hoan)}}}
           d.back={}});}});
   }
@@ -515,26 +519,31 @@ function hdItems(spIds,giaOf){const CD=window.CherieData;return spIds.map(i=>{co
 /* Giao đồ */
 function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don).map(l=>l.sp);
   if(step===0){const done=d.out||(d.out={});const all=ids.every(i=>done[i]);
-    out({body:`<section><h2>Quét xuất kho</h2>${scanBox(ids,done,`Quét đủ ${ids.length} món của đơn ${don.id}`)}</section>`,
+    out({body:`<section><h2>Quét xuất kho</h2>${scanBox(ids,done,`Quét đủ ${ids.length} món của đơn ${don.id}`)}${boBox(ids,done,"Bỏ món khỏi đơn: tiền thuê, gói và cọc tự tính lại theo các món còn lại. Quầy thấy ghi chú để báo khách.")}</section>`,
       foot:nextBtn(all,"Rời tiệm, đi giao","Quét đủ các món để đi"),
-      bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Xuất kho",t.id,SHOP,"Đang mang đi");done[id]=db.clock});goNext(t)}});
+      bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Xuất kho",t.id,SHOP,"Đang mang đi");done[id]=db.clock});
+        bindBo(id=>{if(ids.length<=1)return toast("Đơn chỉ có 1 món. Báo quầy đổi món hoặc huỷ chuyến.");const s=byId("sp",id)||{};db.ct=db.ct.filter(c=>!(c.don===don.id&&c.sp===id));
+          if(don.coc&&s.coc)don.coc=Math.max(0,don.coc-s.coc);if(don.yenTam&&don.phiYenTam!=null)don.phiYenTam=window.CherieData.phiYenTamDs(lines(don).map(l=>byId("sp",l.sp)));
+          don.note=(don.note?don.note+" · ":"")+`Stylist ${STYLIST} bỏ ${s.ten||id} (${id}) lúc xuất kho: không tìm thấy`;(d.bo=d.bo||[]).push(id);save();render();toast("Đã bỏ món khỏi đơn, quầy sẽ thấy ghi chú")});goNext(t)}});
   } else {
-    const CDx=window.CherieData;const photosOk=ids.every(i=>CDx.ttDu(don.id,"giao",i));const cocChua=(+don.coc||0)>0&&don.ttCoc!=="Đang giữ";const ok=d.checkin&&photosOk&&d.cocOk&&!!don.hd;
-    const why=!d.checkin?"Bấm đã đến nơi":!photosOk?"Chụp ảnh tình trạng từng món":!d.cocOk?(cocChua?"Cọc chưa về, xác nhận đã nhận cọc":"Xác nhận cọc với khách"):"Khách chưa ký hợp đồng";
+    const CDx=window.CherieData;const photosOk=ids.every(i=>CDx.ttDu(don.id,"giao",i));const cocChua=(+don.coc||0)>0&&don.ttCoc!=="Đang giữ";const thuCan=!don.daThu,ok=d.checkin&&photosOk&&d.cocOk&&(!thuCan||d.thuOk)&&!!don.hd;
+    const why=!d.checkin?"Bấm đã đến nơi":!photosOk?"Chụp ảnh tình trạng từng món":!d.cocOk?(cocChua?"Cọc chưa về, xác nhận đã nhận cọc":"Xác nhận cọc với khách"):thuCan&&!d.thuOk?"Thu tiền thuê trước":"Khách chưa ký hợp đồng";
     out({body:`<section><h2>Bàn giao</h2>${checkinBlock(t)}</section>
       ${d.checkin?`<section><h2>${ids.length} món · ${new Set(lines(don).map(l=>l.mac)).size} người mặc</h2><div class="list">${lines(don).map(l=>{const s=byId("sp",l.sp);return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">Người mặc: ${esc(kh(l.mac).ten)} · <span class="mono">${s.id}</span></span></span><span class="r">${CDx.ttDu(don.id,"giao",s.id)?'<span class="pill good">4/4 ảnh</span>':`<span class="pill warn">${CDx.ttSo(don.id,"giao",s.id)}/4 ảnh</span>`}</span></div>`}).join("")}</div>
       <button class="btn ${photosOk?"":"primary"} block" type="button" id="ttG" style="margin-top:8px">${photosOk?"Xem, chụp lại ảnh tình trạng":"Chụp 4 ảnh tình trạng mỗi món"}</button><p class="note">Ảnh lưu thẳng lên Drive của tiệm, làm bằng chứng tình trạng lúc giao.</p></section>
       <section><div class="box" style="display:flex;flex-direction:column;gap:8px"><dl class="kv"><dt>Cọc của đơn</dt><dd>${money(don.coc)} · ${esc(don.ttCoc.toLowerCase())}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd></dl>${CDx.tongHtml(don,lines(don).map(l=>l.ct))}
       ${cocChua?`<div class="banner bad">Cọc ${money(don.coc)} CHƯA về (${esc(don.ttCoc.toLowerCase())}). Chưa giao đồ khi chưa thấy tiền về tài khoản tiệm hoặc chưa nhận tiền mặt.</div>`:""}
+      ${thuCan?`<label class="check"><input type="checkbox" id="thuOk2" ${d.thuOk?"checked":""}> Đã thu đủ <b>${money(CDx.tongDon(don,lines(don).map(l=>l.ct)).dichVu)}</b> tiền thuê, gói, phí giao (tiền mặt nộp quầy, hoặc thấy khách chuyển khoản về tiệm)</label>`:`<p class="note" style="color:var(--good,#2F6B4F)">Khách đã trả tiền thuê, gói, phí giao.</p>`}
       <label class="check"><input type="checkbox" id="cocOk" ${d.cocOk?"checked":""}> ${cocChua?`Đã nhận đủ cọc ${money(don.coc)} (thấy tiền về tài khoản tiệm hoặc nhận tiền mặt) và đã nhắc khách giờ trả`:"Đã nhắc khách giờ trả đồ và mức cọc đang giữ"}</label></div></section>
       <section>${hdBlock(don.hd,"hdG")}</section>`:""}`,
       foot:nextBtn(ok,"Hoàn tất giao đồ",why),
       bind:()=>{bindCheckin(t);const tg=view.querySelector("#ttG");if(tg)tg.onclick=()=>CDx.chupTinhTrang({don:don.id,phase:"giao",nv:STYLIST,items:ids.map(i=>({id:i,ten:byId("sp",i).ten})),onDone:render});
         const co=view.querySelector("#cocOk");if(co)co.onchange=()=>{d.cocOk=co.checked;save();render()};
+        const t2=view.querySelector("#thuOk2");if(t2)t2.onchange=()=>{d.thuOk=t2.checked;save();render()};
         const hg=view.querySelector("#hdG");if(hg)hg.onclick=()=>{const k=kh(don.dat)||{};const CD=window.CherieData;CD.lapHopDong({don:don.id,kh:{id:don.dat,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(ids,i=>{const l=lines(don).find(x=>x.sp===i);return l?(+l.ct.gia||0):0}),
           nhan:db.clock,tra:don.tra,luot:don.luot||CD.soLuot(db.clock,don.tra),phiGiao:don.phiGiao||0,giam:don.giam||0,kmTen:don.kmTen||"",yenTam:!!don.yenTam,phiYenTam:don.yenTam?window.CherieData.ytCuaDon(don,lines(don)):0,coc:don.coc,hinhThuc:don.hinhThuc||"",nv:STYLIST,onDone:h=>{don.hd=h.id;d.sign=true;save();render();toast("Đã lưu hợp đồng "+h.id)}})};
         const hx=view.querySelector("#hdGX");if(hx)hx.onclick=()=>window.CherieData.xemHopDong(don.hd);
-        const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{ids.forEach(i=>scan(i,"Giao khách",t.id,t.noi,"Đang thuê"));if(cocChua){don.ttCoc="Đang giữ";don.note=(don.note?don.note+" · ":"")+`Stylist ${STYLIST} xác nhận đã nhận cọc lúc giao ${hm(db.clock)}`}don.tt="Đang thuê";t.tt="Hoàn tất";t.step=TYPES.giao.steps.length;d.end=db.clock;save();render();toast(`Đã giao đơn ${don.id}`)}}});
+        const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{ids.forEach(i=>scan(i,"Giao khách",t.id,t.noi,"Đang thuê"));if(!don.daThu&&d.thuOk)CDx.ghiThu(don,STYLIST);if(cocChua){don.ttCoc="Đang giữ";don.note=(don.note?don.note+" · ":"")+`Stylist ${STYLIST} xác nhận đã nhận cọc lúc giao ${hm(db.clock)}`}don.tt="Đang thuê";t.tt="Hoàn tất";t.step=TYPES.giao.steps.length;d.end=db.clock;save();render();toast(`Đã giao đơn ${don.id}`)}}});
   }
 }
 

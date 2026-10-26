@@ -256,7 +256,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=149e370f"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=584b3097"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -311,9 +311,13 @@ function spLine(id){const s=byId("sp",id);return s?`${esc(s.ten)} (${s.id}) · $
 /* sheet */
 const view=document.getElementById("view"),layer=document.getElementById("layer");
 let curSheet=null,nextSheet=null;
-function sheet(title,html,onMount){const o=layer.querySelector(".sheet"),same=o&&o.getAttribute("aria-label")===String(title),y=same?o.scrollTop:0;curSheet=nextSheet;nextSheet=null;layer.innerHTML=`<div class="scrim" data-close><div class="sheet${same?" still":""}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sheet-head gut"><h3>${esc(title)}</h3><button class="x" type="button" data-close aria-label="Đóng">×</button></div><div class="sheet-body gut">${html}</div></div></div>`;
-  layer.querySelector(".scrim").addEventListener("click",e=>{if(e.target.hasAttribute("data-close"))closeSheet()});const n=layer.querySelector(".sheet");if(same&&n)n.scrollTop=y;if(onMount)onMount(layer.querySelector(".sheet-body"));if(same&&n&&n.scrollTop!==y)n.scrollTop=y}
-function closeSheet(){layer.innerHTML="";curSheet=null}
+/* lịch sử màn: mở đơn → khách → đầm vẫn quay lại được; chạm ra ngoài không đóng màn đang có form */
+let sheetHist=[],sheetBack=false;
+function sheetTruoc(title){const o=layer.querySelector(".sheet"),t=o&&o.getAttribute("aria-label");if(!sheetBack&&o&&curSheet&&t!==String(title))sheetHist.push(curSheet);sheetBack=false}
+
+function sheet(title,html,onMount){sheetTruoc(title);const o=layer.querySelector(".sheet"),same=o&&o.getAttribute("aria-label")===String(title),y=same?o.scrollTop:0;curSheet=nextSheet;nextSheet=null;layer.innerHTML=`<div class="scrim" data-close><div class="sheet${same?" still":""}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sheet-head gut">${sheetHist.length?'<button class="x" type="button" data-back aria-label="Quay lại" style="font-size:20px">‹</button>':""}<h3 style="flex:1">${esc(title)}</h3><button class="x" type="button" data-close aria-label="Đóng">×</button></div><div class="sheet-body gut">${html}</div></div></div>`;
+  layer.querySelector(".scrim").addEventListener("click",e=>{if(e.target.classList.contains("scrim")&&layer.querySelector(".sheet form"))return toast("Đang nhập dở. Bấm × để đóng.");if(e.target.hasAttribute("data-close"))closeSheet()});{const bk=layer.querySelector("[data-back]");if(bk)bk.onclick=()=>{const f=sheetHist.pop();if(f){sheetBack=true;f()}}}const n=layer.querySelector(".sheet");if(same&&n)n.scrollTop=y;if(onMount)onMount(layer.querySelector(".sheet-body"));if(same&&n&&n.scrollTop!==y)n.scrollTop=y}
+function closeSheet(){layer.innerHTML="";curSheet=null;sheetHist=[]}
 function refreshSheet(){if(!curSheet||!layer.innerHTML)return;const a=document.activeElement;if(a&&layer.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;const b0=layer.querySelector(".sheet"),y=b0?b0.scrollTop:0;try{curSheet()}catch(e){closeSheet();return}const b=layer.querySelector(".sheet");if(b&&y)b.scrollTop=y}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
 
@@ -492,10 +496,10 @@ function openOrder(pre){
 }
 function openDonView(id){nextSheet=()=>openDonView(id);const d=byId("don",id);if(!d){closeSheet();return}const kh=byId("kh",d.dat)||{ten:d.dat,sdt:""};const ls=lines(d);
   sheet(`Đơn ${d.id}`,`<div class="pills"><span class="pill mem">Online · ${esc(d.nguonDon||"")}</span><span class="pill line">${esc(d.tt)}</span><span class="pill ${d.quayDaNhan?"good":"warn"}">${d.quayDaNhan?"Quầy đã nhận":"Chờ quầy nhận"}</span>${d.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill line">Không Gói Yên tâm</span>'}</div>${window.CherieData.ytBanner(d)}
-   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd><dt>Tiền thuê</dt><dd>${money(window.CherieData.tienThue(d,ls))}${window.CherieData.luotDon(d)>1?` · ${window.CherieData.luotDon(d)} lượt`:""}</dd>${d.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(window.CherieData.ytCuaDon(d,ls))}</dd>`:""}${d.giam?`<dt>Giảm giá</dt><dd>−${money(d.giam)}${d.kmTen?" · "+esc(d.kmTen):""}</dd><dt>Thuê sau giảm</dt><dd><b>${money(Math.max(0,window.CherieData.tienThue(d,ls)-d.giam))}</b></dd>`:""}${d.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(d.phiGiao)}</dd>`:""}<dt>Cọc</dt><dd>${money(d.coc)} · ${esc(d.ttCoc)}</dd><dt>Hoàn cọc qua</dt><dd>${window.CherieData.hoanDong(d)}${d.hoanLuc?` · đã hoàn ${when(d.hoanLuc)}`:""}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl>${window.CherieData.tongHtml(d,ls)}
+   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd><dt>Tiền thuê</dt><dd>${money(window.CherieData.tienThue(d,ls))}${window.CherieData.luotDon(d)>1?` · ${window.CherieData.luotDon(d)} lượt`:""}</dd>${d.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(window.CherieData.ytCuaDon(d,ls))}</dd>`:""}${d.giam?`<dt>Giảm giá</dt><dd>−${money(d.giam)}${d.kmTen?" · "+esc(d.kmTen):""}</dd><dt>Thuê sau giảm</dt><dd><b>${money(Math.max(0,window.CherieData.tienThue(d,ls)-d.giam))}</b></dd>`:""}${d.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(d.phiGiao)}</dd>`:""}<dt>Cọc</dt><dd>${money(d.coc)} · ${esc(d.ttCoc)}</dd><dt>Hoàn cọc qua</dt><dd>${window.CherieData.hoanDong(d)}${d.hoanLuc?` · đã hoàn ${when(d.hoanLuc)}`:""}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl>${window.CherieData.tongHtml(d,ls)}${d.tt==="Đã đặt"&&!d.daThu?`<button class="btn block" type="button" id="daThuCK" style="margin-top:8px">Khách đã chuyển đủ ${money(window.CherieData.tongDon(d,ls).dichVu)} tiền thuê, gói, phí giao</button>`:""}
    <section><h2>${ls.length} món</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id}</span></span><span class="r">${money(c.gia)}/lượt${c.hu?`<br><span class="pill bad">${c.mat?"Mất":"Hư"} ${money(window.CherieData.huMon(d,c))}</span>`:""}</span></div>`}).join("")}</div>${window.CherieData.quyTacDen(d)}</section>
    ${d.note?`<p class="note">Ghi chú cho quầy: ${esc(d.note)}</p>`:""}
-   <p class="note">Quầy chuẩn bị đồ, nhận cọc tại tiệm hoặc cử stylist giao. Trạng thái cập nhật về đây khi quầy thao tác.</p>`,root=>bind(root))}
+   <p class="note">Quầy chuẩn bị đồ, nhận cọc tại tiệm hoặc cử stylist giao. Trạng thái cập nhật về đây khi quầy thao tác.</p>`,root=>{bind(root);const b=root.querySelector("#daThuCK");if(b)b.onclick=()=>{window.CherieData.ghiThu(d,"CS online");save();render();openDonView(id);toast("Đã ghi khách trả tiền thuê")}})}
 
 /* ================= AGENT AI ================= */
 let sampleFn=null,sampleChecked=false;

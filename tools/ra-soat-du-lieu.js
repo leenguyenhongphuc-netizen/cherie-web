@@ -22,6 +22,7 @@ dons.forEach(d=>{const ls=cts.filter(c=>c.don===d.id);
   if(d.ttCoc==="Chờ hoàn"&&d.traTT&&ls.every(c=>c.kiemLuc)){const gio=(Date.now()+7*36e5-new Date(d.traTT+":00Z").getTime())/36e5;if(gio>1)L(`${d.id}: đã kiểm xong ${Math.floor(gio)} giờ mà chưa hoàn cọc (phải hoàn ngay)`)}
   if((d.ttCoc==="Đã hoàn"||d.ttCoc==="Hoàn một phần")&&d.hoanLuc&&C.hoanCuaDon(d).cach!=="Tiền mặt"&&!d.hoanAnh)L(`${d.id}: hoàn chuyển khoản nhưng thiếu ảnh chụp giao dịch`);
   if(d.ttCoc==="Khách còn nợ")L(`${d.id}: khách còn nợ ${C.quyetToan(d,ls).conNo}, quầy cần thu`);
+  if((d.tt==="Đang thuê"||d.tt==="Đã trả")&&!d.daThu&&String(d.tao||d.taoLuc||"")>="2026-10-26T17")L(`${d.id}: đã giao đồ nhưng chưa ghi nhận thu tiền thuê, gói, phí giao`);
   if(!d.luot)L(`${d.id}: chưa lưu số lượt (tự tính từ ngày: ${C.luotDon(d)} lượt)`);
 });
 (T.trips||[]).forEach(t=>{if(t.don&&!dons.find(d=>d.id===t.don)&&!(T.don||[]).find(d=>d.id===t.don))L(`${t.id}: chuyến trỏ tới đơn ${t.don} không tồn tại`)});
