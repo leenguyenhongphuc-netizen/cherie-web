@@ -212,6 +212,7 @@ details.more>summary{padding:12px;font-weight:600;font-size:13.5px;cursor:pointe
 details.more>summary::after{content:"Xem";color:var(--wine)}
 details.more[open]>summary::after{content:"Ẩn"}
 details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
+.rules{margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}.rules summary{font-weight:600;cursor:pointer}.tblw{overflow-x:auto}.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}.tbl th,.tbl td{text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}.tbl .on{background:var(--good-soft);font-weight:600}
 .footbar{position:sticky;bottom:calc(64px + env(safe-area-inset-bottom,0px));background:var(--bg);padding-block:10px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
 .sel{user-select:all}
@@ -414,7 +415,7 @@ function renderTrip(){
   <div><p class="eyebrow">${t.ngay===TODAY?"Hôm nay":dm(t.ngay+"T")} ${t.gio} · ${esc(T.name)}</p><h1>${esc(c.ten)}</h1></div>
   ${closed?"":quickBtns(t)}<dl class="kv box"><dt>Địa điểm</dt><dd>${esc(t.noi)}</dd><dt>Liên hệ</dt><dd><span class="mono sel">${esc(c.sdt)}</span> <button class="link" type="button" id="copyPhone">Chép</button></dd>${t.don?`<dt>Đơn</dt><dd>${t.don} · cọc ${k((byId("don",t.don)||{}).coc)} ${esc(((byId("don",t.don)||{}).ttCoc||"").toLowerCase())}</dd>`:""}${t.loai==="thu"?`<dt>Dùng đồ</dt><dd>${dm(t.dungNhan)} ${hm(t.dungNhan)}–${hm(t.dungTra)} · ${esc(t.dip)}</dd><dt>Size · ngân sách</dt><dd>${c.size} · ${k(t.nganSach)}/set</dd>`:""}</dl>
   ${t.note?`<p class="note">${esc(t.note)}</p>`:""}
-  <ol class="stepper" aria-label="Các bước">${T.steps.map((s,i)=>`<li class="${i<step||closed?"done":i===step?"cur":""}"><span>${i+1}</span>${esc(s)}</li>`).join("")}</ol>`;
+  ${donBox(t)}<ol class="stepper" aria-label="Các bước">${T.steps.map((s,i)=>`<li class="${i<step||closed?"done":i===step?"cur":""}"><span>${i+1}</span>${esc(s)}</li>`).join("")}</ol>`;
   let body="",foot="",bind=()=>{};
   if(closed){body=summary(t)}
   else ({thu:thuStep,giao:giaoStep,nhan:nhanStep})[t.loai](t,c,step,o=>{body=o.body;foot=o.foot||"";bind=o.bind||(()=>{})});
@@ -530,6 +531,19 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
   }
 }
 
+
+/* ---------- thông tin đơn: ai thuê, thuê gì, có Gói Yên tâm không, quy tắc đền ---------- */
+function ytBanner(don){if(!don)return "";const CD=window.CherieData;return don.yenTam?`<div class="banner good"><b>Đơn này CÓ Gói Yên tâm</b> (khách đã trả ${money(CD.ytCuaDon(don,lines(don)))}). Vết bẩn khó, sút chỉ, rách nhỏ: miễn phí. Mất hoặc hư nặng: khách đền 50% giá trị chiếc đầm.</div>`:`<div class="banner warn"><b>Đơn này KHÔNG mua Gói Yên tâm.</b> Vết bẩn khó, sút chỉ: 100k. Rách cần thợ: 300k. Mất hoặc hư nặng: khách đền 100% giá trị chiếc đầm.</div>`}
+function quyTacDen(don){const yt=!!(don&&don.yenTam),CD=window.CherieData,M=CD.MUC_HU;const ten={L0:"Như mới",L1:"Bẩn nhẹ, giặt thường",L2:"Vết bẩn khó, sút chỉ",L3:"Rách, hỏng cần thợ",L4:"Hư nặng hoặc mất"};
+  const o=(L,co)=>L[0]==="L4"?(co?"50% giá trị":"100% giá trị"):co&&L[0]!=="L0"&&L[0]!=="L1"?"Miễn phí":L[2]?k(L[2]):"Miễn phí";
+  return `<details class="rules"><summary>Quy tắc đền khi hư, mất</summary><div class="tblw"><table class="tbl"><tr><th>Mức</th><th>Tình trạng</th><th${yt?"":' class="on"'}>Không có gói</th><th${yt?' class="on"':""}>Có Gói Yên tâm</th></tr>${M.map(L=>`<tr><td>${L[0]}</td><td>${ten[L[0]]}</td><td${yt?"":' class="on"'}>${o(L,false)}</td><td${yt?' class="on"':""}>${o(L,true)}</td></tr>`).join("")}</table></div><p class="note">Cột tô màu là cột áp dụng cho đơn này. Trả trễ: từ giờ thứ hai 20.000đ mỗi giờ, có gói hay không đều tính.</p></details>`}
+function donBox(t){if(!t.don)return "";const don=byId("don",t.don);if(!don)return "";const CD=window.CherieData,ls=lines(don),dat=kh(don.dat)||{};
+  const it=ls.map(l=>{const sp=byId("sp",l.sp)||{},gt=CD.giaTri(sp),mac=l.mac&&l.mac!==don.dat?(kh(l.mac)||{}).ten:"";return `<div class="row">${sw(sp)}<span class="main"><span class="t">${esc(sp.ten||l.sp)} · ${esc(sp.size||"")}</span><span class="s mono">${esc(l.sp)}</span><span class="s">Thuê ${k(+l.ct.gia||sp.gia||0)} · giá trị ${gt?k(gt):"chưa có"}${don.yenTam?` · gói ${k(CD.phiYenTam(sp))}`:""}${mac?` · người mặc: ${esc(mac)}`:""}</span></span></div>`}).join("");
+  return `<section><h2>Đơn hàng ${esc(don.id)}</h2>
+   <div class="pills" style="margin-bottom:8px">${don.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill warn">Không mua Gói Yên tâm</span>'}<span class="pill line">${esc(don.tt||"")}</span>${don.giaoTanNoi?'<span class="pill line">Giao tận nơi</span>':""}</div>
+   <dl class="kv box"><dt>Người đặt</dt><dd>${esc(dat.ten||don.dat)}</dd><dt>Nhận đồ</dt><dd>${dm(don.nhan)} lúc ${hm(don.nhan)}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd><dt>Cọc đang giữ</dt><dd>${money(don.coc)}${don.hinhThuc?` · ${esc(don.hinhThuc)}`:""} · ${esc((don.ttCoc||"").toLowerCase())}</dd>${don.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(don.phiGiao)}</dd>`:""}${don.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(CD.ytCuaDon(don,ls))}</dd>`:""}</dl>
+   <div class="list" style="margin-top:8px">${it}</div>${quyTacDen(don)}</section>`}
+
 /* Nhận lại đồ */
 function lateFee(t,don){if(!t.d.checkin)return 0;return window.CherieData.phiTre((D(t.d.checkin)-D(don.tra))/36e5)}
 function lateHours(t,don){if(!t.d.checkin)return 0;const h=(D(t.d.checkin)-D(don.tra))/36e5;return h>1?Math.ceil(h):0}
@@ -542,7 +556,8 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
       foot:nextBtn(!!d.checkin,"Bắt đầu nhận đồ","Bấm đã đến nơi"),bind:()=>{bindCheckin(t);goNext(t,()=>{d.in=d.in||{};d.lv=d.lv||{};d.mota=d.mota||{}})}});
   } else if(step===1){
     const done=d.in||(d.in={});d.lv=d.lv||{};d.mota=d.mota||{};const CDx=window.CherieData;
-    const lvSel=(i,cur)=>`<label class="f full" for="lv-${i}">Mức tình trạng<select id="lv-${i}" data-lv="${i}">${LEVELS.map(L=>`<option value="${L[0]}" ${L[0]===cur?"selected":""}>${L[0]} · ${L[0]==="L4"?"Hư nặng không sửa được":L[1]}${L[2]==null?" · đền theo giá trị đầm":L[2]?" · "+k(L[2]):""}${curDon&&curDon.yenTam&&L[0]>"L1"?" · có Gói Yên tâm":""}</option>`).join("")}<option value="MAT" ${cur==="MAT"?"selected":""}>Mất · khách làm mất, không cần chụp ảnh</option></select></label>`;d.mat=d.mat||{};const anhOk=i=>d.mat[i]?!!(d.mota[i]||"").trim():CDx.ttDu(don.id,"nhan",i)&&((d.lv[i]||"L0")<="L1"||((CDx.bbOf(don.id,"nhan")||{mon:{}}).mon[i]||{them:[]}).them.some(Boolean));
+    const lvSel=(i,cur)=>{const sp=byId("sp",i),gt=window.CherieData.giaTri(sp),ten={L0:"Như mới",L1:"Bẩn nhẹ, giặt thường",L2:"Vết bẩn khó hoặc sút chỉ",L3:"Rách, hỏng cần thợ",L4:"Hư nặng không sửa được"};const tien=lv=>{const f=fee(lv,sp);return f?"đền "+k(f):"miễn phí"};
+  return `<label class="f full" for="lv-${i}">Mức tình trạng (số tiền là khách phải đền cho món này)<select id="lv-${i}" data-lv="${i}">${LEVELS.map(L=>`<option value="${L[0]}" ${L[0]===cur?"selected":""}>${L[0]} · ${ten[L[0]]} · ${tien(L[0])}</option>`).join("")}<option value="MAT" ${cur==="MAT"?"selected":""}>Mất · khách làm mất · ${tien("L4")} · không cần ảnh</option></select></label>`};d.mat=d.mat||{};const anhOk=i=>d.mat[i]?!!(d.mota[i]||"").trim():CDx.ttDu(don.id,"nhan",i)&&((d.lv[i]||"L0")<="L1"||((CDx.bbOf(don.id,"nhan")||{mon:{}}).mon[i]||{them:[]}).them.some(Boolean));
     const scanned=ids.every(i=>done[i]),all=scanned&&ids.every(anhOk);
     const whyN=!scanned?"Quét đủ các món (món khách làm mất: bấm Báo mất)":ids.some(i=>d.mat[i]&&!(d.mota[i]||"").trim())?"Ghi chú món bị mất (khách nói mất ở đâu, khi nào)":"Chụp đủ ảnh lúc nhận (vết hư cần thêm ảnh cận vết)";
     out({body:`<section><h2>Bước 2 · Quét và kiểm từng món</h2>${scanBox(ids,done,"Quét món khách trả",d.mat)}</section>
@@ -551,7 +566,7 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
         ${lv!=="L0"&&lv!=="L1"?`<label class="f full" for="mt-${i}">Mô tả và vị trí hư hỏng<input id="mt-${i}" data-mt="${i}" type="text" value="${esc(d.mota[i]||"")}"></label>`:""}
         <span class="s full">Ảnh lúc nhận: ${CDx.ttSo(don.id,"nhan",i)}/4${anhOk(i)?" · đủ":lv>"L1"&&CDx.ttDu(don.id,"nhan",i)?" · thiếu ảnh cận vết":""}</span></div>`}).join("")}</div>
         <div class="btns" style="margin-top:8px"><button class="btn ${ids.filter(i=>done[i]&&!d.mat[i]).every(anhOk)?"":"primary"}" type="button" id="ttN" ${ids.filter(i=>done[i]&&!d.mat[i]).length?"":"hidden"}>${ids.filter(i=>done[i]).every(anhOk)?"Xem, chụp lại ảnh":"Chụp ảnh lúc nhận"}</button><button class="btn" type="button" id="ttS">So với ảnh lúc giao</button></div>
-        <p class="note">${curDon&&curDon.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách nhỏ được miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: tính phí theo mức tình trạng."} Phí là đề xuất; quầy duyệt khi kiểm đồ trước khi trừ cọc.</p></section>`:""}`,
+        ${ytBanner(curDon)}<p class="note">Phí là đề xuất; quầy duyệt khi kiểm đồ rồi mới trừ cọc.</p></section>`:""}`,
       foot:nextBtn(all,"Tiếp tục ký biên bản",whyN),
       bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Nhận trả",t.id,t.noi,"Chờ kiểm tra");done[id]=db.clock});
         view.querySelectorAll("[data-lv]").forEach(s=>s.onchange=()=>{const i=s.dataset.lv;if(s.value==="MAT"){d.mat[i]=true;d.lv[i]="L4"}else{delete d.mat[i];d.lv[i]=s.value}save();const y=window.scrollY;render();window.scrollTo(0,y)});
