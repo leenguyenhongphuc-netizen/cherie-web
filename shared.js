@@ -295,7 +295,28 @@ function hoanDoc(root,p){const w=root.querySelector(`[data-hoanf="${p}"]`);if(!w
   const h={cach:g("cach"),nh:g("nh").trim(),stk:g("stk").replace(/\D/g,""),chu:g("chu").trim().toUpperCase()};return h.cach==="Tiền mặt"?{cach:"Tiền mặt"}:h}
 function hoanBind(root,p,cb){const w=root.querySelector(`[data-hoanf="${p}"]`);if(!w)return;const s=w.querySelector('[data-h="cach"]');s.onchange=()=>{w.querySelector("[data-hck]").style.display=s.value==="Tiền mặt"?"none":"flex";cb&&cb()};w.querySelectorAll("input").forEach(i=>i.oninput=()=>cb&&cb())}
 function hoanLuu(d,h){if(!d||!h)return;d.hoan=h;const k=(db.kh||[]).find(x=>x.id===d.dat);if(k&&h.cach!=="Tiền mặt"&&h.stk){k.nganHang=h.nh;k.stk=h.stk;k.chuTk=h.chu}}
-function hoanAnhCua(d){const b=bbOf(d.id,"hoan");return b&&b.mon&&b.mon.CK&&b.mon.CK.anh&&b.mon.CK.anh[0]||""}
+/* Một dòng "Hoàn cọc qua" dùng chung mọi app: hiện ngân hàng, STK, tên chủ TK, nút chép nhanh; thiếu thì có nút nhập ngay */
+function hoanDong(d){const h=hoanCuaDon(d),e=hdEsc;if(hoanThieu(h))return `<span style="color:#B42318">Chưa có tài khoản khách</span> <button class="link" type="button" data-hoan-sua="${e(d.id)}">Nhập ngay</button>`;
+  if(h.cach==="Tiền mặt")return `Tiền mặt <button class="link" type="button" data-hoan-sua="${e(d.id)}">Đổi</button>`;
+  return `${e(h.nh)} · <b class="mono" style="user-select:all;-webkit-user-select:all">${e(h.stk)}</b> · ${e(h.chu)}<br><button class="link" type="button" data-hoan-cp="${e(d.id)}">Chép STK</button> · <button class="link" type="button" data-hoan-cpall="${e(d.id)}">Chép cả ngân hàng, tên</button> · <button class="link" type="button" data-hoan-sua="${e(d.id)}">Sửa</button>`}
+function hoanBindDong(root,onDone,toast){const tim=id=>(db.don||[]).find(x=>x.id===id);const bao=m=>{try{toast?toast(m):0}catch(e){}};
+  const chep=(t,b)=>{try{navigator.clipboard.writeText(t).then(()=>{b.textContent="Đã chép";bao("Đã chép")},()=>{bao("Không chép được, giữ ngón tay vào số để chép")})}catch(e){bao("Giữ ngón tay vào số để chép")}};
+  root.querySelectorAll("[data-hoan-cp]").forEach(b=>b.onclick=()=>{const d=tim(b.dataset.hoanCp);if(d)chep(hoanCuaDon(d).stk,b)});
+  root.querySelectorAll("[data-hoan-cpall]").forEach(b=>b.onclick=()=>{const d=tim(b.dataset.hoanCpall);if(!d)return;const h=hoanCuaDon(d);chep(`${h.nh} ${h.stk} ${h.chu}`,b)});
+  root.querySelectorAll("[data-hoan-sua]").forEach(b=>b.onclick=()=>{const d=tim(b.dataset.hoanSua);if(d)suaTkHoan(d,onDone)})}
+function hoanToast(m){try{const t=document.createElement("div");t.textContent=m;t.setAttribute("role","status");t.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:#141414;color:#F6F1EA;padding:10px 14px;border-radius:12px;font:14px system-ui;z-index:9999;max-width:90vw";document.body.appendChild(t);setTimeout(()=>t.remove(),1800)}catch(e){}}
+try{document.addEventListener("click",e=>{const b=e.target&&e.target.closest&&e.target.closest("[data-hoan-cp],[data-hoan-cpall],[data-hoan-sua]");if(!b)return;e.preventDefault();e.stopPropagation();
+  const id=b.dataset.hoanCp||b.dataset.hoanCpall||b.dataset.hoanSua,d=(db.don||[]).find(x=>x.id===id);if(!d)return;const h=hoanCuaDon(d);
+  const chep=t=>{try{navigator.clipboard.writeText(t).then(()=>{b.textContent="Đã chép";hoanToast("Đã chép: "+t)},()=>hoanToast("Giữ ngón tay vào số tài khoản để chép"))}catch(x){hoanToast("Giữ ngón tay vào số tài khoản để chép")}};
+  if(b.dataset.hoanCp)chep(h.stk);else if(b.dataset.hoanCpall)chep(`${h.nh} ${h.stk} ${h.chu}`);else suaTkHoan(d,()=>{hoanToast("Đã lưu tài khoản hoàn cọc");try{changeCb()}catch(x){}})},true)}catch(e){}
+function suaTkHoan(d,onDone){const el=hdLayer(),pn=el.querySelector(".pn");const close=()=>el.remove();
+  pn.innerHTML=`<div class="hd"><h2>Tài khoản hoàn cọc · ${hdEsc(d.id)}</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
+   <p class="note">Hỏi khách ngay để trả đồ xong là chuyển liền. Lưu vào đơn và hồ sơ khách cho lần sau.</p>${hoanFields(hoanCuaDon(d),"sua")}<p class="note bad" id="eS"></p>
+   <div class="row"><button class="btn" type="button" data-x>Để sau</button><button class="btn p" type="button" id="okS">Lưu</button></div>`;
+  hoanBind(pn,"sua");pn.querySelectorAll("[data-x]").forEach(b=>b.onclick=close);
+  pn.querySelector("#okS").onclick=()=>{const h=hoanDoc(pn,"sua");if(hoanThieu(h)){pn.querySelector("#eS").textContent="Nhập đủ ngân hàng, số tài khoản (chỉ số) và tên chủ tài khoản, hoặc chọn tiền mặt.";return}
+    hoanLuu(d,h);try{CherieData.save()}catch(e){}close();onDone&&onDone(h)}}
+function hoanAnhCua(d){const q=ttqCho(d.id,"hoan","CK","a0");if(q)return "q:"+q.k;const b=bbOf(d.id,"hoan");return b&&b.mon&&b.mon.CK&&b.mon.CK.anh&&b.mon.CK.anh[0]||""}
 function xemAnhHoan(d){const v=hoanAnhCua(d);if(!v)return;ttCss();ttSrc(v).then(x=>{if(x)ttXem(x)})}
 /* Màn hoàn cọc. o:{don, nv, onDone}. Hoàn bằng chuyển khoản bắt buộc có ảnh chụp giao dịch; tiền mặt bắt buộc xác nhận khách đã nhận đủ. */
 function hoanCoc(o){const d=o.don,ls=ctCuaDon(d),q=quyetToan(d,ls);ttCss();const el=hdLayer(),pn=el.querySelector(".pn");const close=()=>el.remove();
@@ -319,7 +340,7 @@ function hoanCoc(o){const d=o.don,ls=ctCuaDon(d),q=quyetToan(d,ls);ttCss();const
     const fi=pn.querySelector("#anhCk");if(fi)fi.onchange=()=>{const f=fi.files&&fi.files[0];if(!f)return;nenAnh(f,1400,0.82).then(x=>{anh=x;loi="";draw()},e=>{loi=e.message||"Không đọc được ảnh";draw()})};
     pn.querySelector("#okH").onclick=()=>{h=Object.assign({},h,hoanDoc(pn,"hc"));if(h.cach!=="Tiền mặt"&&(hoanThieu(h)||!anh))return;
       hoanLuu(d,h);d.hoanLuc=hdNow();d.hoanNv=o.nv||"";d.hoanSo=q.hoan;
-      if(h.cach!=="Tiền mặt"){let b=bbOf(d.id,"hoan");if(!b){b={id:bbId(d.id,"hoan"),don:d.id,phase:"hoan",mon:{},tao:hdNow()};db.bb.push(b)}b.mon.CK={anh:[anh],them:[],luc:hdNow(),nv:o.nv||""};d.hoanAnh=true}
+      if(h.cach!=="Tiền mặt"){ttqThem({don:d.id,phase:"hoan",sp:"CK",o:"a0",anh,nv:o.nv||""});d.hoanAnh=true}
       busy=1;draw();try{CherieData.save()}catch(e){}
       Promise.resolve(CherieData.flush&&CherieData.flush()).then(()=>{close();o.onDone&&o.onDone(h)},()=>{close();o.onDone&&o.onDone(h)})};
   };draw()}
@@ -592,36 +613,58 @@ const ttCache={};
 function bbId(don,phase){return "BB-"+don+"-"+phase}
 function bbOf(don,phase){return (db.bb||[]).find(x=>x.id===bbId(don,phase))}
 function ttAnh(don,phase,sp){const b=bbOf(don,phase);return b&&b.mon&&b.mon[sp]?b.mon[sp]:{anh:[],them:[]}}
-function ttSo(don,phase,sp){const m=ttAnh(don,phase,sp);return TT_GOC.filter((_,i)=>m.anh&&m.anh[i]).length}
+/* Hàng đợi gửi ảnh: mỗi ảnh gửi RIÊNG lên Drive (một ảnh một lần, lần lượt), biên bản chỉ giữ mã ảnh nên lưu rất nhẹ.
+   Ảnh chưa gửi được nằm trong máy (IndexedDB), mất mạng hay tải lại trang vẫn còn, có mạng là tự gửi tiếp. */
+const TTQ={ds:[],chay:false,loi:"",nghe:new Set(),cu:false};
+function ttqKey(x){return x.don+"|"+x.phase+"|"+x.sp+"|"+x.o}
+function ttqDb(){return new Promise((ok,no)=>{try{const r=indexedDB.open("cherie-anh",1);r.onupgradeneeded=()=>r.result.createObjectStore("q",{keyPath:"k"});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})}
+function ttqLuu(x){return ttqDb().then(d=>new Promise(ok=>{const t=d.transaction("q","readwrite");t.objectStore("q").put(x);t.oncomplete=ok;t.onerror=ok})).catch(()=>{})}
+function ttqXoa(k){return ttqDb().then(d=>new Promise(ok=>{const t=d.transaction("q","readwrite");t.objectStore("q").delete(k);t.oncomplete=ok;t.onerror=ok})).catch(()=>{})}
+function ttqNap(){return ttqDb().then(d=>new Promise(ok=>{const r=d.transaction("q").objectStore("q").getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>ok([])})).catch(()=>[])}
+function ttqBao(){TTQ.nghe.forEach(f=>{try{f()}catch(e){}})}
+function ttqCho(don,phase,sp,o){return TTQ.ds.find(x=>x.don===don&&x.phase===phase&&x.sp===sp&&x.o===o)}
+function ttqDat(m,o,v){if(o[0]==="a"){m.anh=m.anh||[];m.anh[+o.slice(1)]=v}else{m.them=m.them||[];m.them[+o.slice(1)]=v}}
+function ttqGhi(x,v){let b=bbOf(x.don,x.phase);if(!b){b={id:bbId(x.don,x.phase),don:x.don,phase:x.phase,mon:{},tao:new Date().toISOString().slice(0,16)};db.bb.push(b)}
+  const m=b.mon[x.sp]=b.mon[x.sp]||{anh:[],them:[]};ttqDat(m,x.o,v);m.luc=new Date().toISOString().slice(0,16);if(x.nv)m.nv=x.nv;try{CherieData.save()}catch(e){}}
+function ttqThem(x){x.k=ttqKey(x);TTQ.ds=TTQ.ds.filter(y=>y.k!==x.k);TTQ.ds.push(x);ttCache["q:"+x.k]=Promise.resolve(x.anh);ttqLuu(x);ttqBao();ttqChay()}
+function ttqChay(){if(TTQ.chay)return;const x=TTQ.ds[0];if(!x)return;TTQ.chay=true;
+  const xong=v=>{ttqGhi(x,v);if(/^drive:/.test(v))ttCache[v]=Promise.resolve(x.anh);TTQ.ds=TTQ.ds.filter(y=>y!==x);ttqXoa(x.k);TTQ.loi="";TTQ.lan=0;TTQ.chay=false;ttqBao();ttqChay()};
+  const thuLai=e=>{TTQ.chay=false;TTQ.lan=(TTQ.lan||0)+1;TTQ.loi=e&&e.code==="unavailable"?"Mạng yếu, ảnh vẫn nằm trong máy và đang tự gửi lại.":"Chưa gửi được: "+(e&&e.message||e);ttqBao();setTimeout(ttqChay,Math.min(30000,2000*TTQ.lan))};
+  if(TTQ.cu||!window.GASDB){/* máy chủ cũ chưa có cách gửi riêng từng ảnh: ghi thẳng vào biên bản như trước */
+    if(!window.GASDB){thuLai({code:"unavailable"});return}
+    ttqGhi(x,x.anh);Promise.resolve(CherieData.flush()).then(st=>{if(st==="error")return thuLai({code:"unavailable"});TTQ.ds=TTQ.ds.filter(y=>y!==x);ttqXoa(x.k);TTQ.loi="";TTQ.chay=false;ttqBao();ttqChay()},thuLai);return}
+  window.GASDB.call("luuAnhRieng",{anh:x.anh,ten:x.don+"-"+x.phase+"-"+x.sp+"-"+x.o}).then(r=>{if(r&&r.id)xong(r.id);else thuLai({message:"máy chủ không trả mã ảnh"})},
+    e=>{if(e&&/Không rõ yêu cầu/.test(e.message||"")){TTQ.cu=true;TTQ.chay=false;ttqChay();return}thuLai(e)})}
+let ttqDaNap=false;function ttqKhoiDong(){if(ttqDaNap)return;ttqDaNap=true;ttqNap().then(ds=>{ds.forEach(x=>{if(!TTQ.ds.some(y=>y.k===x.k)){TTQ.ds.push(x);ttCache["q:"+x.k]=Promise.resolve(x.anh)}});ttqBao();ttqChay()})}
+try{window.addEventListener("online",()=>ttqChay())}catch(e){}
+function ttSo(don,phase,sp){const m=ttAnh(don,phase,sp);return TT_GOC.filter((_,i)=>(m.anh&&m.anh[i])||ttqCho(don,phase,sp,"a"+i)).length}
 function ttDu(don,phase,sp){return ttSo(don,phase,sp)===TT_GOC.length}
-function ttSrc(v){if(!v)return Promise.resolve("");if(/^(data:|https:)/.test(v))return Promise.resolve(v);if(!ttCache[v])ttCache[v]=anhRieng(v).then(x=>{if(!x)delete ttCache[v];return x});return ttCache[v]}
+function ttSrc(v){if(!v)return Promise.resolve("");if(/^(data:|https:)/.test(v))return Promise.resolve(v);if(/^q:/.test(v))return ttCache[v]||Promise.resolve("");if(!ttCache[v])ttCache[v]=anhRieng(v).then(x=>{if(!x)delete ttCache[v];return x});return ttCache[v]}
 function ttFill(root){root.querySelectorAll("img[data-tt]").forEach(im=>{ttSrc(im.dataset.tt).then(x=>{if(x){im.src=x;im.closest("[data-ttbox]")&&im.closest("[data-ttbox]").classList.add("ok")}})})}
 const TT_CSS=`.ttg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.tts{position:relative;aspect-ratio:3/4;border:1px dashed #C8A97E;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;line-height:1.25;color:#6B635A;padding:4px;cursor:pointer}
-.tts img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.tts input{position:absolute;inset:0;opacity:0;cursor:pointer}.tts .lb{position:absolute;left:0;right:0;bottom:0;background:rgba(20,20,20,.55);color:#fff;font-size:10px;padding:3px}.tts.has{border-style:solid;border-color:#2F6B4F}
+.tts img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.tts input{position:absolute;inset:0;opacity:0;cursor:pointer}.tts .lb{position:absolute;left:0;right:0;bottom:0;background:rgba(20,20,20,.55);color:#fff;font-size:10px;padding:3px}.tts.has{border-style:solid;border-color:#2F6B4F}.tts.cho{border-color:#B7791F;border-style:dashed}
 .ttit{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid #EFE7DB}.ttit b{font-size:15px}.ttit .st{font-size:12px;color:#6B635A}.ttcmp{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}.ttcmp>span{font-size:11px;color:#6B635A;writing-mode:horizontal-tb;width:52px}
 .ttbig{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center}.ttbig img{max-width:100%;max-height:100%}`;
 function ttCss(){if(!document.getElementById("tt-css")){const st=document.createElement("style");st.id="tt-css";st.textContent=TT_CSS;document.head.appendChild(st)}}
-function ttSlot(v,lb,attrs){return `<label class="tts ${v?"has":""}" data-ttbox>${v?`<img alt="${lb}" ${/^data:|^https:/.test(v)?`src="${v}"`:`data-tt="${v}"`}>`:`${lb}<br>+`}<span class="lb">${lb}</span>${attrs?`<input type="file" accept="image/*" capture="environment" ${attrs}>`:""}</label>`}
+function ttSlot(v,lb,attrs,cho){return `<label class="tts ${v?"has":""}${cho?" cho":""}" data-ttbox>${v?`<img alt="${lb}" ${/^data:|^https:/.test(v)?`src="${v}"`:`data-tt="${v}"`}>`:`${lb}<br>+`}<span class="lb">${cho?"Đang gửi…":lb}</span>${attrs?`<input type="file" accept="image/*" capture="environment" ${attrs}>`:""}</label>`}
 function ttXem(src){ttCss();const el=document.createElement("div");el.className="ttbig";el.innerHTML=`<img src="${src}" alt="">`;el.onclick=()=>el.remove();document.body.appendChild(el)}
 /* Chụp ảnh tình trạng. o: {don, phase:"giao"|"nhan", items:[{id,ten}], tieuDe, nv, onDone} */
-function chupTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn");const close=()=>el.remove();let busy=0,loi="";
-  const doc=()=>{let b=bbOf(o.don,o.phase);if(!b){b={id:bbId(o.don,o.phase),don:o.don,phase:o.phase,mon:{},tao:new Date().toISOString().slice(0,16)};db.bb.push(b)}return b};
-  const draw=()=>{const du=o.items.every(x=>ttDu(o.don,o.phase,x.id));
+function chupTinhTrang(o){ttCss();ttqKhoiDong();const el=hdLayer(),pn=el.querySelector(".pn");let mo=true;const close=()=>{mo=false;TTQ.nghe.delete(draw);el.remove()};let loi="";
+  const slot=(sp,k,v)=>{const q=ttqCho(o.don,o.phase,sp,k);return q?"q:"+q.k:v};
+  const draw=()=>{if(!mo)return;const du=o.items.every(x=>ttDu(o.don,o.phase,x.id));const cho=TTQ.ds.filter(x=>x.don===o.don&&x.phase===o.phase).length;
     pn.innerHTML=`<div class="hd"><h2>${o.tieuDe||(o.phase==="giao"?"Ảnh tình trạng lúc giao":"Ảnh tình trạng lúc nhận lại")}</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
-     <p class="note">Mỗi món chụp đủ 4 góc, đủ sáng, thấy rõ vết nếu có. Ảnh gửi thẳng lên Drive của tiệm, không lưu trong máy.${o.phase==="nhan"?" Món có vết bẩn hoặc hư, chụp thêm cận vết ở ô cuối.":""}</p>
+     <p class="note">Mỗi món chụp đủ 4 góc, đủ sáng, thấy rõ vết nếu có. Ảnh gửi lần lượt từng ảnh lên Drive của tiệm; mạng yếu thì ảnh nằm chờ trong máy và tự gửi lại, không mất.${o.phase==="nhan"?" Món có vết bẩn hoặc hư, chụp thêm cận vết ở ô cuối.":""}</p>
      ${o.items.map(x=>{const m=ttAnh(o.don,o.phase,x.id);return `<div class="ttit"><b>${hdEsc(x.ten)} <span class="st">· ${x.id} · ${ttSo(o.don,o.phase,x.id)}/4</span></b>
-       <div class="ttg">${TT_GOC.map((g,i)=>ttSlot((m.anh||[])[i],g,`data-sp="${x.id}" data-i="${i}"`)).join("")}</div>
-       ${o.phase==="nhan"?`<div class="ttg">${[0,1,2,3].map(j=>ttSlot((m.them||[])[j],"Cận vết "+(j+1),`data-sp="${x.id}" data-j="${j}"`)).join("")}</div>`:""}</div>`}).join("")}
-     <p class="note" role="status">${busy?`Đang gửi ${busy} ảnh lên Drive…`:loi?loi:"Ảnh đã lưu lên Drive."}</p>
+       <div class="ttg">${TT_GOC.map((g,i)=>{const v=slot(x.id,"a"+i,(m.anh||[])[i]);return ttSlot(v,g,`data-sp="${x.id}" data-k="a${i}"`,/^q:/.test(v||""))}).join("")}</div>
+       ${o.phase==="nhan"?`<div class="ttg">${[0,1,2,3].map(j=>{const v=slot(x.id,"t"+j,(m.them||[])[j]);return ttSlot(v,"Cận vết "+(j+1),`data-sp="${x.id}" data-k="t${j}"`,/^q:/.test(v||""))}).join("")}</div>`:""}</div>`}).join("")}
+     <p class="note" role="status" style="${TTQ.loi?"color:#B7791F":""}">${loi||(cho?`Đang gửi ${cho} ảnh lên Drive, lần lượt từng ảnh. ${TTQ.loi||"Có thể bấm Xong, ảnh vẫn tự gửi tiếp."}`:"Ảnh đã lưu lên Drive.")}</p>
      <button class="btn primary" type="button" data-ok ${du?"":"disabled"} style="width:100%">${du?"Xong":"Chụp đủ 4 góc mỗi món"}</button>`;
     ttFill(pn);
     pn.querySelector("[data-x]").onclick=close;
     pn.querySelector("[data-ok]").onclick=()=>{close();o.onDone&&o.onDone()};
-    pn.querySelectorAll("input[type=file]").forEach(inp=>inp.onchange=()=>{const f=inp.files&&inp.files[0];if(!f)return;busy++;draw();
-      nenAnh(f,1400,0.8).then(d=>{const b=doc(),sp=inp.dataset.sp;const m=b.mon[sp]=b.mon[sp]||{anh:[],them:[]};m.anh=m.anh||[];m.them=m.them||[];
-        if(inp.dataset.i!=null)m.anh[+inp.dataset.i]=d;else m.them[+inp.dataset.j]=d;m.luc=new Date().toISOString().slice(0,16);if(o.nv)m.nv=o.nv;
-        CherieData.save();return CherieData.flush()}).then(st=>{busy--;loi=st==="error"?"Mạng chập chờn, ảnh sẽ tự gửi lại khi có mạng. Đừng đóng trang.":"";draw()},e=>{busy--;loi="Chưa gửi được ảnh: "+(e&&e.message||e)+". Chụp lại ô đó.";draw()})})};
-  draw()}
+    pn.querySelectorAll("input[type=file]").forEach(inp=>inp.onchange=()=>{const f=inp.files&&inp.files[0];if(!f)return;loi="";
+      nenAnh(f,1280,0.72).then(d=>{ttqThem({don:o.don,phase:o.phase,sp:inp.dataset.sp,o:inp.dataset.k,anh:d,nv:o.nv||""});draw()},e=>{loi="Không đọc được ảnh: "+(e&&e.message||e)+". Chụp lại ô đó.";draw()})})};
+  TTQ.nghe.add(draw);draw()}
 /* So ảnh lúc giao và lúc nhận lại của từng món. o: {don, items:[{id,ten,ghi}]} */
 function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn");
   pn.innerHTML=`<div class="hd"><h2>So ảnh giao · nhận lại</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
@@ -634,10 +677,10 @@ function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn")
   pn.querySelectorAll(".tts img").forEach(im=>im.onclick=e=>{e.preventDefault();if(im.src)ttXem(im.src)})}
 
 window.CherieData={
-  lapHopDong,xemHopDong,anhRieng,chupTinhTrang,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
+  lapHopDong,xemHopDong,anhRieng,chupTinhTrang,TTQ,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
-  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,LY_DO_XOA,idDaXoa,xoaDon,khoiPhucDon,xoaDonUI,NGAN_HANG,hoanCuaDon,hoanThieu,hoanTxt,hoanFields,hoanDoc,hoanBind,hoanLuu,hoanAnhCua,xemAnhHoan,hoanCoc,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
-  init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
+  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,LY_DO_XOA,idDaXoa,xoaDon,khoiPhucDon,xoaDonUI,NGAN_HANG,hoanCuaDon,hoanThieu,hoanTxt,hoanFields,hoanDoc,hoanBind,hoanLuu,hoanAnhCua,xemAnhHoan,hoanCoc,hoanDong,hoanBindDong,suaTkHoan,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
+  init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;setTimeout(ttqKhoiDong,2500);statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},
   reset(){/* bản chính thức: tắt nạp lại dữ liệu mẫu để không ghi đè dữ liệu thật */},
   status(){return state},
