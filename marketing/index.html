@@ -256,7 +256,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=3f71e5d5"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=daa893dc"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -301,7 +301,7 @@ function nextId(t,p){let m=0;db[t].forEach(x=>{const n=parseInt(String(x.id).rep
 function normPhone(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("84")&&d.length===11)d="0"+d.slice(2);return /^0\d{9}$/.test(d)?d:""}
 function given(t){return String(t||"").trim().split(/\s+/).pop()||""}
 function lines(d){return db.ct.filter(c=>c.don===d.id)}
-function conflict(spId,nhan,tra){const sp=byId("sp",spId);if(!sp)return"Chưa chọn món";if(sp.tt==="Sửa"||sp.tt==="Ngưng")return`Món đang ${sp.tt.toLowerCase()}`;
+function conflict(spId,nhan,tra){const sp=byId("sp",spId);if(!sp)return"Chưa chọn món";if(sp.tt==="Mất")return"Món đã báo mất";if(sp.tt==="Sửa"||sp.tt==="Ngưng")return`Món đang ${sp.tt.toLowerCase()}`;
   const a=dayNum(nhan),b=dayNum(tra);for(const c of db.ct){if(c.sp!==spId)continue;const d=byId("don",c.don);if(!d||d.tt==="Hủy"||d.tt==="Đã trả")continue;
     if(dayNum(d.nhan)<=b+sp.giat&&dayNum(d.tra)+sp.giat>=a)return`Kín lịch ${dm(d.nhan)}–${dm(d.tra)} + ${sp.giat} ngày giặt`}return""}
 function toast(m){const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
@@ -455,7 +455,7 @@ function openOrder(pre){
    <button class="btn primary" type="submit">Tạo đơn, chuyển sang Quầy</button></form>`,root=>{
     const $=q=>root.querySelector(q);
     const toggleNew=()=>{$("#newKh").hidden=!!$("#kh").value};toggleNew();$("#kh").onchange=toggleNew;$("#yt").onchange=()=>check();
-    function draw(){$("#lines").innerHTML=st.items.map((id,i)=>`<div class="line-item"><label class="f">Món<select data-i="${i}"><option value="">Chọn món</option>${db.sp.filter(s=>s.tt!=="Ngưng").map(s=>{const c=conflict(s.id,$("#nhan").value,$("#tra").value);return `<option value="${s.id}" ${s.id===id?"selected":""}>${s.id} ${esc(s.ten)} · ${k(s.gia)} ${c?"· kín":"· trống"}</option>`}).join("")}</select></label><div data-m="${i}"></div>${st.items.length>1?`<button class="link" type="button" data-rm="${i}" style="align-self:flex-start">Bỏ</button>`:""}</div>`).join("");
+    function draw(){$("#lines").innerHTML=st.items.map((id,i)=>`<div class="line-item"><label class="f">Món<select data-i="${i}"><option value="">Chọn món</option>${db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất").map(s=>{const c=conflict(s.id,$("#nhan").value,$("#tra").value);return `<option value="${s.id}" ${s.id===id?"selected":""}>${s.id} ${esc(s.ten)} · ${k(s.gia)} ${c?"· kín":"· trống"}</option>`}).join("")}</select></label><div data-m="${i}"></div>${st.items.length>1?`<button class="link" type="button" data-rm="${i}" style="align-self:flex-start">Bỏ</button>`:""}</div>`).join("");
       root.querySelectorAll("[data-i]").forEach(s=>s.onchange=()=>{st.items[+s.dataset.i]=s.value;check()});
       root.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{st.items.splice(+b.dataset.rm,1);draw()});check()}
     function check(){st.items.forEach((id,i)=>{const m=root.querySelector(`[data-m="${i}"]`);if(!id){m.innerHTML="";return}const c=conflict(id,$("#nhan").value,$("#tra").value);m.innerHTML=c?`<span class="err">${esc(c)}</span>`:'<span class="ok">Trống lịch</span>'});
@@ -477,7 +477,7 @@ function openOrder(pre){
       let Lx=L||(p?(db.lead||[]).find(x=>x.id==="84"+p.slice(1)):null);
       if(!Lx&&p){Lx=upsertLead(p,kh.ten,$("#kenh").value,false)}
       const coc=items.reduce((a,i)=>a+byId("sp",i).coc,0);const id=nextId("don","D");
-      db.don.push({id,dat:khId,nhom:"",dip:$("#dip").value,nhan,tra,traTT:"",tt:"Đã đặt",coc,hinhThuc:"Chuyển khoản",ttCoc:$("#ttCoc").value,phi:0,note:$("#note").value.trim(),kenh:"Online",nguonDon:$("#kenh").value,nvTao:"CS online",taoLuc:nowIso(),giaoTanNoi:st.giao,vung:st.giao?$("#vung").value:"",phiGiao:st.giao?window.CherieData.phiVung($("#vung").value):0,noi:st.giao?$("#noi").value.trim():"",lead:Lx?Lx.id:"",quayDaNhan:false,yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?window.CherieData.phiYenTamDs(st.items.map(i=>byId("sp",i)).filter(Boolean)):0,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",giam:st.giam||0});
+      db.don.push({id,dat:khId,nhom:"",dip:$("#dip").value,nhan,tra,luot:window.CherieData.soLuot(nhan,tra),traTT:"",tt:"Đã đặt",coc,hinhThuc:"Chuyển khoản",ttCoc:$("#ttCoc").value,phi:0,note:$("#note").value.trim(),kenh:"Online",nguonDon:$("#kenh").value,nvTao:"CS online",taoLuc:nowIso(),giaoTanNoi:st.giao,vung:st.giao?$("#vung").value:"",phiGiao:st.giao?window.CherieData.phiVung($("#vung").value):0,noi:st.giao?$("#noi").value.trim():"",lead:Lx?Lx.id:"",quayDaNhan:false,yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?window.CherieData.phiYenTamDs(st.items.map(i=>byId("sp",i)).filter(Boolean)):0,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",giam:st.giam||0});
       items.forEach(i=>db.ct.push({id:nextId("ct","CT"),don:id,mac:khId,sp:i,gia:byId("sp",i).gia,hu:false,moTa:"",phiHu:0}));
       if(Lx){Lx.giaiDoan="Đã thuê";Lx.kh=khId;Lx.don=id}
       if(pre.yc){const y=(db.yc||[]).find(x=>x.id===pre.yc);if(y){y.tt="Đã chốt";y.don=id}}
@@ -486,8 +486,8 @@ function openOrder(pre){
 }
 function openDonView(id){nextSheet=()=>openDonView(id);const d=byId("don",id);if(!d){closeSheet();return}const kh=byId("kh",d.dat)||{ten:d.dat,sdt:""};const ls=lines(d);
   sheet(`Đơn ${d.id}`,`<div class="pills"><span class="pill mem">Online · ${esc(d.nguonDon||"")}</span><span class="pill line">${esc(d.tt)}</span><span class="pill ${d.quayDaNhan?"good":"warn"}">${d.quayDaNhan?"Quầy đã nhận":"Chờ quầy nhận"}</span>${d.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill line">Không Gói Yên tâm</span>'}</div>${window.CherieData.ytBanner(d)}
-   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd>${d.giam?`<dt>Giảm giá</dt><dd>−${money(d.giam)}${d.kmTen?" · "+esc(d.kmTen):""}</dd>`:""}${d.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(d.phiGiao)}</dd>`:""}<dt>Cọc</dt><dd>${money(d.coc)} · ${esc(d.ttCoc)}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl>
-   <section><h2>${ls.length} món</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id}</span></span><span class="r">${money(c.gia)}</span></div>`}).join("")}</div>${window.CherieData.quyTacDen(d)}</section>
+   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd><dt>Tiền thuê</dt><dd>${money(window.CherieData.tienThue(d,ls))}${window.CherieData.luotDon(d)>1?` · ${window.CherieData.luotDon(d)} lượt`:""}</dd>${d.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(window.CherieData.ytCuaDon(d,ls))}</dd>`:""}${d.giam?`<dt>Giảm giá</dt><dd>−${money(d.giam)}${d.kmTen?" · "+esc(d.kmTen):""}</dd>`:""}${d.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(d.phiGiao)}</dd>`:""}<dt>Cọc</dt><dd>${money(d.coc)} · ${esc(d.ttCoc)}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl>
+   <section><h2>${ls.length} món</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id}</span></span><span class="r">${money(c.gia)}/lượt${c.hu?`<br><span class="pill bad">${c.mat?"Mất":"Hư"} ${money(window.CherieData.huMon(d,c))}</span>`:""}</span></div>`}).join("")}</div>${window.CherieData.quyTacDen(d)}</section>
    ${d.note?`<p class="note">Ghi chú cho quầy: ${esc(d.note)}</p>`:""}
    <p class="note">Quầy chuẩn bị đồ, nhận cọc tại tiệm hoặc cử stylist giao. Trạng thái cập nhật về đây khi quầy thao tác.</p>`,root=>bind(root))}
 
@@ -499,7 +499,7 @@ function agentBox(id){return running[id]?`<div class="agent" role="status"><span
 function agentNote(){return sampleChecked&&!sampleFn?`<p class="note">Agent marketing chạy mỗi giờ: lập kế hoạch phút 05, đánh giá phút 20, sản xuất phút 35, dựng video phút 41, kiểm duyệt phút 50. Chỉ bản đạt từ 9/10 mới tới bạn.</p>`:""}
 async function ask(prompt){if(!sampleFn)throw{code:"unavailable"};return await sampleFn.json(prompt,{modelTier:"default",cache:false})}
 function errMsg(e){const c=e&&e.code;return c==="not_granted"?"Bạn chưa cho phép trang gọi Claude.":c==="rate_limited"?"Đang gọi quá nhanh, thử lại sau ít phút.":"Agent chưa chạy được, thử lại sau."}
-function kho(){return db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Sửa").map(s=>`${s.id} | ${s.ten} | ${s.loai} | size ${s.size} | ${s.mau} | ${s.gia}đ/lượt | giá trị ${window.CherieData.giaTri(s)}đ | co giãn: ${s.co||"?"} | cọc ${s.coc}đ (chỉ dùng nội bộ, không ghi vào caption)`).join("\n")}
+function kho(){return db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&s.tt!=="Sửa").map(s=>`${s.id} | ${s.ten} | ${s.loai} | size ${s.size} | ${s.mau} | ${s.gia}đ/lượt | giá trị ${window.CherieData.giaTri(s)}đ | co giãn: ${s.co||"?"} | cọc ${s.coc}đ (chỉ dùng nội bộ, không ghi vào caption)`).join("\n")}
 async function agentPlan(P){
   running[P.id]="Agent Lập kế hoạch đang soạn…";render();refreshSheet();
   try{
@@ -685,7 +685,7 @@ function renderND(){
 
 /* Ảnh lookbook tự chụp: team marketing thêm cho từng mẫu; website hiện ảnh này thay cho hình minh hoạ */
 let anhSp="";
-function openAnh(){nextSheet=()=>openAnh();const CD=window.CherieData;const sps=db.sp.filter(s=>s.tt!=="Ngưng").sort((a,b)=>CD.anhCua(a.id,false).length-CD.anhCua(b.id,false).length);if(!anhSp&&sps[0])anhSp=sps[0].id;const list=CD.anhCua(anhSp,false);
+function openAnh(){nextSheet=()=>openAnh();const CD=window.CherieData;const sps=db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất").sort((a,b)=>CD.anhCua(a.id,false).length-CD.anhCua(b.id,false).length);if(!anhSp&&sps[0])anhSp=sps[0].id;const list=CD.anhCua(anhSp,false);
   const cur=db.sp.find(x=>x.id===anhSp);const can=CD.canChup();
   sheet("Ảnh lookbook",`<p class="note">Chỉ dùng ảnh tụi mình tự chụp hoặc ảnh khách đã đồng ý. Không dùng ảnh của thương hiệu. Mỗi mẫu cần ít nhất ${CD.ANH_TOI_THIEU} ảnh; mẫu thiếu ảnh xếp lên đầu.</p>
    ${can.length?`<div class="banner warn"><b>${can.length} mẫu cần chụp thêm.</b> ${can.slice(0,6).map(s=>`${esc(s.ten)} (${CD.anhThat(s.id).length}/${CD.ANH_TOI_THIEU})`).join(", ")}${can.length>6?"…":""}</div>`:""}
@@ -843,6 +843,8 @@ function renderKQ(){
 
 function syncChip(s){const el=document.getElementById("sync");if(!el)return;const m={live:["live","Đồng bộ với Quầy, Website, Admin"],connecting:["","Đang kết nối…"],local:["warn","Chỉ trên máy này"],empty:["warn","Kho chung trống"],readonly:["warn","Chỉ xem"],error:["warn","Mất kết nối"]}[s]||["",s];el.className="syncchip "+m[0];el.textContent=m[1]}
 render();
+try{window.__m={openDonView};}catch(e){}
 })();
+
 </script>
 </body></html>

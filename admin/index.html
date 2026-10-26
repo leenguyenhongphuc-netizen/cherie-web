@@ -208,7 +208,7 @@ header .homebtn{text-decoration:none;color:var(--ink)}
   <button type="button" data-tab="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Nhập liệu</button>
 </nav>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=3f71e5d5"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=daa893dc"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -258,12 +258,12 @@ const GN={d:"ngày",w:"tuần",m:"tháng"};
    Đơn đã giao chưa trả = tạm tính; đơn đã đặt chưa giao = dự kiến. Cọc không phải doanh thu. */
 function donNhan(a,b){return db.don.filter(d=>!d.demo&&d.tt!=="Hủy"&&d.nhan&&d.nhan.slice(0,10)>=a&&d.nhan.slice(0,10)<=b)}
 function ngayGN(d){return String(d.traTT||d.tra||"").slice(0,10)}
-function orders(a,b){return db.don.filter(d=>!d.demo&&d.tt==="Đã trả"&&ngayGN(d)>=a&&ngayGN(d)<=b)}
-function tamTinh(){return db.don.filter(d=>!d.demo&&d.tt==="Đang thuê")}
+function orders(a,b){return db.don.filter(d=>!d.demo&&CD.daKiemXong(d,lines(d))&&ngayGN(d)>=a&&ngayGN(d)<=b)}
+function tamTinh(){return db.don.filter(d=>!d.demo&&(d.tt==="Đang thuê"||(d.tt==="Đã trả"&&!CD.daKiemXong(d,lines(d)))))}
 function duKien(){return db.don.filter(d=>!d.demo&&d.tt==="Đã đặt")}
 function lines(d){return db.ct.filter(c=>c.don===d.id)}
-function rev(d){const ls=lines(d);const luot=+d.luot||(CD.soLuot?CD.soLuot(d.nhan,d.tra):1)||1;const goc=ls.reduce((x,c)=>x+(+c.gia||0),0)*luot,giam=Math.min(goc,+d.giam||0),thue=goc-giam;
-  const yt=CD.ytCuaDon(d,ls),giao=+d.phiGiao||0,tre=+d.phi||0,hu=ls.reduce((x,c)=>x+(c.hu?(+c.phiHu||0):0),0);const ps=yt+giao+tre+hu;
+function rev(d){const ls=lines(d);const luot=CD.luotDon(d);const goc=CD.tienThue(d,ls),giam=Math.min(goc,+d.giam||0),thue=goc-giam;
+  const yt=CD.ytCuaDon(d,ls),giao=+d.phiGiao||0,tre=+d.phi||0,hu=CD.tongHu(d,ls);const ps=yt+giao+tre+hu;
   return{thue,yt,giao,tre,hu,ps,tong:thue+ps,luot,giam}}
 function sumRev(os){const t={thue:0,yt:0,giao:0,tre:0,hu:0,ps:0,tong:0,giam:0};os.forEach(d=>{const r=rev(d);Object.keys(t).forEach(k=>t[k]+=r[k])});return t}
 function costs(a,b){return db.chiphi.filter(c=>c.ngay>=a&&c.ngay<=b)}
@@ -398,16 +398,16 @@ function vanHanh(a,b){const os=orders(a,b),now=new Date();const D2=x=>new Date(x
   const live=db.don.filter(d=>!d.demo);
   const qh=live.filter(d=>d.tt==="Đang thuê"&&now>D2(d.tra));
   const ch=live.filter(d=>d.tt==="Đã trả"&&(d.ttCoc==="Chờ hoàn"||d.ttCoc==="Đang giữ"));const ch24=ch.filter(d=>d.traTT&&(now-D2(d.traTT))>24*36e5);
-  const ck=db.sp.filter(s=>s.tt==="Chờ kiểm tra").length,lech=db.trips.filter(t=>String(t.tt).startsWith("Lệch")).length;
+  const no=live.filter(d=>d.ttCoc==="Khách còn nợ"),noT=no.reduce((x,d)=>x+CD.quyetToan(d,lines(d)).conNo,0),mat=db.sp.filter(s=>s.tt==="Mất").length;const ck=db.sp.filter(s=>s.tt==="Chờ kiểm tra").length,lech=db.trips.filter(t=>String(t.tt).startsWith("Lệch")).length;
   const P=(x,n)=>n?Math.round(x/n*100)+"%":"–";const col=(x,n,ok)=>!n?"var(--muted)":x/n>=ok?"var(--pos)":"var(--neg)";
   const m=(l,v,sub,c)=>`<div class="kpi"><span class="l">${l}</span><span class="v" style="color:${c||"inherit"}">${v}</span><span class="d">${sub}</span></div>`;
   return card("cvh","Vận hành quầy và stylist","Tỷ lệ tính trên đơn đã trả trong kỳ. Hàng dưới là việc đang tồn ngay lúc này, mục tiêu là 0.",
    `<div class="kpis">${m("Trả đúng hẹn",P(dung,os.length),`${dung}/${os.length} đơn`,col(dung,os.length,.9))}${m("Đủ ảnh giao và nhận",P(coAnh,os.length),`${coAnh}/${os.length} đơn có đủ 4 ảnh mỗi món`,col(coAnh,os.length,.95))}${m("Stylist đến đúng giờ",P(dg,tr.length),`${dg}/${tr.length} chuyến, trễ dưới 15 phút`,col(dg,tr.length,.9))}${m("Mua Gói Yên tâm",P(yt,os.length),`${yt}/${os.length} đơn`)}</div>
-   <div class="kpis" style="margin-top:10px">${m("Đơn quá hạn trả",qh.length,qh.length?"Quầy cần gọi khách":"Không có",qh.length?"var(--neg)":"var(--pos)")}${m("Cọc chờ hoàn",ch.length,ch24.length?`${ch24.length} đơn đã quá 24 giờ`:`${tr0(ch)}`,ch24.length?"var(--neg)":"inherit")}${m("Món chờ kiểm",ck,ck?"Stylist mang về, quầy chưa kiểm":"Không có",ck?"var(--neg)":"var(--pos)")}${m("Chuyến thiếu món",lech,lech?"Cần đối soát":"Không có",lech?"var(--neg)":"var(--pos)")}</div>`,"")}
+   <div class="kpis" style="margin-top:10px">${m("Đơn quá hạn trả",qh.length,qh.length?"Quầy cần gọi khách":"Không có",qh.length?"var(--neg)":"var(--pos)")}${m("Cọc chờ hoàn",ch.length,ch24.length?`${ch24.length} đơn đã quá 24 giờ`:`${tr0(ch)}`,ch24.length?"var(--neg)":"inherit")}${m("Khách còn nợ",no.length,no.length?noT.toLocaleString("vi-VN")+"đ phí vượt cọc, quầy cần thu":"Không có",no.length?"var(--neg)":"var(--pos)")}${m("Đầm báo mất",mat,mat?"Đã loại khỏi kho, cân nhắc nhập thay":"Không có",mat?"var(--neg)":"inherit")}${m("Món chờ kiểm",ck,ck?"Stylist mang về, quầy chưa kiểm":"Không có",ck?"var(--neg)":"var(--pos)")}${m("Chuyến thiếu món",lech,lech?"Cần đối soát":"Không có",lech?"var(--neg)":"var(--pos)")}</div>`,"")}
 function tr0(ch){return ch.length?ch.reduce((x,d)=>x+(+d.coc||0),0).toLocaleString("vi-VN")+"đ đang giữ":"Không có"}
 function renderTQ(){const [a,b]=range(),g=gran(a,b),[pa,pb]=prevRange(a,b);const s=stats(a,b),p=stats(pa,pb);const S=series(a,b,g);
   const held=db.don.filter(d=>!d.demo&&(d.ttCoc==="Đang giữ"||d.ttCoc==="Chờ hoàn")).reduce((x,d)=>x+(+d.coc||0),0);
-  const byLoai={};s.os.forEach(d=>lines(d).forEach(c=>{const sp=db.sp.find(x=>x.id===c.sp);const k=sp?sp.loai:"Khác";byLoai[k]=(byLoai[k]||0)+(+c.gia||0)}));
+  const byLoai={};s.os.forEach(d=>lines(d).forEach(c=>{const sp=db.sp.find(x=>x.id===c.sp);const k=sp?sp.loai:"Khác";byLoai[k]=(byLoai[k]||0)+(+c.gia||0)*CD.luotDon(d)}));
   view.innerHTML=`<div><h1>Tổng quan</h1><p class="sub">Doanh thu chỉ ghi nhận khi khách trả đồ và chốt phí phát sinh. Đơn chưa trả hiện ở phần tạm tính. Chi phí lấy từ tab Chi phí.</p></div>${periodBar()}
   <div class="kpis">${kpi("Doanh thu ghi nhận",big(s.dt),s.dt,p.dt,{hero:true,extra:`${s.n} đơn đã trả · thuê ${tr(s.thue)} · phát sinh ${tr(s.ps)}`})}${kpi("Tạm tính (đang thuê)",big(sumRev(tamTinh()).tong),null,null,{extra:`${tamTinh().length} đơn chưa trả, có thể thêm phí trễ, hư hỏng`})}${kpi("Dự kiến (đã đặt)",big(sumRev(duKien()).tong),null,null,{extra:`${duKien().length} đơn chưa giao`})}${kpi("EBITDA",big(s.ebitda),s.ebitda,p.ebitda,{extra:`Biên ${pct(s.dt?s.ebitda/s.dt:NaN)}`})}${kpi("Số đơn",s.n,s.n,p.n,{extra:`${s.items} lượt món`})}${kpi("Giá trị đơn TB",big(s.aov),s.aov,p.aov)}${kpi("Cọc đang giữ",big(held),null,null,{extra:"Hiện tại, gồm đơn chờ hoàn"})}</div>
   ${vanHanh(a,b)}
@@ -694,7 +694,7 @@ function lnReview(box,id,back){const x=(db.nhap||[]).find(n=>n.id===id);if(!x||!
 }
 /* ---------- Ảnh lookbook: ảnh tự chụp, team marketing và admin cùng thêm ---------- */
 let anhSp="";
-function nlAnh(el){const sps=[...db.sp].filter(s=>s.tt!=="Ngưng").sort((a,b)=>(b.nhap||"")<(a.nhap||"")?-1:1);if(!anhSp&&sps[0])anhSp=sps[0].id;
+function nlAnh(el){const sps=[...db.sp].filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất").sort((a,b)=>(b.nhap||"")<(a.nhap||"")?-1:1);if(!anhSp&&sps[0])anhSp=sps[0].id;
   const list=CD.anhCua(anhSp,false);
   const can=CD.canChup();const cur=db.sp.find(x=>x.id===anhSp);
   el.innerHTML=`${can.length?`<section class="card" style="margin-bottom:16px"><h2>Cần chụp · ${can.length} mẫu chưa đủ ${CD.ANH_TOI_THIEU} ảnh</h2><div class="list">${can.slice(0,12).map(s=>`<div class="it"><span class="t">${esc(s.ten)} · ${s.id}</span><span class="s">${CD.anhThat(s.id).length}/${CD.ANH_TOI_THIEU} ảnh thật${s.brand?" · "+esc(s.brand):""}</span><span class="r"><button class="btn sm" type="button" data-pick="${s.id}">Thêm ảnh</button></span></div>`).join("")}</div></section>`:""}
@@ -816,6 +816,8 @@ function nlYC(el){const ys=[...db.yc].sort((x,y)=>x.tg<y.tg?1:-1);
 }
 
 render();
+try{window.__a={rev,lines};}catch(e){}
 })();
+
 </script>
 </body></html>

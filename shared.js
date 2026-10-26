@@ -125,7 +125,7 @@ function gen(o){
       const traTT=new Date(tra);traTT.setHours(12+late-(late?0:Math.floor(rnd()*3)),late?0:30*Math.floor(rnd()*2));
       const id="D"+String(dId++).padStart(3,"0");let hu=0;
       items.forEach(s=>{const h=rnd()<0.07;const ph=h?(rnd()<0.7?100000:300000):0;hu+=ph;o.ct.push({id:"CT"+String(cId++).padStart(3,"0"),don:id,mac:kh,sp:s.id,gia:s.gia,hu:h,moTa:h?(ph===100000?"L2 Vết bẩn khó":"L3 Sút đường may, cần thợ"):"",phiHu:ph})});
-      const phi=Math.min(late,24)*20000;const coc=items.reduce((x,s)=>x+s.coc,0);
+      const phi=phiTre(late);const coc=items.reduce((x,s)=>x+s.coc,0);
       o.don.push({id,dat:kh,nhom:"",dip:pick(dips),nhan:ymd(nhan)+"T15:00",tra:ymd(tra)+"T12:00",traTT:ymd(traTT)+"T"+pad(traTT.getHours())+":"+pad(traTT.getMinutes()),tt:"Đã trả",coc,hinhThuc:rnd()<0.8?"Chuyển khoản":"Tiền mặt",ttCoc:phi||hu?"Hoàn một phần":"Đã hoàn",phi,note:late?`Trả trễ ${late} giờ`:""});
     }});
   const nOrders=m=>o.don.filter(d=>d.nhan.slice(5,7)===pad(m+1)).length;
@@ -247,6 +247,14 @@ function denCss(){if(!document.getElementById("den-css")){const st=document.crea
 function kk(n){n=+n||0;return n>=1e6?(Math.round(n/1e5)/10).toString().replace(".",",")+" tr":Math.round(n/1000)+"k"}
 function vnd(n){return Math.round(+n||0).toLocaleString("vi-VN")+"đ"}
 function ctCuaDon(d){return (db.ct||[]).filter(c=>c.don===d.id)}
+/* ==== Quyết toán đơn: MỘT nguồn duy nhất cho Quầy, Stylist, CS, Admin ==== */
+function luotDon(d){return Math.max(1,+(d&&d.luot)||(d&&d.nhan&&d.tra?soLuot(d.nhan,d.tra):1)||1)}
+function tienThue(d,ls){ls=ls||ctCuaDon(d);return ls.reduce((a,c)=>a+(+c.gia||0),0)*luotDon(d)}
+function mucMon(c){return c.mat?"L4":(c.muc||(c.hu?String(c.moTa||"").slice(0,2):"L0"))}
+function huMon(d,c){if(!c||!c.hu)return 0;const lv=mucMon(c),f=+c.phiHu||0;if(d&&d.yenTam&&lv!=="L4"&&f<=300000)return 0;return f}
+function tongHu(d,ls){ls=ls||ctCuaDon(d);return ls.reduce((a,c)=>a+huMon(d,c),0)}
+function quyetToan(d,ls){ls=ls||ctCuaDon(d);const coc=+d.coc||0,hu=tongHu(d,ls),tre=+d.phi||0,tong=hu+tre;return {coc,hu,tre,tong,hoan:Math.max(0,coc-tong),conNo:Math.max(0,tong-coc)}}
+function daKiemXong(d,ls){ls=ls||ctCuaDon(d);return d.tt==="Đã trả"&&(d.ttCoc!=="Chờ hoàn"||ls.every(c=>c.kiemLuc))}
 /* banner nói rõ đơn có hay không có gói và hệ quả */
 function ytBanner(d){if(!d)return "";denCss();const ls=ctCuaDon(d);return d.yenTam?`<div class="den-b co"><b>Đơn này CÓ Gói Yên tâm</b> (khách đã trả ${vnd(ytCuaDon(d,ls))}). Vết bẩn khó, sút chỉ, rách nhỏ: miễn phí. Mất hoặc hư nặng: khách đền 50% giá trị chiếc đầm.</div>`:`<div class="den-b khong"><b>Đơn này KHÔNG mua Gói Yên tâm.</b> Vết bẩn khó, sút chỉ: 100k. Rách cần thợ: 300k. Mất hoặc hư nặng: khách đền 100% giá trị chiếc đầm.</div>`}
 /* bảng quy tắc đền, tô cột áp dụng cho đơn; kèm số tiền đền nếu mất từng món */
@@ -331,7 +339,7 @@ function nenAnh(file,max,q){return new Promise((ok,no)=>{const r=new FileReader(
 /* Mỗi mẫu cần ít nhất 4 ảnh tự chụp. Brief mặc định khi agent chưa viết brief riêng. */
 const ANH_TOI_THIEU=4;
 const BRIEF_CHUP=["Toàn thân chính diện trên người mẫu, nền Ivory","Sau lưng toàn thân","Nghiêng 45 độ khi đang bước","Cận chất liệu và chi tiết (cổ, eo, đường may)"];
-function canChup(){return db.sp.filter(s=>s.tt!=="Ngưng"&&anhThat(s.id).length<ANH_TOI_THIEU).sort((a,b)=>anhThat(a.id).length-anhThat(b.id).length||((b.nhap||"")<(a.nhap||"")?-1:1))}
+function canChup(){return db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&anhThat(s.id).length<ANH_TOI_THIEU).sort((a,b)=>anhThat(a.id).length-anhThat(b.id).length||((b.nhap||"")<(a.nhap||"")?-1:1))}
 /* hợp đồng */
 /* ---------- Hợp đồng thuê: chụp CCCD (đọc mã QR tự điền), điều khoản, khách đồng ý và ký trên máy ----------
    Chérie không giữ CCCD bản cứng; chỉ chụp lưu ảnh để lập hợp đồng và xử lý khiếu nại, có sự đồng ý của khách (Nghị định 13/2023). */
@@ -371,7 +379,7 @@ function hdDieuKhoan(o){/* o: {so, tao, ben, sdt, items:[{id,ten,size,giaTri,gia
   <p><b>Điều 1. Trang phục cho thuê</b></p>
   <table class="hd-t"><tr><th>Mã</th><th>Tên mẫu</th><th>Size</th><th>Giá trị</th><th>Giá thuê/lượt</th></tr>${o.items.map(x=>`<tr><td>${hdEsc(x.id)}</td><td>${hdEsc(x.ten)}</td><td>${hdEsc(x.size)}</td><td>${hdMoney(x.giaTri)}</td><td>${hdMoney(x.gia)}</td></tr>`).join("")}</table>
   <p>Bên B đã kiểm tra trang phục khi nhận: tình trạng như mới (mức L0), có ảnh chụp tình trạng lúc giao do Bên A lưu.</p>
-  <p><b>Điều 2. Thời gian thuê</b><br>Nhận lúc ${hdWhen(o.nhan)}, hẹn trả trước ${hdWhen(o.tra)} (${o.luot||1} lượt, mỗi lượt 24 giờ). Trả trễ: miễn 1 giờ đầu, từ giờ thứ hai tính 20.000đ mỗi giờ; trễ quá 24 giờ tính thêm một lượt thuê.</p>
+  <p><b>Điều 2. Thời gian thuê</b><br>Nhận lúc ${hdWhen(o.nhan)}, hẹn trả trước ${hdWhen(o.tra)} (${o.luot||1} lượt, mỗi lượt 24 giờ). Trả trễ: miễn 1 giờ đầu, từ giờ thứ hai tính 20.000đ mỗi giờ, tối đa 24 giờ.</p>
   <p><b>Điều 3. Chi phí và tiền cọc</b><br>Tiền thuê: ${hdMoney(tienThue)}${giam?` · Giảm giá${o.kmTen?" ("+hdEsc(o.kmTen)+")":""}: −${hdMoney(giam)} · Tiền thuê sau giảm: ${hdMoney(Math.max(0,tienThue-giam))}`:""}${o.phiGiao?` · Phí đến tận nơi: ${hdMoney(o.phiGiao)}`:""}${yt?` · ${YEN_TAM.ten}: ${hdMoney(yt)}`:""}.<br>Tiền cọc: ${hdMoney(o.coc)}${o.hinhThuc?` (${hdEsc(o.hinhThuc)})`:""}. Bên A hoàn cọc trong 24 giờ sau khi kiểm tra trang phục, trừ các khoản tại Điều 2 và Điều 4 nếu có. Bên A không giữ CCCD bản cứng của Bên B.</p>
   <p><b>Điều 4. Hư hỏng, mất mát</b>${o.yenTam?` · Bên B có ${YEN_TAM.ten}`:""}</p>
   <table class="hd-t"><tr><th>Mức</th><th>Tình trạng khi trả</th><th>Không có ${YEN_TAM.ten}</th><th>Có ${YEN_TAM.ten}</th></tr>${hu}</table>
@@ -473,7 +481,7 @@ function lapHopDong(opts){
       pn.querySelector("#b3").onclick=()=>{st.buoc=3;draw()};
       pn.querySelector("#ok3").onclick=()=>{if(moved<8){pn.querySelector("#e3").textContent="Khách chưa ký.";return}
         const ky=c.toDataURL("image/png"),luc=hdNow(),sdt=String(st.sdt).replace(/\D/g,"");
-        const hd={id:so,don:opts.don||"",kh:opts.kh.id,tao,kyLuc:luc,nv:opts.nv||"",ben:Object.assign({},st.ben),sdt,items:opts.items,nhan:opts.nhan,tra:opts.tra,luot:opts.luot||1,phiGiao:opts.phiGiao||0,giam:+opts.giam||0,kmTen:opts.kmTen||"",yenTam:!!opts.yenTam,coc:+opts.coc||0,hinhThuc:opts.hinhThuc||"",
+        const hd={id:so,don:opts.don||"",kh:opts.kh.id,tao,kyLuc:luc,nv:opts.nv||"",ben:Object.assign({},st.ben),sdt,items:opts.items,nhan:opts.nhan,tra:opts.tra,luot:opts.luot||1,phiGiao:opts.phiGiao||0,giam:+opts.giam||0,kmTen:opts.kmTen||"",yenTam:!!opts.yenTam,phiYenTam:opts.phiYenTam!=null?+opts.phiYenTam:undefined,coc:+opts.coc||0,hinhThuc:opts.hinhThuc||"",
           loai:st.loai,truoc:st.truoc,sau:st.sau,chuKy:ky,dongY:{dieuKhoan:true,duLieu:true,luc},luuDen:"",tt:"Đã ký",phienBan:1};
         db.hd=db.hd||[];db.hd.push(hd);
         db.cccd=db.cccd||[];const cur=db.cccd.find(z=>z.id===opts.kh.id);const rec={id:opts.kh.id,so:st.ben.so,ten:st.ben.ten,ngaySinh:st.ben.ngaySinh,gioiTinh:st.ben.gioiTinh,diaChi:st.ben.diaChi,ngayCap:st.ben.ngayCap,loai:st.loai,truoc:st.truoc,sau:st.sau,cap:luc.slice(0,10),hd:so};
@@ -548,7 +556,7 @@ function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn")
 window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
-  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
+  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
   init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},
   reset(){/* bản chính thức: tắt nạp lại dữ liệu mẫu để không ghi đè dữ liệu thật */},

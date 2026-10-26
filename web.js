@@ -76,7 +76,7 @@ function dressSvg(s,id){
 
 /* ----- lịch trống: giống luật trong app quầy (tính cả ngày giặt) ----- */
 function busyReason(s,nhan,tra){
-  if(s.tt==="Sửa"||s.tt==="Ngưng")return "Đang chỉnh sửa";
+  if(s.tt==="Sửa"||s.tt==="Ngưng"||s.tt==="Mất")return "Đang chỉnh sửa";
   const a=dn(nhan),b=dn(tra);
   for(const c of db.ct){if(c.sp!==s.id)continue;const d=db.don.find(x=>x.id===c.don);if(!d||d.tt==="Hủy"||d.tt==="Đã trả")continue;
     if(dn(d.nhan)<=b+s.giat&&dn(d.tra)+s.giat>=a)return "Kín lịch";}
@@ -87,11 +87,11 @@ function dayBusy(s,day){return !!busyReason(s,day,day)}
 function chipRow(el,arr,cur,set){el.innerHTML=arr.map(x=>`<button class="chip" type="button" aria-pressed="${x===cur}" data-v="${esc(x)}">${esc(x)}</button>`).join("");
   el.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{set(b.dataset.v);renderFilters();renderGrid()})}
 function renderFilters(){
-  const have=new Set(db.sp.map(s=>s.loai));const cnt=f=>db.sp.filter(s=>s.tt!=="Ngưng"&&f(s)).length;
+  const have=new Set(db.sp.map(s=>s.loai));const cnt=f=>db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&f(s)).length;
   /* chỉ ẩn kiểu chưa có hàng khi kho đã tải xong; kiểu lạ do nhập tay vẫn hiện để lọc được */
   const extra=[...have].filter(l=>l&&!LOAI.includes(l)).sort();
   const L=db.sp.length?LOAI.filter(l=>l==="Tất cả"||have.has(l)).concat(extra):LOAI;
-  const ORD=["XS","S","M","L","XL","XXL","Freesize"],hs=[...new Set(db.sp.filter(x=>x.tt!=="Ngưng").map(x=>x.size).filter(Boolean))].sort((a,b)=>(ORD.indexOf(a)+99)%99-(ORD.indexOf(b)+99)%99||String(a).localeCompare(b));
+  const ORD=["XS","S","M","L","XL","XXL","Freesize"],hs=[...new Set(db.sp.filter(x=>x.tt!=="Ngưng"&&x.tt!=="Mất").map(x=>x.size).filter(Boolean))].sort((a,b)=>(ORD.indexOf(a)+99)%99-(ORD.indexOf(b)+99)%99||String(a).localeCompare(b));
   const SZ=["Mọi size"].concat(hs.length?hs:SIZES.slice(1)),Z=myFit()?[FITCHIP,...SZ]:SZ;
   const ls=$("#fLoaiS"),zs=$("#fSizeS");
   ls.innerHTML=L.map(l=>`<option value="${esc(l)}" ${l===fLoai?"selected":""}>${esc(l==="Tất cả"?"Mọi kiểu":l)}</option>`).join("");
@@ -120,7 +120,7 @@ function bindTiles(root){root.querySelectorAll(".tile").forEach(t=>{const sw=t.q
   const open=()=>{stack=[];go(()=>openSP(t.dataset.sp),true)};t.onclick=open;t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}}})}
 function renderGrid(){
   const [n,t]=dates();
-  const g=myFit();const list=db.sp.filter(s=>s.tt!=="Ngưng"&&(fLoai==="Tất cả"||s.loai===fLoai)&&(fSize==="Mọi size"||(fSize===FITCHIP?(g&&CD.doVua(s,g).muc!=="khong"):s.size===fSize)));
+  const g=myFit();const list=db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&(fLoai==="Tất cả"||s.loai===fLoai)&&(fSize==="Mọi size"||(fSize===FITCHIP?(g&&CD.doVua(s,g).muc!=="khong"):s.size===fSize)));
   const rk=s=>{const v=g&&CD.doVua(s,g);return !v?0:v.muc==="vua"?0:v.muc==="co-the"?1:2};const rows=list.map(s=>({s,why:busyReason(s,n,t)})).sort((a,b)=>(!!a.why-!!b.why)||rk(a.s)-rk(b.s)||a.s.gia-b.s.gia);
   const key=[n,t,fLoai,fSize].join("|");if(key!==gridKey){gridKey=key;shown=PAGE}
   const free=rows.filter(r=>!r.why).length;
@@ -164,7 +164,7 @@ function myFit(){return me.do?CD.goiYSize(me.do):null}
 function fitTag(s){const g=myFit();if(!g)return"";const v=CD.doVua(s,g);return `<span class="fit ${v.muc}">${v.muc==="vua"?"Vừa với nàng":v.muc==="co-the"?"Có thể vừa":"Lệch size"}</span>`}
 function renderSizeFind(){const g=myFit();const el=$("#sizeFind");
   if(!g){el.innerHTML=`<p>Chưa chắc size? Nhập số đo, tụi mình đánh dấu chiếc vừa với nàng.</p><button class="btn" type="button" id="sfGo">Tìm size của mình</button>`}
-  else{const vua=db.sp.filter(s=>s.tt!=="Ngưng"&&CD.doVua(s,g).muc==="vua").length,cothe=db.sp.filter(s=>s.tt!=="Ngưng"&&CD.doVua(s,g).muc==="co-the").length;
+  else{const vua=db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&CD.doVua(s,g).muc==="vua").length,cothe=db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&CD.doVua(s,g).muc==="co-the").length;
     el.innerHTML=`<p><b class="sz">${g.size}</b>size gợi ý theo ${g.tu} · ${vua} chiếc vừa, ${cothe} chiếc có thể vừa</p><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="sfShow">${fSize===FITCHIP?"Xem tất cả":"Chỉ xem chiếc vừa"}</button><button class="btn" type="button" id="sfGo">Sửa số đo</button></span>`;
     el.querySelector("#sfShow").onclick=()=>{fSize=fSize===FITCHIP?"Mọi size":FITCHIP;renderFilters();renderGrid();toSec("bst")}}
   el.querySelector("#sfGo").onclick=()=>{stack=[];go(openSize)}}
@@ -180,7 +180,7 @@ function openSize(){const d=me.do||{};
    </form>`,r=>{
     const read=()=>({cao:+r.querySelector("#zCao").value||"",nang:+r.querySelector("#zNang").value||"",nguc:+r.querySelector("#zNguc").value||"",eo:+r.querySelector("#zEo").value||"",mong:+r.querySelector("#zMong").value||""});
     const show=()=>{const g=CD.goiYSize(read());if(!g){r.querySelector("#zOut").innerHTML="";return}
-      const vua=db.sp.filter(s=>s.tt!=="Ngưng"&&CD.doVua(s,g).muc==="vua"),cothe=db.sp.filter(s=>s.tt!=="Ngưng"&&CD.doVua(s,g).muc==="co-the");
+      const vua=db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&CD.doVua(s,g).muc==="vua"),cothe=db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&CD.doVua(s,g).muc==="co-the");
       r.querySelector("#zOut").innerHTML=`<div class="ytbox"><p class="eyebrow">Size gợi ý</p><p style="font-family:var(--serif);font-size:34px;line-height:1">${g.size}</p><p class="note">Theo ${g.tu}. ${vua.length} chiếc vừa đúng size, ${cothe.length} chiếc có thể vừa nhờ dây chỉnh, vải co giãn hoặc dáng suông.${g.ghiChu?" "+g.ghiChu:""}</p></div>`};
     r.querySelectorAll("input").forEach(i=>i.oninput=show);show();
     const del=r.querySelector("#zDel");if(del)del.onclick=()=>{delete me.do;saveMe();if(fSize===FITCHIP)fSize="Mọi size";renderFilters();renderGrid();close();toast("Đã xoá số đo trên máy này")};
@@ -224,7 +224,7 @@ function renderInfo(){const Y=CD.YEN_TAM,g=db.sp.map(s=>s.gia).filter(Boolean);c
    ["Vệ sinh sau mỗi lượt",`<p>Kiểm tra từng đường may, giặt riêng từng chiếc, hấp phẳng, khử khuẩn trong lẫn ngoài, rồi niêm phong túi kín có tem ngày giặt. Nàng là người xé tem đầu tiên.</p>`],
    ["Không đúng size thì sao",`<p>Dùng nút Tìm size để biết chiếc nào vừa trước khi chọn. Đi thử tận nơi, stylist chỉnh dây, ghim dáng tại chỗ; không vừa thì đổi chiếc khác, không tính thêm.</p>`],
    ["Trả trễ",`<p>Trễ dưới 1 giờ thì thôi, tụi mình không tính. Từ giờ thứ hai, 20.000đ mỗi giờ, tối đa 24 giờ. Báo trước cho tụi mình là được dời miễn phí nếu chiếc đó chưa có người hẹn.</p>`],
-   ["Đi nhóm",`<p>Từ 3 người giảm 10%, từ 5 người giảm 15% tổng tiền thuê.</p>`]];
+   ["Đi nhóm",`<p>Đi từ 3 người, nàng nhắn stylist khi đặt. Ưu đãi nhóm theo chương trình đang chạy, stylist báo rõ số tiền trước khi chốt.</p>`]];
   $("#info").innerHTML=Q.map(([q,a])=>`<details><summary>${q}</summary><div style="padding:0 0 16px;color:var(--muted);display:flex;flex-direction:column;gap:10px;max-width:46em">${a}</div></details>`).join("")}
 function openInfo(i){stack=[];go(()=>sheet("Gói Yên tâm",`<div style="display:flex;flex-direction:column;gap:10px">${$("#info").children[i].querySelector("div").innerHTML}</div>`))}
 
@@ -256,7 +256,7 @@ function openSP(id){
   const gal=CD.anhCua(s.id,true);
   sheet(s.ten,`${gal.length?`<div class="gal" aria-label="Ảnh thật tại Chérie">${gal.map((a,i)=>`<img src="${a.src}" alt="${esc(s.ten)}, ${a.loai==="Ảnh AI"?"ảnh dựng bằng AI":"ảnh "+(i+1)}" loading="lazy">`).join("")}</div><p class="note" style="margin-top:-6px">${gal.some(a=>a.loai!=="Ảnh AI"&&a.loai!=="Ảnh hãng")?"Ảnh tụi mình tự chụp":gal.some(a=>a.loai==="Ảnh hãng")?`Ảnh mẫu của ${esc(s.brand||"thương hiệu")}`:"Ảnh minh hoạ"}${gal.some(a=>a.loai==="Lookbook khách")?", có ảnh khách thật đã đồng ý chia sẻ":""}${gal.some(a=>a.loai==="Ảnh AI")?`. ${gal.filter(a=>a.loai==="Ảnh AI").length} ảnh dựng bằng AI để nàng hình dung dáng, ảnh thật đang được cập nhật`:""}. ${gal.length>1?"Vuốt để xem thêm.":""}</p>`:`<div class="big">${dressSvg(s,"big")}</div>`}${!gal.length&&(s.anhBrand||[]).length?`<div><p class="eyebrow">Ảnh mẫu thật · ${s.anhBrand.length} ảnh</p><div class="imgl">${s.anhBrand.slice(0,8).map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener">Ảnh ${i+1}</a>`).join("")}</div><p class="note" style="margin-top:6px">Ảnh mẫu từ ${esc(s.brand||"thương hiệu")}, chạm để mở. Ảnh tụi mình tự chụp đang được cập nhật.</p></div>`:""}
    <div><p class="eyebrow">${esc(s.loai)} · ${esc(s.pc)}</p><h2 style="font-size:28px;margin-top:6px">${esc(s.ten)}</h2><p class="note" style="margin-top:4px">${esc(s.mo)} · màu ${esc((s.mau||"").toLowerCase())}${s.brand?` · thiết kế của ${esc(s.brand)}`:""}</p>${s.moTa?`<p style="margin-top:8px">${esc(s.moTa)}</p>`:""}</div>
-   <dl class="kv"><dt>Giá thuê</dt><dd>${money(s.gia)} / lượt</dd>${CD.giaTri(s)?`<dt>Giá trị chiếc đầm</dt><dd>${money(CD.giaTri(s))}</dd>`:""}<dt>${CD.YEN_TAM.ten} (tuỳ chọn)</dt><dd>${money(CD.phiYenTam(s))}</dd><dt>Size</dt><dd>${s.size} · ${esc((s.co||"").toLowerCase())}</dd>${s.chatLieu?`<dt>Chất liệu</dt><dd>${esc(s.chatLieu)}</dd>`:""}<dt>${CD.YEN_TAM.ten}</dt><dd>+${money(CD.YEN_TAM.phi)}, tự chọn <button class="link" type="button" id="ytInfo">gồm gì</button></dd></dl>
+   <dl class="kv"><dt>Giá thuê</dt><dd>${money(s.gia)} / lượt</dd>${CD.giaTri(s)?`<dt>Giá trị chiếc đầm</dt><dd>${money(CD.giaTri(s))}</dd>`:""}<dt>Size</dt><dd>${s.size} · ${esc((s.co||"").toLowerCase())}</dd>${s.chatLieu?`<dt>Chất liệu</dt><dd>${esc(s.chatLieu)}</dd>`:""}<dt>${CD.YEN_TAM.ten}</dt><dd>+${money(CD.phiYenTam(s))}, tự chọn <button class="link" type="button" id="ytInfo">gồm gì</button></dd></dl>
    ${(()=>{const g=myFit();if(!g)return `<button class="link" type="button" id="spSize" style="align-self:flex-start">Không chắc size? Nhập số đo để biết chiếc này có vừa không</button>`;const v=CD.doVua(s,g);return `<div class="hint">${ICON.info}<span><b>${esc(v.txt)}.</b> Size gợi ý của nàng là ${g.size}.</span></div>`})()}
    <div><p class="f" style="margin-bottom:8px">Lịch 14 ngày tới</p><div class="days">${days.map(d=>{const b=dayBusy(s,d);return `<div class="${b?"busy":""} ${d>=n&&d<=t?"sel":""}" title="${b?"Kín lịch":"Còn trống"}">${wd(d)}<b>${+d.slice(8,10)}</b></div>`}).join("")}</div>
    <p class="note" style="margin-top:8px">${why?`Ngày ${dm(n)}–${dm(t)} chiếc này ${why==="Kín lịch"?"đã có hẹn":why.toLowerCase()}. Nàng vẫn bỏ vào túi được, stylist sẽ gợi ý ngày khác hoặc một chiếc cùng tinh thần.`:`Chiếc này rảnh từ ${dm(n)} đến ${dm(t)}. Ô gạch ngang là ngày đã có người hẹn hoặc đang giặt hấp.`}</p></div>
@@ -356,9 +356,9 @@ function bookSummary(){
   const L=luotOf(n,t),tr=traOf(),F=fee();const thue=ps.reduce((a,s)=>a+s.gia,0)*L,coc=ps.reduce((a,s)=>a+s.coc,0),yt=draft.yt?CD.phiYenTamDs(ps):0;
   return `<div class="sum"><div class="head">${ps.length?thumbs(ps,4):""}<span class="tx"><b>${placeLabel()}</b>${wd(n)} ${dm(n)} lúc ${esc(draft.bG||"15:00")}${c==="tan"&&draft.bNoi?` · ${esc(draft.bNoi)}`:""}</span></div>
     <dl class="kv"><dt>Đầm</dt><dd>${ps.length?ps.map(s=>esc(s.ten)).join(", "):"Stylist chọn giùm"}</dd><dt>Trả đồ</dt><dd>${wd(tr.slice(0,10))} ${dm(tr.slice(0,10))} lúc ${tr.slice(11)} · ${L} lượt (${24*L} giờ)</dd>
-    ${m==="giu"?`<dt>Tiền thuê</dt><dd>${money(thue)}</dd>${yt?`<dt>${CD.YEN_TAM.ten}</dt><dd>${money(yt)}</dd>`:""}<dt>Cọc giữ đồ, về lại trong 24 giờ</dt><dd>${money(coc)}</dd>`:`<dt>Thuê và cọc</dt><dd>Theo chiếc nàng chọn khi thử</dd>${draft.yt?`<dt>${CD.YEN_TAM.ten}</dt><dd>${money(CD.YEN_TAM.phi)} mỗi chiếc nàng thuê</dd>`:""}`}
+    ${m==="giu"?`<dt>Tiền thuê</dt><dd>${money(thue)}</dd>${yt?`<dt>${CD.YEN_TAM.ten}</dt><dd>${money(yt)}</dd>`:""}<dt>Cọc giữ đồ, về lại trong 24 giờ</dt><dd>${money(coc)}</dd>`:`<dt>Thuê và cọc</dt><dd>Theo chiếc nàng chọn khi thử</dd>${draft.yt?`<dt>${CD.YEN_TAM.ten}</dt><dd>1% giá trị mỗi chiếc nàng thuê, từ ${money(CD.YEN_TAM.toiThieu)}</dd>`:""}`}
     <dt>Phí đến tận nơi</dt><dd>${c==="tan"?`${money(F)} · ${esc((CD.VUNG.find(v=>v.id===(draft.vung||"V1"))||{}).ten||"")}`:"Miễn phí"}</dd>
-    ${m==="giu"?`<dt class="tot">Cần chuyển khi nhận</dt><dd class="tot">${money(thue+yt+coc+(c==="tan"?F:0))}</dd>`:""}</dl></div>`;
+    ${m==="giu"?`<dt class="tot">Cần chuyển khi nhận</dt><dd class="tot">${money(thue+yt+coc+(c==="tan"?F:0))}</dd>`:""}</dl>${m==="giu"?`<p class="note" style="margin-top:6px">Chưa gồm ưu đãi. Nếu đơn hợp chương trình đang chạy, stylist trừ khi xác nhận.</p>`:""}</div>`;
 }
 function checkout2(){
   const m=mode();
@@ -526,7 +526,7 @@ function openPost(id){const b=(db.blog||[]).find(x=>x.id===id);const el=$("#post
   if(b&&curView==="post")document.title=b.tieuDe+" · Chérie";
   if(!b){el.innerHTML=`<header class="mag-hero noimg"><div class="in gut">${back}<h1>Không tìm thấy bài</h1><p class="deck">Bài này có thể đã được gỡ.</p></div></header>`;return}
   const body=bodies[id]||(b.noiDung?b:null);
-  const sp=(((body&&body.spLienQuan)||b.spLienQuan)||[]).map(i=>db.sp.find(s=>s.id===i)).filter(s=>s&&s.tt!=="Ngưng").slice(0,4);
+  const sp=(((body&&body.spLienQuan)||b.spLienQuan)||[]).map(i=>db.sp.find(s=>s.id===i)).filter(s=>s&&s.tt!=="Ngưng"&&s.tt!=="Mất").slice(0,4);
   const pics=sp.map(s=>({s,a:CD.anhCua(s.id,true)})).filter(x=>x.a.length);
   const cover=b.anh||(pics[0]&&pics[0].a[0].src)||"";
   /* ảnh xen giữa bài: lấy ảnh khác ảnh bìa của các mẫu được gợi ý */
@@ -561,7 +561,7 @@ renderInfo();
 $("#bagBtn").onclick=openBagFresh;
 /* ----- băng trượt đầu trang: lời giới thiệu, các mẫu có ảnh đẹp, banner khuyến mãi (bảng banner) ----- */
 let heroT=null,heroIdle=0,heroSig="";
-function renderHero(){const ok=s=>s.tt!=="Ngưng"&&s.tt!=="Sửa",ph=s=>CD.anhCua(s.id,true)[0];
+function renderHero(){const ok=s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&s.tt!=="Sửa",ph=s=>CD.anhCua(s.id,true)[0];
   const picks=db.sp.filter(s=>ok(s)&&ph(s)).sort((a,b)=>(b.gia||0)-(a.gia||0)).slice(0,6);
   const today=TODAY,bn=(db.banner||[]).filter(b=>b.tt==="Hiện"&&b.anh&&(!b.tu||b.tu<=today)&&(!b.den||b.den>=today)).sort((a,b)=>(a.thuTu||0)-(b.thuTu||0));
   const sig=JSON.stringify([picks.map(s=>s.id+(ph(s)||{}).src),bn.map(b=>b.id+b.anh)]);if(sig===heroSig)return;heroSig=sig;
