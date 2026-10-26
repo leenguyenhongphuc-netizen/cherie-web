@@ -646,7 +646,7 @@ const TT_CSS=`.ttg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));ga
 .ttit{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid #EFE7DB}.ttit b{font-size:15px}.ttit .st{font-size:12px;color:#6B635A}.ttcmp{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}.ttcmp>span{font-size:11px;color:#6B635A;writing-mode:horizontal-tb;width:52px}
 .ttbig{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center}.ttbig img{max-width:100%;max-height:100%}`;
 function ttCss(){if(!document.getElementById("tt-css")){const st=document.createElement("style");st.id="tt-css";st.textContent=TT_CSS;document.head.appendChild(st)}}
-function ttSlot(v,lb,attrs,cho){return `<label class="tts ${v?"has":""}${cho?" cho":""}" data-ttbox>${v?`<img alt="${lb}" ${/^data:|^https:/.test(v)?`src="${v}"`:`data-tt="${v}"`}>`:`${lb}<br>+`}<span class="lb">${cho?"Đang gửi…":lb}</span>${attrs?`<input type="file" accept="image/*" capture="environment" ${attrs}>`:""}</label>`}
+function ttSlot(v,lb,attrs,cho){return `<label class="tts ${v?"has":""}${cho?" cho":""}" data-ttbox>${v?`<img alt="${lb}" ${/^data:|^https:/.test(v)?`src="${v}"`:`data-tt="${v}"`}>`:(attrs?`${lb}<br>+`:`<span style="opacity:.6">Chưa có ảnh</span>`)}<span class="lb">${cho?"Đang gửi…":lb}</span>${attrs?`<input type="file" accept="image/*" capture="environment" ${attrs}>`:""}</label>`}
 function ttXem(src){ttCss();const el=document.createElement("div");el.className="ttbig";el.innerHTML=`<img src="${src}" alt="">`;el.onclick=()=>el.remove();document.body.appendChild(el)}
 /* Chụp ảnh tình trạng. o: {don, phase:"giao"|"nhan", items:[{id,ten}], tieuDe, nv, onDone} */
 function chupTinhTrang(o){ttCss();ttqKhoiDong();const el=hdLayer(),pn=el.querySelector(".pn");let mo=true;const close=()=>{mo=false;TTQ.nghe.delete(draw);el.remove()};let loi="";
@@ -666,15 +666,22 @@ function chupTinhTrang(o){ttCss();ttqKhoiDong();const el=hdLayer(),pn=el.querySe
       nenAnh(f,1280,0.72).then(d=>{ttqThem({don:o.don,phase:o.phase,sp:inp.dataset.sp,o:inp.dataset.k,anh:d,nv:o.nv||""});draw()},e=>{loi="Không đọc được ảnh: "+(e&&e.message||e)+". Chụp lại ô đó.";draw()})})};
   TTQ.nghe.add(draw);draw()}
 /* So ảnh lúc giao và lúc nhận lại của từng món. o: {don, items:[{id,ten,ghi}]} */
-function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn");
-  pn.innerHTML=`<div class="hd"><h2>So ảnh giao · nhận lại</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
-   ${o.items.map(x=>{const g=ttAnh(o.don,"giao",x.id),n=ttAnh(o.don,"nhan",x.id);return `<div class="ttit"><b>${hdEsc(x.ten)} <span class="st">· ${x.id}</span></b>${x.ghi?`<span class="st">${hdEsc(x.ghi)}</span>`:""}
-     <div class="ttcmp"><span>Lúc giao</span><div class="ttg">${TT_GOC.map((t,i)=>ttSlot((g.anh||[])[i],t)).join("")}</div>
-     <span>Lúc nhận</span><div class="ttg">${TT_GOC.map((t,i)=>ttSlot((n.anh||[])[i],t)).join("")}</div>
-     ${(n.them||[]).filter(Boolean).length?`<span>Cận vết</span><div class="ttg">${n.them.filter(Boolean).map((v,j)=>ttSlot(v,"Vết "+(j+1))).join("")}</div>`:""}</div></div>`}).join("")}
-   <p class="note">Chạm vào ảnh để xem lớn. Ô trống là góc chưa chụp.</p>`;
+function soAnhTinhTrang(o){ttCss();ttqKhoiDong();const el=hdLayer(),pn=el.querySelector(".pn");
+  const hang=(ten,ds)=>`<span>${ten}</span><div class="ttg">${ds}</div>`,trong=t=>`<span>${t}</span><p class="note" style="margin:0;color:#6B635A">`;
+  const draw=()=>{pn.innerHTML=`<div class="hd"><h2>So ảnh giao · nhận lại</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
+   <p class="note">Màn này <b>chỉ để xem và so</b>, không chụp ở đây. Chạm ảnh để xem lớn.${o.chup?" Cần chụp thêm thì bấm nút dưới cùng.":""}</p>
+   ${o.items.map(x=>{const g=ttAnh(o.don,"giao",x.id),n=ttAnh(o.don,"nhan",x.id),mat=x.mat||/mất/i.test(x.ghi||"")&&/^L4/.test(x.ghi||"")&&x.mat!==false;
+     const coG=TT_GOC.some((_,i)=>(g.anh||[])[i]),coN=TT_GOC.some((_,i)=>(n.anh||[])[i]||ttqCho(o.don,"nhan",x.id,"a"+i));
+     const sl=(m,ph,i)=>{const q=ttqCho(o.don,ph,x.id,"a"+i);return q?"q:"+q.k:(m.anh||[])[i]};
+     return `<div class="ttit"><b>${hdEsc(x.ten)} <span class="st">· ${x.id}</span></b>${x.ghi?`<span class="st">${hdEsc(x.ghi)}</span>`:""}
+     <div class="ttcmp">${coG?hang("Lúc giao",TT_GOC.map((t,i)=>ttSlot(sl(g,"giao",i),t)).join("")):trong("Lúc giao")+"Đơn này không có ảnh lúc giao.</p>"}
+     ${x.mat?trong("Lúc nhận")+"<b>Khách làm mất</b>, không có đồ nên không có ảnh.</p>":coN?hang("Lúc nhận",TT_GOC.map((t,i)=>ttSlot(sl(n,"nhan",i),t)).join("")):trong("Lúc nhận")+"Chưa chụp ảnh lúc nhận.</p>"}
+     ${(n.them||[]).filter(Boolean).length?hang("Cận vết",n.them.filter(Boolean).map((v,j)=>ttSlot(v,"Vết "+(j+1))).join("")):""}</div></div>`}).join("")}
+   ${o.chup?`<button class="btn primary" type="button" id="chupThem" style="width:100%;margin-top:10px">Chụp, bổ sung ảnh lúc nhận</button>`:""}`;
   ttFill(pn);pn.querySelector("[data-x]").onclick=()=>el.remove();
-  pn.querySelectorAll(".tts img").forEach(im=>im.onclick=e=>{e.preventDefault();if(im.src)ttXem(im.src)})}
+  const ct=pn.querySelector("#chupThem");if(ct)ct.onclick=()=>{el.remove();chupTinhTrang({don:o.don,phase:"nhan",nv:o.nv,items:o.items.filter(x=>!x.mat).map(x=>({id:x.id,ten:x.ten})),onDone:()=>soAnhTinhTrang(o)})};
+  pn.querySelectorAll(".tts img").forEach(im=>im.onclick=e=>{e.preventDefault();if(im.src)ttXem(im.src)})};
+  draw()}
 
 window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,TTQ,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,

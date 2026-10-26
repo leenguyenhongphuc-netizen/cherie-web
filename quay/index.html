@@ -229,7 +229,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=d5bed8ba"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=deee9dcd"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -688,7 +688,7 @@ function openDon(id){nextSheet=()=>openDon(id);
     const hx=root.querySelector("#hdXem");if(hx)hx.onclick=()=>window.CherieData.xemHopDong(d.hd);
     root.querySelectorAll("[data-lvq]").forEach(sel=>sel.onchange=()=>{root.querySelector(`[data-mtq="${sel.dataset.lvq}"]`).hidden=sel.value<="L1"&&sel.value!=="MAT"});
     const tnq=root.querySelector("#ttNq");if(tnq)tnq.onclick=()=>window.CherieData.chupTinhTrang({don:d.id,phase:"nhan",items:ttItems,onDone:()=>openDon(id)});
-    const tsq=root.querySelector("#ttSq");if(tsq)tsq.onclick=()=>window.CherieData.soAnhTinhTrang({don:d.id,items:ttItems});
+    const tsq=root.querySelector("#ttSq");if(tsq)tsq.onclick=()=>window.CherieData.soAnhTinhTrang({don:d.id,items:ttItems,chup:true,nv:nvTen()});
     const t=root.querySelector("#aTra");if(t)t.onclick=()=>{
       const matQ=c=>root.querySelector(`[data-lvq="${c.id}"]`).value==="MAT";const canAnh=ls.filter(c=>!matQ(c));
       if(!canAnh.every(c=>window.CherieData.ttDu(d.id,"nhan",c.sp))){toast("Chụp đủ 4 ảnh lúc nhận cho mỗi món khách mang trả");return window.CherieData.chupTinhTrang({don:d.id,phase:"nhan",items:ttItems.filter(x=>canAnh.some(c=>c.sp===x.id)),onDone:()=>openDon(id)})}
@@ -696,7 +696,7 @@ function openDon(id){nextSheet=()=>openDon(id);
         c.hu=bad;c.muc=lv;if(mat)c.mat=true;else delete c.mat;c.moTa=bad?`${lv} ${mat?"Khách làm mất":L[1]}${ghi?": "+ghi:""}`:"";c.phiHu=bad?window.CherieData.phiHu(lv,s,d.yenTam):0;c.kiemLuc=iso(NOW);
         s.tt=mat?"Mất":lv==="L3"||lv==="L4"?"Sửa":"Đang giặt"});
       d.phi=+root.querySelector("#phi").value||0;d.traTT=iso(NOW);d.tt="Đã trả";d.ttCoc=d.ttCoc==="Đang giữ"?"Chờ hoàn":d.ttCoc;save();render();openDon(id);toast(`Đã nhận trả đơn ${id}.`)};
-    const tsk=root.querySelector("#ttSk");if(tsk)tsk.onclick=()=>window.CherieData.soAnhTinhTrang({don:d.id,items:ls.map(c=>({id:c.sp,ten:byId("sp",c.sp).ten,ghi:c.hu?c.moTa:"Stylist: không hư hỏng"}))});
+    const tsk=root.querySelector("#ttSk");if(tsk)tsk.onclick=()=>window.CherieData.soAnhTinhTrang({don:d.id,chup:true,nv:nvTen(),items:ls.map(c=>({id:c.sp,ten:byId("sp",c.sp).ten,mat:!!c.mat,ghi:c.hu?c.moTa:"Stylist: không hư hỏng"}))});
     root.querySelectorAll("[data-kq]").forEach(sel=>sel.onchange=()=>{const c=ls.find(x=>x.id===sel.dataset.kq),s=byId("sp",c.sp),mat=sel.value==="MAT",lv=mat?"L4":sel.value,L=window.CherieData.MUC_HU.find(x=>x[0]===lv);
       if(mat)c.mat=true;else delete c.mat;c.muc=lv;c.hu=lv>"L1";c.phiHu=c.hu?window.CherieData.phiHu(lv,s,d.yenTam):0;if(c.hu&&!String(c.moTa||"").startsWith(lv)||mat)c.moTa=`${lv} ${mat?"Khách làm mất":L[1]}`;if(!c.hu)c.moTa="";save();openDon(id)});
     const ak=root.querySelector("#aKiem");if(ak)ak.onclick=()=>{ls.forEach(c=>{const s=byId("sp",c.sp);if(s.tt!=="Chờ kiểm tra")return;const lv=c.muc||(c.hu?String(c.moTa||"").slice(0,2):"L0");s.tt=c.mat?"Mất":lv==="L3"||lv==="L4"?"Sửa":"Đang giặt";c.kiemLuc=iso(NOW)});save();render();openDon(id);toast("Đã chốt phí, đồ chuyển sang giặt hoặc sửa");if(d.ttCoc==="Chờ hoàn"&&!conNo(d)&&cocHoan(d)>0)CD.hoanCoc({don:d,nv:nvTen(),onDone:()=>{d.ttCoc=cocHoan(d)===d.coc?"Đã hoàn":"Hoàn một phần";save();render();openDon(id);toast(`Đã hoàn cọc ${money(cocHoan(d))}`)}})};
