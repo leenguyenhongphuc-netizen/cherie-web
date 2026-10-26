@@ -1,0 +1,64 @@
+{
+ "dresses": [
+  {
+   "a": "https://sixdo.vn/images/products/2026/original/Untitled-71.jpg",
+   "b": "https://sixdo.vn/images/products/2026/original/Untitled-69.jpg",
+   "bPos": "50% 0%",
+   "bScale": 1.0,
+   "labelBottom": 300,
+   "ten": "Khoác hờ blazer",
+   "dong": "Soie Noire · Lụa đen · Size S",
+   "phu": "Gợi ý 1/3: vắt blazer khi se lạnh.",
+   "gia": "360k",
+   "giaTri": "3,3 triệu"
+  },
+  {
+   "a": "https://sixdo.vn/images/products/2026/original/Untitled-74.jpg",
+   "b": "https://sixdo.vn/images/products/2026/original/Untitled-72.jpg",
+   "bPos": "50% 0%",
+   "bScale": 1.05,
+   "labelBottom": 300,
+   "ten": "Khăn choàng",
+   "dong": "Soie Noire · Lụa đen · Size S",
+   "phu": "Gợi ý 2/3: quấn lỏng khăn cho ấm.",
+   "gia": "360k",
+   "giaTri": "3,3 triệu"
+  },
+  {
+   "a": "https://sixdo.vn/images/products/2026/original/untitled-73-1788074078.jpg",
+   "b": "https://sixdo.vn/images/products/2026/original/Untitled-70.jpg",
+   "bPos": "50% 0%",
+   "bScale": 1.0,
+   "labelBottom": 300,
+   "ten": "Đổi thắt lưng",
+   "dong": "Soie Noire · Lụa đen · Size S",
+   "phu": "Gợi ý 3/3: thêm khuyên tai bản to.",
+   "gia": "360k",
+   "giaTri": "3,3 triệu"
+  }
+ ],
+ "hookImg": "https://sixdo.vn/images/products/2026/original/Untitled-74.jpg",
+ "hookPos": "0% 0%",
+ "hook1": "Một đầm đen,\nba cách phối.",
+ "hook2": "Nàng thuê 24 giờ:",
+ "hookBig": "360k.",
+ "serviceImg": "https://sixdo.vn/images/products/2026/original/Untitled-72.jpg",
+ "serviceTitle": "Tụi mình lo phần còn lại.",
+ "service": [
+  [
+   "Thuê theo lượt ",
+   "24 giờ."
+  ],
+  [
+   "Cọc chuyển khoản, về lại trong 24 giờ. ",
+   "Không giữ căn cước."
+  ],
+  [
+   "Stylist mang đầm đến khách sạn hoặc nhà riêng, ",
+   "từ 120k."
+  ]
+ ],
+ "cta": "Lưu lại để mix nhé nàng",
+ "ctaSub": "Ba cách mặc mùa lạnh.",
+ "nguon": "Ảnh lookbook: SIXDO"
+}
