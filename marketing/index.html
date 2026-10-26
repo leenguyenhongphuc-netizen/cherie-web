@@ -285,15 +285,16 @@ function save(){CD.save()}
 const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const pad=n=>String(n).padStart(2,"0");
 function nowIso(){const d=new Date();return `${ymd(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`}
-function D(s){return s?new Date(s.length===10?s+"T00:00":s):null}
+function D(s){if(!s)return null;s=isoT(s);return new Date(s.length===10?s+"T00:00":s)}
 function dayNum(s){const d=D(s);return Math.round(new Date(d.getFullYear(),d.getMonth(),d.getDate())/864e5)}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function money(n){return Math.round(n||0).toLocaleString("vi-VN")+"đ"}
 function k(n){return n>=1e6?(Math.round(n/1e5)/10).toString().replace(".",",")+" tr":Math.round(n/1000)+"k"}
 function dm(s){const d=D(s);return d.getDate()+"/"+(d.getMonth()+1)}
-function hm(s){return s&&s.length>10?s.slice(11,16):""}
-function when(s){if(!s)return"";const t=s.slice(0,10);return (t===TODAY?"Hôm nay":dm(s))+(hm(s)?" "+hm(s):"")}
+function hm(s){s=s?isoT(s):s;return s&&s.length>10?s.slice(11,16):""}
+function isoT(s){if(typeof s==="number"||/^\d{12,}$/.test(String(s))){const d=new Date(+s+7*36e5);return d.toISOString().slice(0,16)}return String(s)}
+function when(s){if(!s)return"";s=isoT(s);const t=s.slice(0,10);return (t===TODAY?"Hôm nay":dm(s))+(hm(s)?" "+hm(s):"")}
 function byId(t,id){return db[t].find(x=>x.id===id)}
 function nextId(t,p){let m=0;db[t].forEach(x=>{const n=parseInt(String(x.id).replace(/\D/g,""),10);if(n>m)m=n});return p+String(m+1).padStart(3,"0")}
 function normPhone(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("84")&&d.length===11)d="0"+d.slice(2);return /^0\d{9}$/.test(d)?d:""}
@@ -741,7 +742,7 @@ function renderKH(){
   view.innerHTML=`<div><h1>Kế hoạch</h1><p class="sub">Agent lập, agent đánh giá, bạn duyệt rồi mới sang sản xuất</p></div>
   ${agentNote()}
   <div class="btns"><button class="btn primary" type="button" id="nW">Kế hoạch tuần tới</button><button class="btn" type="button" id="nM">Kế hoạch tháng 11</button></div>
-  <div class="list">${ps.map(P=>`<button class="row" type="button" data-plan="${P.id}"><span class="stripe ${P.tt==="Chờ chủ duyệt"?"warn":P.tt==="Đã duyệt"?"good":P.tt==="Cần làm lại"?"bad":""}"></span><span class="main"><span class="t">${esc(P.loai)} ${esc(P.ky)}</span><span class="s">${esc(P.giaiDoan)} · ${(P.items||[]).length} hạng mục</span></span><span class="r">${P.review?`<span class="score ${P.review.diem>=9?"ok":"no"}">${String(P.review.diem).replace(".",",")}</span><br>`:""}<span class="note">${esc(running[P.id]?"Agent đang chạy":P.tt)}</span></span></button>`).join("")||'<div class="empty">Chưa có kế hoạch.</div>'}</div>`;
+  <div class="list">${ps.map(P=>`<button class="row" type="button" data-plan="${P.id}"><span class="stripe ${P.tt==="Chờ chủ duyệt"?"warn":P.tt==="Đã duyệt"?"good":P.tt==="Cần làm lại"?"bad":""}"></span><span class="main"><span class="t">${esc(/^(Tháng|Tuần)/.test(P.ky||"")?P.ky:P.loai+" "+(P.ky||""))}</span><span class="s">${esc(P.giaiDoan)} · ${P.loai==="Tháng"?"Định hướng tháng"+(P.review&&P.review.diem!=null?" · AI chấm "+P.review.diem:""):(P.items||[]).length+" hạng mục"}</span></span><span class="r">${P.review?`<span class="score ${P.review.diem>=9?"ok":"no"}">${String(P.review.diem).replace(".",",")}</span><br>`:""}<span class="note">${esc(running[P.id]?"Agent đang chạy":P.tt)}</span></span></button>`).join("")||'<div class="empty">Chưa có kế hoạch.</div>'}</div>`;
   bind(view);
   const mk=(loai)=>{const p2=n=>String(n).padStart(2,"0"),y=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()),dd=d=>p2(d.getDate())+"/"+p2(d.getMonth()+1);const now=new Date();
     let id,ky,tu,den;if(loai==="Tuần"){const mo=new Date(now);mo.setDate(mo.getDate()+((8-mo.getDay())%7||7));const su=new Date(mo);su.setDate(su.getDate()+6);const t=new Date(Date.UTC(mo.getFullYear(),mo.getMonth(),mo.getDate()+3));const w1=new Date(Date.UTC(t.getUTCFullYear(),0,4));const wk=1+Math.round(((t-w1)/864e5-3+((w1.getUTCDay()+6)%7))/7);id="KH-T"+wk;ky=dd(mo)+" – "+dd(su)+"/"+su.getFullYear();tu=y(mo);den=y(su)}
