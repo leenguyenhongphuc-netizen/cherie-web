@@ -230,9 +230,13 @@ function kinhTe(sp,luotList,today){/* luotList: các dòng ct đã thuê (không
   return {G,lg,kh,loiLuot:lg-kh,luot,dong,khLuyKe,conLai:G-khLuyKe,loiLuyKe:dong-khLuyKe,hoaVon,conThieu,nhip,
     thangConLai:conThieu===0?0:(nhip>0?Math.ceil(conThieu/nhip):Math.ceil(conThieu/KT.luotThangGiaDinh)),daHoaVon:dong>=G&&G>0,tyLeThue:G?(+sp.gia||0)/giaTri(sp):0}}
 /* Gói Yên tâm: bảo vệ hư hỏng do chính Chérie bảo đảm (không phải hợp đồng của công ty bảo hiểm). */
-const YEN_TAM={phi:20000,ten:"Gói Yên tâm",
+/* Gói Yên tâm (chủ tiệm chốt 26/10/2026): 1% giá trị chiếc đầm, tối thiểu 20.000đ, làm tròn lên 10.000đ. Đơn cũ không có phiYenTam thì giữ 20.000đ mỗi chiếc. */
+const YEN_TAM={phi:20000,tyLe:0.01,toiThieu:20000,ten:"Gói Yên tâm",
   gom:["Vết bẩn khó giặt: rượu vang, son, kem nền, nước sốt","Sút chỉ, bung đường may, tuột khoá, rơi cúc hay hạt đính","Rách nhỏ cần thợ vá (dưới 3 cm), móc sợi"],
   khong:["Mất đồ hoặc hư nặng không sửa được: nàng đền 50% giá trị chiếc đầm thay vì 100%","Tự ý cắt, may sửa, nhuộm đầm","Trả trễ: vẫn tính 20.000đ mỗi giờ"]};
+function phiYenTam(sp){const v=(sp&&sp.giaTri!=null?+sp.giaTri:giaTri(sp))||0;return Math.max(YEN_TAM.toiThieu,Math.ceil(v*YEN_TAM.tyLe/10000)*10000)}
+function phiYenTamDs(sps){return (sps||[]).reduce((a,s)=>a+(s?phiYenTam(s):YEN_TAM.toiThieu),0)}
+function ytCuaDon(d,sps){if(!d||!d.yenTam)return 0;if(d.phiYenTam!=null)return +d.phiYenTam||0;return YEN_TAM.phi*(sps||[]).length}
 const MUC_HU=[["L0","Như mới",0],["L1","Bẩn nhẹ, giặt thường",0],["L2","Vết bẩn khó hoặc sút chỉ",100000],["L3","Rách, hỏng cần thợ",300000],["L4","Hư nặng hoặc mất",null]];
 function phiHu(muc,sp,yenTam){const m=MUC_HU.find(x=>x[0]===muc);if(!m)return 0;if(muc==="L4"){const v=giaTri(sp)||(+sp.coc||0);return yenTam?Math.round(v*0.5):v}return yenTam?0:m[2]}
 /* Gợi ý size từ số đo (cm, kg). Bảng size nữ Việt Nam, áp chung cho đầm của Chérie. */
@@ -339,7 +343,7 @@ function hdQuetAnh(file){return new Promise((ok,no)=>{const r=new FileReader();r
 function anhRieng(v){if(!v)return Promise.resolve("");if(/^data:/.test(v))return Promise.resolve(v);
   const m=/^drive:(.+)$/.exec(v);if(m&&window.GASDB)return window.GASDB.call("anhRieng",{id:m[1]}).then(r=>r.src||"").catch(()=>"");return Promise.resolve("")}
 function hdDieuKhoan(o){/* o: {so, tao, ben, sdt, items:[{id,ten,size,giaTri,gia}], nhan, tra, luot, phiGiao, yenTam, coc, hinhThuc, nv} */
-  const tienThue=o.items.reduce((a,x)=>a+(+x.gia||0),0)*(o.luot||1),giam=+o.giam||0,yt=o.yenTam?YEN_TAM.phi*o.items.length:0;
+  const tienThue=o.items.reduce((a,x)=>a+(+x.gia||0),0)*(o.luot||1),giam=+o.giam||0,yt=o.yenTam?(o.phiYenTam!=null?+o.phiYenTam:o.items.reduce((a,x)=>a+Math.max(YEN_TAM.toiThieu,Math.ceil((+x.giaTri||0)*YEN_TAM.tyLe/10000)*10000),0)):0;
   const hu=MUC_HU.slice(1).map(([c,t,p])=>`<tr><td>${c}</td><td>${hdEsc(t)}</td><td>${p==null?"Đền 100% giá trị chiếc đầm":p?hdMoney(p):"Miễn phí"}</td><td>${p==null?"Đền 50% giá trị":"Miễn phí"}</td></tr>`).join("");
   return `<div class="hd-doc">
   <p class="hd-c">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập – Tự do – Hạnh phúc</p>
@@ -526,7 +530,7 @@ function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn")
 window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
-  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
+  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
   init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},
   reset(){/* bản chính thức: tắt nạp lại dữ liệu mẫu để không ghi đè dữ liệu thật */},

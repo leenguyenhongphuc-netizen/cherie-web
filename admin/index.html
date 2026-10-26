@@ -208,7 +208,7 @@ header .homebtn{text-decoration:none;color:var(--ink)}
   <button type="button" data-tab="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Nhập liệu</button>
 </nav>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=51ee2ce7"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=8755e4df"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -263,7 +263,7 @@ function tamTinh(){return db.don.filter(d=>!d.demo&&d.tt==="Đang thuê")}
 function duKien(){return db.don.filter(d=>!d.demo&&d.tt==="Đã đặt")}
 function lines(d){return db.ct.filter(c=>c.don===d.id)}
 function rev(d){const ls=lines(d);const luot=+d.luot||(CD.soLuot?CD.soLuot(d.nhan,d.tra):1)||1;const goc=ls.reduce((x,c)=>x+(+c.gia||0),0)*luot,giam=Math.min(goc,+d.giam||0),thue=goc-giam;
-  const yt=d.yenTam?ls.length*CD.YEN_TAM.phi:0,giao=+d.phiGiao||0,tre=+d.phi||0,hu=ls.reduce((x,c)=>x+(c.hu?(+c.phiHu||0):0),0);const ps=yt+giao+tre+hu;
+  const yt=CD.ytCuaDon(d,ls),giao=+d.phiGiao||0,tre=+d.phi||0,hu=ls.reduce((x,c)=>x+(c.hu?(+c.phiHu||0):0),0);const ps=yt+giao+tre+hu;
   return{thue,yt,giao,tre,hu,ps,tong:thue+ps,luot,giam}}
 function sumRev(os){const t={thue:0,yt:0,giao:0,tre:0,hu:0,ps:0,tong:0,giam:0};os.forEach(d=>{const r=rev(d);Object.keys(t).forEach(k=>t[k]+=r[k])});return t}
 function costs(a,b){return db.chiphi.filter(c=>c.ngay>=a&&c.ngay<=b)}

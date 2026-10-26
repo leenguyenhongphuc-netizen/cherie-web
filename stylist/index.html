@@ -246,7 +246,7 @@ details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
   </div>
 </div>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=51ee2ce7"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=8755e4df"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -522,7 +522,7 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
       bind:()=>{bindCheckin(t);const tg=view.querySelector("#ttG");if(tg)tg.onclick=()=>CDx.chupTinhTrang({don:don.id,phase:"giao",nv:STYLIST,items:ids.map(i=>({id:i,ten:byId("sp",i).ten})),onDone:render});
         const co=view.querySelector("#cocOk");if(co)co.onchange=()=>{d.cocOk=co.checked;save();render()};
         const hg=view.querySelector("#hdG");if(hg)hg.onclick=()=>{const k=kh(don.dat)||{};const CD=window.CherieData;CD.lapHopDong({don:don.id,kh:{id:don.dat,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(ids,i=>{const l=lines(don).find(x=>x.sp===i);return l?(+l.ct.gia||0):0}),
-          nhan:db.clock,tra:don.tra,luot:don.luot||CD.soLuot(db.clock,don.tra),phiGiao:don.phiGiao||0,giam:don.giam||0,kmTen:don.kmTen||"",yenTam:!!don.yenTam,coc:don.coc,hinhThuc:don.hinhThuc||"",nv:STYLIST,onDone:h=>{don.hd=h.id;d.sign=true;save();render();toast("Đã lưu hợp đồng "+h.id)}})};
+          nhan:db.clock,tra:don.tra,luot:don.luot||CD.soLuot(db.clock,don.tra),phiGiao:don.phiGiao||0,giam:don.giam||0,kmTen:don.kmTen||"",yenTam:!!don.yenTam,phiYenTam:don.yenTam?window.CherieData.ytCuaDon(don,lines(don)):0,coc:don.coc,hinhThuc:don.hinhThuc||"",nv:STYLIST,onDone:h=>{don.hd=h.id;d.sign=true;save();render();toast("Đã lưu hợp đồng "+h.id)}})};
         const hx=view.querySelector("#hdGX");if(hx)hx.onclick=()=>window.CherieData.xemHopDong(don.hd);
         const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{ids.forEach(i=>scan(i,"Giao khách",t.id,t.noi,"Đang thuê"));don.tt="Đang thuê";t.tt="Hoàn tất";t.step=TYPES.giao.steps.length;d.end=db.clock;save();render();toast(`Đã giao đơn ${don.id}`)}}});
   }
