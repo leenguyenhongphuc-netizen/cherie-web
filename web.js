@@ -15,7 +15,7 @@ try{bag=JSON.parse(localStorage.getItem("cherie-web-picks")||"[]");if(!Array.isA
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money=n=>Math.round(n||0).toLocaleString("vi-VN")+"đ";
-const k=n=>n>=1e6?(Math.round(n/1e5)/10).toString().replace(".",",")+" triệu":Math.round(n/1000)+"k";
+const k=n=>{n=+n||0;const a=Math.abs(n);return a<1e6&&a%1000===0?(n<0?"−":"")+a/1000+"k":(n<0?"−":"")+a.toLocaleString("vi-VN").replace(/,/g,".")+"đ"};
 const dn=s=>Math.round(new Date(s.slice(0,10)+"T00:00")/864e5);
 const addD=(s,n)=>{const d=new Date(s+"T00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const dm=s=>+s.slice(8,10)+"/"+(+s.slice(5,7));
@@ -217,8 +217,8 @@ function openReview(){let sao=5;
 /* ----- thông tin thuê: gói gọn trong một danh sách mở ra khi cần ----- */
 function renderInfo(){const Y=CD.YEN_TAM,g=db.sp.map(s=>s.gia).filter(Boolean);const lo=g.length?k(Math.min(...g)):"",hi=g.length?k(Math.max(...g)):"";
   const lv=CD.MUC_HU.slice(1).map(([c,t,p])=>`<tr><td>${t}</td><td>${p==null?"Đền theo giá trị chiếc đầm":p?money(p):"Miễn phí"}</td><td>${p==null?"Giảm còn 50%":p?"Miễn phí":"Miễn phí"}</td></tr>`).join("");
-  const Q=[["Giá thuê và tiền cọc",`<p>Giá tính theo lượt, từ ${lo} đến ${hi}, in trên từng chiếc. Một lượt là 24 giờ kể từ lúc nàng nhận đồ. Nếu giờ trả rơi vào buổi tối sau 21:00, nàng trả trước 10:00 sáng hôm sau là được, không tính thêm. Cọc là khoản giữ đồ, chuyển khoản lúc nhận và về lại đủ trong 24 giờ sau khi trả; tổng cọc hiện ở bước đặt lịch. Căn cước hay hộ chiếu, nàng cứ giữ trong ví.</p>`],
-   [`${Y.ten}: 1% giá trị chiếc đầm, từ ${money(Y.toiThieu)}`,`<p>Một khoản tự chọn khi đặt lịch, bằng 1% giá trị chiếc đầm (tối thiểu ${money(Y.toiThieu)} mỗi chiếc, làm tròn lên 10.000đ). Ví dụ chiếc giá trị 3,3 triệu: 40.000đ; chiếc 10 triệu: 100.000đ. Gói giúp mấy sự cố nhỏ trong lúc mặc không thành nỗi lo. Đây là cam kết của chính Chérie, không phải hợp đồng của công ty bảo hiểm.</p><p><b>Tụi mình lo trọn, nàng không trả thêm:</b></p><ul class="cov">${Y.gom.map(x=>`<li>${x}</li>`).join("")}</ul><p><b>Không nằm trong gói:</b></p><ul class="cov">${Y.khong.map(x=>`<li>${x}</li>`).join("")}</ul>`],
+  const Q=[["Giá thuê và tiền cọc",`<p>Giá tính theo lượt, từ ${lo} đến ${hi}, in trên từng chiếc. Một lượt là 24 giờ kể từ lúc nàng nhận đồ. Nếu giờ trả rơi vào buổi tối sau 21:00, nàng trả trước 10:00 sáng hôm sau là được, không tính thêm. Cọc là khoản giữ đồ, chuyển khoản lúc nhận và hoàn ngay khi nàng trả đồ: kiểm đồ xong là tụi mình chuyển liền vào tài khoản nàng để lại lúc ký hợp đồng, kèm ảnh chụp giao dịch (hoặc trả tiền mặt nếu nàng muốn). Tổng cọc hiện ở bước đặt lịch. Căn cước hay hộ chiếu, nàng cứ giữ trong ví.</p>`],
+   [`${Y.ten}: 1% giá trị chiếc đầm, từ ${money(Y.toiThieu)}`,`<p>Một khoản tự chọn khi đặt lịch, bằng 1% giá trị chiếc đầm (tối thiểu ${money(Y.toiThieu)} mỗi chiếc, làm tròn lên 10.000đ). Ví dụ chiếc giá trị 3.300.000đ: gói 40.000đ; chiếc 10.000.000đ: gói 100.000đ. Gói giúp mấy sự cố nhỏ trong lúc mặc không thành nỗi lo. Đây là cam kết của chính Chérie, không phải hợp đồng của công ty bảo hiểm.</p><p><b>Tụi mình lo trọn, nàng không trả thêm:</b></p><ul class="cov">${Y.gom.map(x=>`<li>${x}</li>`).join("")}</ul><p><b>Không nằm trong gói:</b></p><ul class="cov">${Y.khong.map(x=>`<li>${x}</li>`).join("")}</ul>`],
    ["Nếu làm bẩn, hư hoặc mất đồ",`<table class="lv"><tbody><tr><td><b>Tình trạng</b></td><td><b>Không có gói</b></td><td><b>Có Gói Yên tâm</b></td></tr>${lv}</tbody></table><p>Giá trị từng chiếc in trên trang chi tiết của chiếc đó. Stylist chụp ảnh và cùng nàng ký biên bản lúc giao và lúc nhận lại.</p>`],
    ["Đến tận nơi ở đâu",`<p>Khách sạn, homestay, căn hộ hay nhà riêng. Phí tính trọn một đơn, gồm chuyến mang đồ tới và chuyến nhận lại.</p><table class="lv"><tbody>${CD.VUNG.map(v=>`<tr><td><b>${v.ten}</b><br>${v.mo}</td><td>${money(v.phi)}</td></tr>`).join("")}</tbody></table><p>${CD.NGOAI_VUNG} Stylist gọi nàng 15 phút trước khi tới, mang thêm một size dự phòng nếu kho còn. Ghé tiệm thì thử miễn phí.</p>`],
    ["Vệ sinh sau mỗi lượt",`<p>Kiểm tra từng đường may, giặt riêng từng chiếc, hấp phẳng, khử khuẩn trong lẫn ngoài, rồi niêm phong túi kín có tem ngày giặt. Nàng là người xé tem đầu tiên.</p>`],
@@ -287,7 +287,7 @@ function openBag(){
    <div class="meter" aria-hidden="true">${[1,2,3,4,5].map(i=>`<span class="${i<=ps.length?"on":""}"></span>`).join("")}</div>
    <dl class="kv"><dt>Thuê cả ${ps.length} chiếc${L>1?` · ${L} lượt`:""}</dt><dd>${money(thue)}</dd></dl>
    ${ytToggle(ps)}
-   <p class="note">Cọc giữ đồ sẽ hiện ở bước đặt lịch và về lại đủ trong 24 giờ sau khi trả. Thử trước thì nàng chỉ trả tiền chiếc mình chọn. Lúc đặt lịch chưa cần chuyển khoản.</p>
+   <p class="note">Cọc giữ đồ sẽ hiện ở bước đặt lịch và hoàn ngay khi nàng trả đồ. Thử trước thì nàng chỉ trả tiền chiếc mình chọn. Lúc đặt lịch chưa cần chuyển khoản.</p>
    <div class="acts"><button class="btn solid block" type="button" id="gGo">Đặt lịch với ${ps.length} chiếc này</button><button class="btn block" type="button" id="gMore">Chọn thêm</button></div>`,r=>{
     r.querySelector("#gN").onchange=e=>{setDates(e.target.value,null);openBag()};
     r.querySelector("#gT").onchange=e=>{setDates(null,e.target.value);openBag()};
@@ -349,14 +349,14 @@ function checkout1(){
   });
 }
 function ytSheet(){const i=1;sheet(CD.YEN_TAM.ten,`<div style="display:flex;flex-direction:column;gap:10px;color:var(--muted)">${$("#info").children[i].querySelector("div").innerHTML}${$("#info").children[2].querySelector("div").innerHTML}</div>`)}
-function ytToggle(L){const n=(L||[]).length,tong=CD.phiYenTamDs(L||[]);return `<div class="ytbox"><label class="consent" style="color:var(--ink)"><input type="checkbox" id="yt" ${draft.yt?"checked":""}> <span><b>Thêm ${CD.YEN_TAM.ten}</b> · 1% giá trị mỗi chiếc, từ ${money(CD.YEN_TAM.toiThieu)}${n?` (đơn này ${money(tong)})`:""}. Bẩn khó giặt, sút chỉ, rách nhỏ: tụi mình lo trọn.</span></label><button class="link" type="button" id="ytMore" style="align-self:flex-start">Xem gói gồm gì</button></div>`}
+function ytToggle(L){const n=(L||[]).length,tong=CD.phiYenTamDs(L||[]);return `<div class="ytbox"><label class="consent" style="color:var(--ink)"><input type="checkbox" id="yt" ${draft.yt?"checked":""}> <span><b>Thêm ${CD.YEN_TAM.ten}</b> · 1% giá trị mỗi chiếc, từ ${money(CD.YEN_TAM.toiThieu)}${n?` (đơn này ${money(tong)})`:""}. Bẩn khó giặt, sút chỉ, rách cần thợ sửa: tụi mình lo trọn.</span></label><button class="link" type="button" id="ytMore" style="align-self:flex-start">Xem gói gồm gì</button></div>`}
 function bindYt(r,re){const c=r.querySelector("#yt");if(c)c.onchange=()=>{keepAll();draft.yt=c.checked;saveDraft();re()};const m=r.querySelector("#ytMore");if(m)m.onclick=()=>{keepAll();go(ytSheet)}}
 function bookSummary(){
   const ps=bagItems();const [n,t]=dates();const m=mode(),c=cach();
   const L=luotOf(n,t),tr=traOf(),F=fee();const thue=ps.reduce((a,s)=>a+s.gia,0)*L,coc=ps.reduce((a,s)=>a+s.coc,0),yt=draft.yt?CD.phiYenTamDs(ps):0;
   return `<div class="sum"><div class="head">${ps.length?thumbs(ps,4):""}<span class="tx"><b>${placeLabel()}</b>${wd(n)} ${dm(n)} lúc ${esc(draft.bG||"15:00")}${c==="tan"&&draft.bNoi?` · ${esc(draft.bNoi)}`:""}</span></div>
     <dl class="kv"><dt>Đầm</dt><dd>${ps.length?ps.map(s=>esc(s.ten)).join(", "):"Stylist chọn giùm"}</dd><dt>Trả đồ</dt><dd>${wd(tr.slice(0,10))} ${dm(tr.slice(0,10))} lúc ${tr.slice(11)} · ${L} lượt (${24*L} giờ)</dd>
-    ${m==="giu"?`<dt>Tiền thuê</dt><dd>${money(thue)}</dd>${yt?`<dt>${CD.YEN_TAM.ten}</dt><dd>${money(yt)}</dd>`:""}<dt>Cọc giữ đồ, về lại trong 24 giờ</dt><dd>${money(coc)}</dd>`:`<dt>Thuê và cọc</dt><dd>Theo chiếc nàng chọn khi thử</dd>${draft.yt?`<dt>${CD.YEN_TAM.ten}</dt><dd>1% giá trị mỗi chiếc nàng thuê, từ ${money(CD.YEN_TAM.toiThieu)}</dd>`:""}`}
+    ${m==="giu"?`<dt>Tiền thuê</dt><dd>${money(thue)}</dd>${yt?`<dt>${CD.YEN_TAM.ten}</dt><dd>${money(yt)}</dd>`:""}<dt>Cọc giữ đồ, hoàn ngay khi trả</dt><dd>${money(coc)}</dd>`:`<dt>Thuê và cọc</dt><dd>Theo chiếc nàng chọn khi thử</dd>${draft.yt?`<dt>${CD.YEN_TAM.ten}</dt><dd>1% giá trị mỗi chiếc nàng thuê, từ ${money(CD.YEN_TAM.toiThieu)}</dd>`:""}`}
     <dt>Phí đến tận nơi</dt><dd>${c==="tan"?`${money(F)} · ${esc((CD.VUNG.find(v=>v.id===(draft.vung||"V1"))||{}).ten||"")}`:"Miễn phí"}</dd>
     ${m==="giu"?`<dt class="tot">Cần chuyển khi nhận</dt><dd class="tot">${money(thue+yt+coc+(c==="tan"?F:0))}</dd>`:""}</dl>${m==="giu"?`<p class="note" style="margin-top:6px">Chưa gồm ưu đãi. Nếu đơn hợp chương trình đang chạy, stylist trừ khi xác nhận.</p>`:""}</div>`;
 }

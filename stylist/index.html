@@ -247,7 +247,7 @@ details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
   </div>
 </div>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=daa893dc"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d085200"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -279,9 +279,10 @@ function myOther(){const end=(()=>{const d=new Date(TODAY+"T00:00");d.setDate(d.
   const mine=db.trips.filter(t=>t.stylist===STYLIST&&t.ngay!==TODAY);
   return{tre:mine.filter(t=>t.ngay<TODAY&&t.tt!=="Hoàn tất").sort((a,b)=>(a.ngay+a.gio)<(b.ngay+b.gio)?-1:1),
     toi:mine.filter(t=>t.ngay>TODAY&&t.ngay<=end).sort((a,b)=>(a.ngay+a.gio)<(b.ngay+b.gio)?-1:1)}}
+function luotThu(t){const C=window.CherieData;return C.soLuot(db.clock,t.dungTra||C.hanTra(db.clock,1))}
 function tripRow(t,withDay){const c=kh(t.kh);const n=t.loai==="thu"?(t.d&&t.d.pick?t.d.pick.length+" món":"chưa chọn đồ"):tripItems(t).length+" món";
   const thu=["CN","T2","T3","T4","T5","T6","T7"][new Date(t.ngay+"T00:00").getDay()];
-  return `<button class="row" type="button" data-trip="${t.id}"><span class="time">${withDay?`${thu} ${dm(t.ngay+"T")}<br>`:""}${t.gio}</span><span class="main"><span class="t">${esc(TYPES[t.loai].name)} · ${esc(c.ten)}</span><span class="s">${esc(t.noi)} · ${n}</span></span><span class="r">${tripPill(t)}</span></button>`}
+  return `<button class="row" type="button" data-trip="${t.id}"><span class="time">${withDay?`${thu} ${dm(t.ngay+"T")}<br>`:""}${t.gio}</span><span class="main"><span class="t">${esc(TYPES[t.loai].name)} · ${esc(c.ten)}</span><span class="s">${esc(t.noi)} · ${n}${(()=>{const dn=t.don&&byId("don",t.don);return dn?(dn.yenTam?" · có gói Yên tâm":" · không gói"):""})()}</span></span><span class="r">${tripPill(t)}</span></button>`}
 function syncChip(st){const el=document.getElementById("sync");if(!el)return;
   const m={live:["live","Đã đồng bộ với quầy"],connecting:["","Đang kết nối kho chung…"],local:["warn","Chỉ đồng bộ giữa các tab trên máy này"],empty:["warn","Kho chung chưa có dữ liệu"],readonly:["warn","Chỉ xem, không ghi được kho chung"],full:["warn","Kho chung đã đầy"],error:["warn","Mất kết nối, đang thử lại"]}[st]||["",st];
   el.className="syncchip "+m[0];el.textContent=m[1]}
@@ -289,7 +290,7 @@ function syncChip(st){const el=document.getElementById("sync");if(!el)return;
 /* helpers */
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function money(n){return Math.round(n||0).toLocaleString("vi-VN")+"đ"}
-function k(n){return n>=1e6?(Math.round(n/1e5)/10).toString().replace(".",",")+" tr":Math.round(n/1000)+"k"}
+function k(n){n=+n||0;const a=Math.abs(n);return a<1e6&&a%1000===0?(n<0?"−":"")+a/1000+"k":(n<0?"−":"")+a.toLocaleString("vi-VN").replace(/,/g,".")+"đ"}
 function D(s){return new Date(s)}
 function pad(n){return String(n).padStart(2,"0")}
 function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())}
@@ -302,7 +303,7 @@ function tick(m){const d=D(db.clock);d.setMinutes(d.getMinutes()+(m||2));db.cloc
 function atLeast(hhmm){const t=TODAY+"T"+hhmm;if(db.clock<t)db.clock=t}
 function scan(spId,loai,trip,noi,newTt){tick(1);const s=byId("sp",spId);s.tt=newTt;db.log.unshift({id:CD.newId("L"),t:db.clock,sp:spId,loai,trip,noi,tt:newTt,who:STYLIST})}
 function tripItems(t){if(t.loai==="thu")return t.d.pick||[];return lines(byId("don",t.don)).map(l=>l.sp)}
-function ttPill(s){const m={"Sẵn sàng":"good","Đang thuê":"mem","Đang giặt":"warn","Sửa":"bad","Mất":"bad","Đang mang đi":"vip","Chờ kiểm tra":"warn"};return `<span class="pill ${m[s]||"line"}">${esc(s)}</span>`}
+function ttPill(s){const m={"Sẵn sàng":"good","Đang thuê":"mem","Đang giặt":"warn","Sửa":"bad","Mất":"bad","Ngưng":"line","Đang mang đi":"vip","Chờ kiểm tra":"warn"};return `<span class="pill ${m[s]||"line"}">${esc(s)}</span>`}
 function tripPill(t){const m={"Chưa đi":"line","Đang làm":"mem","Hoàn tất":"good","Lệch – chờ quản lý":"bad"};return `<span class="pill ${m[t.tt]}">${esc(t.tt)}</span>`}
 function sw(s){return `<span class="stripe" style="background:${SWATCH[s.mau]||"#888"}"></span>`}
 function toast(msg){const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
@@ -344,7 +345,7 @@ function renderToday(){
   const next=open[0];
   const nextCard=next?(()=>{const c=kh(next.kh),n=tripItems(next).length,dn=next.don?byId("don",next.don):null;return `<div class="nextc"><span class="when">${next.tt==="Đang làm"?"Đang làm dở · ":"Chuyến kế tiếp · "}${esc(untilTxt(next))}</span>
     <span class="big">${esc(TYPES[next.loai].name)} · ${esc(c.ten)}</span>
-    <span class="meta">${esc(next.noi||"")} · ${n} món${dn&&dn.yenTam?" · có Gói Yên tâm":""}</span>
+    <span class="meta">${esc(next.noi||"")} · ${n} món${dn?(dn.yenTam?" · có Gói Yên tâm":" · không mua Gói Yên tâm"):""}</span>
     ${quickBtns(next)}
     <button class="btn primary block" type="button" data-trip="${next.id}">${next.tt==="Đang làm"?"Làm tiếp":"Mở chuyến, bắt đầu"}</button></div>`})():`<div class="empty">Chưa có chuyến nào cần đi. Quầy cử chuyến là hiện ở đây ngay.</div>`;
   const rest=t=>t!==next;
@@ -466,9 +467,9 @@ function thuStep(t,c,step,out){const d=t.d;
      ${d.checkin?`<section><h2>Khách chọn</h2><div class="list">${ids.map(i=>{const s=byId("sp",i);const v=d.kq[i];return `<div class="row wrap">${sw(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${k(s.gia)} · cọc ${k(s.coc)}</span></span><span class="seg"><button type="button" class="chip" data-kq="${i}" data-v="thue" aria-pressed="${v==="thue"}">Khách thuê</button><button type="button" class="chip" data-kq="${i}" data-v="ve" aria-pressed="${v==="ve"}">Mang về</button></span>
        ${v==="thue"?`<label class="check full"><input type="checkbox" data-photo="${i}" ${d.photo[i]?"checked":""}> Đã chụp 4 ảnh tình trạng lúc giao (trước, sau, chi tiết, nhãn) · mức L0 Như mới</label>`:""}</div>`}).join("")}</div></section>
      ${rent.length?`<section><h2>Biên bản giao và cọc</h2><div class="box" style="display:flex;flex-direction:column;gap:10px">
-       ${(()=>{const thue=rent.reduce((a,i)=>a+byId("sp",i).gia,0),CDk=window.CherieData,m=(db.km||[]).find(x=>x.id===d.km),g=CDk.kmGiam(m,thue);return `<label class="f" for="kmT">Chương trình giảm giá<select id="kmT">${CDk.kmOptions("Trực tiếp",d.km||"",thue)}</select>${m?`<span class="note">${esc(CDk.kmMoTa(m))}</span>`:""}</label>
-       <dl class="kv"><dt>Tiền thuê</dt><dd>${money(thue)}</dd>${g?`<dt>Giảm giá</dt><dd>−${money(g)}</dd><dt>Khách trả tiền thuê</dt><dd><b>${money(thue-g)}</b></dd>`:""}<dt>Cọc đề xuất</dt><dd>${money(cocDx)}</dd></dl>
-       <label class="check"><input type="checkbox" id="ytT" ${d.yt?"checked":""}> Khách mua Gói Yên tâm: ${money(CDk.phiYenTamDs(rent.map(i=>byId("sp",i))))} (1% giá trị mỗi chiếc, tối thiểu 20.000đ). Hư nhẹ miễn phí; mất hoặc hư nặng đền 50% thay vì 100%.</label>`})()}
+       ${(()=>{const thue=rent.reduce((a,i)=>a+byId("sp",i).gia,0)*luotThu(t),CDk=window.CherieData,m=(db.km||[]).find(x=>x.id===d.km),g=CDk.kmGiam(m,thue);return `<label class="f" for="kmT">Chương trình giảm giá<select id="kmT">${CDk.kmOptions("Trực tiếp",d.km||"",thue)}</select>${m?`<span class="note">${esc(CDk.kmMoTa(m))}</span>`:""}</label>
+       <dl class="kv"><dt>Tiền thuê</dt><dd>${money(thue)}${luotThu(t)>1?` · ${luotThu(t)} lượt`:""}</dd>${g?`<dt>Giảm giá</dt><dd>−${money(g)}</dd><dt>Khách trả tiền thuê</dt><dd><b>${money(thue-g)}</b></dd>`:""}<dt>Cọc đề xuất</dt><dd>${money(cocDx)}</dd></dl>
+       <label class="check"><input type="checkbox" id="ytT" ${d.yt?"checked":""}> Khách mua Gói Yên tâm: ${money(CDk.phiYenTamDs(rent.map(i=>byId("sp",i))))} (1% giá trị mỗi chiếc, tối thiểu 20.000đ). Bẩn khó, sút chỉ, rách cần thợ sửa miễn phí; mất hoặc hư nặng đền 50% thay vì 100%.</label>`})()}
        <div class="two"><label class="f" for="cocSo">Cọc thu (đ)<input id="cocSo" type="number" min="0" step="50000" value="${d.coc.so!=null?d.coc.so:cocDx}"></label><label class="f" for="cocHt">Hình thức<select id="cocHt"><option ${d.coc.hinhThuc==="Chuyển khoản"?"selected":""}>Chuyển khoản</option><option ${d.coc.hinhThuc==="Tiền mặt"?"selected":""}>Tiền mặt</option></select></label></div>
        <label class="check"><input type="checkbox" id="cocOk" ${d.coc.nhan?"checked":""}> Đã nhận đủ cọc (chuyển khoản: xem tiền về tài khoản tiệm). Không giữ CCCD bản cứng.</label></div></section>
        <section>${hdBlock(hdOk?d.hdId:"","hdT")}</section>`:""}`:""}`,
@@ -482,16 +483,16 @@ function thuStep(t,c,step,out){const d=t.d;
         const ht=view.querySelector("#cocHt");if(ht)ht.onchange=()=>{d.coc.hinhThuc=ht.value;save()};
         const co=view.querySelector("#cocOk");if(co)co.onchange=()=>{d.coc.nhan=co.checked;save();render()};
         const ht2=view.querySelector("#hdT");if(ht2)ht2.onclick=()=>{const k=kh(t.kh)||{};const CD=window.CherieData;const tra=t.dungTra||CD.hanTra(db.clock,1);
-          CD.lapHopDong({don:"",kh:{id:t.kh,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(rent),nhan:db.clock,tra,luot:CD.soLuot(db.clock,tra),phiGiao:0,...(()=>{const m=(db.km||[]).find(x=>x.id===d.km),g=CD.kmGiam(m,rent.reduce((a,i)=>a+byId("sp",i).gia,0));return g?{giam:g,kmTen:m.ten}:{}})(),yenTam:!!d.yt,phiYenTam:d.yt?CD.phiYenTamDs(rent.map(i=>byId("sp",i))):0,coc:d.coc.so!=null?d.coc.so:cocDx,hinhThuc:d.coc.hinhThuc,nv:STYLIST,
+          CD.lapHopDong({don:"",kh:{id:t.kh,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(rent),nhan:db.clock,tra,luot:CD.soLuot(db.clock,tra),phiGiao:0,...(()=>{const m=(db.km||[]).find(x=>x.id===d.km),g=CD.kmGiam(m,rent.reduce((a,i)=>a+byId("sp",i).gia,0)*luotThu(t));return g?{giam:g,kmTen:m.ten}:{}})(),yenTam:!!d.yt,phiYenTam:d.yt?CD.phiYenTamDs(rent.map(i=>byId("sp",i))):0,coc:d.coc.so!=null?d.coc.so:cocDx,hinhThuc:d.coc.hinhThuc,nv:STYLIST,
             onDone:h=>{d.hdId=h.id;d.hdItems=rent.join(",");d.sign=true;save();render();toast("Đã lưu hợp đồng "+h.id)}})};
         const hx2=view.querySelector("#hdTX");if(hx2)hx2.onclick=()=>window.CherieData.xemHopDong(d.hdId);
         goNext(t,()=>{const r=d.pick.filter(i=>d.kq[i]==="thue");
           r.forEach(i=>scan(i,"Khách chọn, giao khách",t.id,t.noi,"Đang thuê"));
           if(r.length){const id=nextId("don","D");const coc=d.coc.so!=null?d.coc.so:r.reduce((a,i)=>a+byId("sp",i).coc,0);
             const traD=t.dungTra||window.CherieData.hanTra(db.clock,1);
-            db.don.push({id,dat:t.kh,nhom:"",dip:t.dip||"Khác",nhan:db.clock,tra:traD,luot:window.CherieData.soLuot(db.clock,traD),yenTam:!!d.yt,phiYenTam:d.yt?window.CherieData.phiYenTamDs(r.map(i=>byId("sp",i))):0,traTT:"",tt:"Đang thuê",coc,hinhThuc:d.coc.hinhThuc,ttCoc:coc>0?"Đang giữ":"Chưa cọc",phi:0,note:`Tạo từ chuyến thử ${t.id} của stylist ${STYLIST}`,...(()=>{const m=(db.km||[]).find(x=>x.id===d.km),g=window.CherieData.kmGiam(m,r.reduce((a,i)=>a+byId("sp",i).gia,0));return g?{km:m.id,kmTen:m.ten,giam:g}:{}})()});
+            db.don.push({id,dat:t.kh,nhom:"",dip:t.dip||"Khác",nhan:db.clock,tra:traD,luot:window.CherieData.soLuot(db.clock,traD),yenTam:!!d.yt,phiYenTam:d.yt?window.CherieData.phiYenTamDs(r.map(i=>byId("sp",i))):0,traTT:"",tt:"Đang thuê",coc,hinhThuc:d.coc.hinhThuc,ttCoc:coc>0?"Đang giữ":"Chưa cọc",phi:0,note:`Tạo từ chuyến thử ${t.id} của stylist ${STYLIST}`,...(()=>{const m=(db.km||[]).find(x=>x.id===d.km),g=window.CherieData.kmGiam(m,r.reduce((a,i)=>a+byId("sp",i).gia,0)*luotThu(t));return g?{km:m.id,kmTen:m.ten,giam:g}:{}})()});
             r.forEach(i=>db.ct.push({id:nextId("ct","CT"),don:id,mac:t.kh,sp:i,gia:byId("sp",i).gia,hu:false,moTa:"",phiHu:0}));d.newDon=id;
-            if(d.hdId){const dn=byId("don",id);if(dn)dn.hd=d.hdId;const h=(db.hd||[]).find(x=>x.id===d.hdId);if(h)h.don=id}}
+            if(d.hdId){const dn=byId("don",id);if(dn)dn.hd=d.hdId;const h=(db.hd||[]).find(x=>x.id===d.hdId);if(h){h.don=id;if(dn&&h.hoan)window.CherieData.hoanLuu(dn,h.hoan)}}}
           d.back={}});}});
   }
   else{
@@ -541,10 +542,10 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
 /* ---------- thông tin đơn: ai thuê, thuê gì, có Gói Yên tâm không, quy tắc đền ---------- */
 const ytBanner=d=>window.CherieData.ytBanner(d),quyTacDen=d=>window.CherieData.quyTacDen(d);
 function donBox(t){if(!t.don)return "";const don=byId("don",t.don);if(!don)return "";const CD=window.CherieData,ls=lines(don),dat=kh(don.dat)||{};
-  const it=ls.map(l=>{const sp=byId("sp",l.sp)||{},gt=CD.giaTri(sp),mac=l.mac&&l.mac!==don.dat?(kh(l.mac)||{}).ten:"";return `<div class="row">${sw(sp)}<span class="main"><span class="t">${esc(sp.ten||l.sp)} · ${esc(sp.size||"")}</span><span class="s mono">${esc(l.sp)}</span><span class="s">Thuê ${k(+l.ct.gia||sp.gia||0)} · giá trị ${gt?k(gt):"chưa có"}${don.yenTam?` · đã mua gói ${k(CD.ytMon(don,sp))}`:""}${mac?` · người mặc: ${esc(mac)}`:""}</span></span></div>`}).join("");
+  const it=ls.map(l=>{const sp=byId("sp",l.sp)||{},gt=CD.giaTri(sp),mac=l.mac&&l.mac!==don.dat?(kh(l.mac)||{}).ten:"";return `<div class="row">${sw(sp)}<span class="main"><span class="t">${esc(sp.ten||l.sp)} · ${esc(sp.size||"")}</span><span class="s mono">${esc(l.sp)}</span><span class="s">Thuê ${k(+l.ct.gia||sp.gia||0)} · giá trị ${gt?k(gt):"chưa có"}${mac?` · người mặc: ${esc(mac)}`:""}</span></span></div>`}).join("");
   return `<section><h2>Đơn hàng ${esc(don.id)}</h2>
-   <div class="pills" style="margin-bottom:8px">${don.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill warn">Không mua Gói Yên tâm</span>'}<span class="pill line">${esc(don.tt||"")}</span>${don.giaoTanNoi?'<span class="pill line">Giao tận nơi</span>':""}</div>
-   <dl class="kv box"><dt>Người đặt</dt><dd>${esc(dat.ten||don.dat)}</dd><dt>Nhận đồ</dt><dd>${dm(don.nhan)} lúc ${hm(don.nhan)}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd><dt>Cọc đang giữ</dt><dd>${money(don.coc)}${don.hinhThuc?` · ${esc(don.hinhThuc)}`:""} · ${esc((don.ttCoc||"").toLowerCase())}</dd>${don.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(don.phiGiao)}</dd>`:""}${don.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(CD.ytCuaDon(don,ls))}</dd>`:""}</dl>
+   <div class="pills" style="margin-bottom:8px">${don.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill warn">Không mua Gói Yên tâm</span>'}<span class="pill line">${esc(don.tt||"")}</span>${don.giaoTanNoi?'<span class="pill line">Giao tận nơi</span>':""}</div>${CD.ytBanner(don)}
+   <dl class="kv box"><dt>Người đặt</dt><dd>${esc(dat.ten||don.dat)}</dd><dt>Nhận đồ</dt><dd>${dm(don.nhan)} lúc ${hm(don.nhan)}</dd><dt>Hẹn trả</dt><dd>${dm(don.tra)} lúc ${hm(don.tra)}</dd><dt>Tiền thuê</dt><dd>${money(CD.tienThue(don,ls.map(l=>l.ct)))}${CD.luotDon(don)>1?` · ${CD.luotDon(don)} lượt`:""}</dd><dt>Cọc</dt><dd>${money(don.coc)}${don.hinhThuc?` · ${esc(don.hinhThuc)}`:""} · ${esc((don.ttCoc||"").toLowerCase())}</dd><dt>Hoàn cọc qua</dt><dd>${CD.hoanThieu(CD.hoanCuaDon(don))?'<span style="color:var(--neg,#b42318)">Chưa có tài khoản khách</span>':esc(CD.hoanTxt(CD.hoanCuaDon(don)))}</dd>${don.phiGiao?`<dt>Phí đến tận nơi</dt><dd>${money(don.phiGiao)}</dd>`:""}${don.yenTam?`<dt>Gói Yên tâm</dt><dd>${money(CD.ytCuaDon(don,ls))}</dd>`:""}</dl>
    <div class="list" style="margin-top:8px">${it}</div>${quyTacDen(don)}</section>`}
 
 /* Nhận lại đồ */
@@ -582,9 +583,9 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
     const hu=ids.reduce((a,i)=>a+fee(d.lv[i]||"L0",byId("sp",i)),0),tre=lateFee(t,don),hoan=Math.max(0,don.coc-hu-tre),no=Math.max(0,hu+tre-don.coc);
     out({body:`<section><h2>Ký và hoàn tất</h2><dl class="kv box"><dt>Cọc đang giữ</dt><dd>${money(don.coc)}</dd><dt>Phí hư hỏng đề xuất</dt><dd>${money(hu)}</dd><dt>Phí trễ</dt><dd>${money(tre)}</dd>${no?`<dt><b>Khách còn nợ</b></dt><dd><b style="color:var(--neg,#b42318)">${money(no)}</b></dd>`:`<dt><b>Hoàn dự kiến</b></dt><dd><b>${money(hoan)}</b></dd>`}</dl>
       ${no?`<div class="banner bad">Phí vượt cọc ${money(no)}. Báo khách: quầy sẽ liên hệ thu phần còn lại sau khi kiểm đồ. Stylist không thu tiền tại chỗ.</div>`:""}
-      <p class="note">Quầy chuyển hoàn cọc sau khi kiểm đồ. Stylist không giữ tiền cọc.</p></section><section>${sigBox(d,"khách")}</section>`,
+      ${(()=>{const CD=window.CherieData,h=CD.hoanCuaDon(don);return no?"":CD.hoanThieu(h)?`<div class="box" style="display:flex;flex-direction:column;gap:8px"><p class="note"><b>Khách chưa có tài khoản nhận lại cọc.</b> Hỏi khách ngay để quầy chuyển liền.</p>${CD.hoanFields(h,"st")}<button class="btn" type="button" id="luuTk">Lưu tài khoản</button></div>`:`<p class="note">Hoàn ${money(hoan)} qua <b>${esc(CD.hoanTxt(h))}</b>. Báo khách: quầy chuyển ngay khi duyệt ảnh, kèm ảnh chụp giao dịch. Stylist không giữ tiền cọc.</p>`})()}</section><section>${sigBox(d,"khách")}</section>`,
       foot:nextBtn(!!d.sign,"Hoàn tất nhận đồ","Khách chưa ký"),
-      bind:()=>{bindSig(d);const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{don.tt="Đã trả";don.ttCoc="Chờ hoàn";don.traTT=d.checkin||db.clock;don.phi=tre;
+      bind:()=>{bindSig(d);{const CD=window.CherieData;CD.hoanBind(view,"st");const lt=view.querySelector("#luuTk");if(lt)lt.onclick=()=>{const h=CD.hoanDoc(view,"st");if(CD.hoanThieu(h)){toast("Nhập đủ ngân hàng, số tài khoản, tên chủ tài khoản, hoặc chọn tiền mặt");return}CD.hoanLuu(don,h);save();render();toast("Đã lưu tài khoản hoàn cọc")}}const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{don.tt="Đã trả";if((+don.coc||0)>0&&don.ttCoc==="Đang giữ")don.ttCoc="Chờ hoàn";don.traTT=d.checkin||db.clock;don.phi=tre;
           lines(don).forEach(l=>{const lv=d.lv[l.sp]||"L0",bad=lv>"L1";l.ct.hu=bad;l.ct.muc=lv;l.ct.moTa=bad?`${lv} ${d.mat&&d.mat[l.sp]?"Khách làm mất":LEVELS.find(x=>x[0]===lv)[1]}${d.mota[l.sp]?": "+d.mota[l.sp]:""}`:"";if(d.mat&&d.mat[l.sp])l.ct.mat=true;l.ct.phiHu=bad?fee(lv,byId("sp",l.sp)):0});
           don.note=(don.note?don.note+" · ":"")+`Stylist ${STYLIST} nhận lại lúc ${hm(don.traTT)}`;t.tt="Hoàn tất";t.step=TYPES.nhan.steps.length;tick(2);d.end=db.clock;d.fee={hu,tre,hoan,no};save();render();toast("Đã nhận đồ. Món chuyển sang Chờ kiểm tra")}}});
   }
@@ -592,9 +593,9 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
 
 function summary(t){const d=t.d;const items=tripItems(t);
   const rows=db.log.filter(l=>l.trip===t.id).slice().reverse();
-  return `${t.tt.startsWith("Lệch")?`<div class="banner bad">Phiên đóng khi còn thiếu ${d.missing.length} món: ${d.missing.map(i=>byId("sp",i).ten).join(", ")}. Quản lý đã nhận cảnh báo; món giữ trạng thái Đang mang đi đến khi tìm thấy.</div>`:`<div class="banner good">Hoàn tất lúc ${d.end?hm(d.end):""}.${d.newDon?` Đơn mới ${d.newDon}.`:""}${d.fee?` Hoàn cọc dự kiến ${money(d.fee.hoan)}.`:""}</div>`}
+  return `${t.tt.startsWith("Lệch")?`<div class="banner bad">Phiên đóng khi còn thiếu ${d.missing.length} món: ${d.missing.map(i=>byId("sp",i).ten).join(", ")}. Quản lý đã nhận cảnh báo; món giữ trạng thái Đang mang đi đến khi tìm thấy.</div>`:`<div class="banner good">Hoàn tất lúc ${d.end?hm(d.end):""}.${d.newDon?` Đơn mới ${d.newDon}.`:""}${d.fee?(()=>{const dn=t.don&&byId("don",t.don);if(dn&&dn.hoanLuc)return ` Quầy đã hoàn cọc ${money(dn.hoanSo!=null?dn.hoanSo:d.fee.hoan)} lúc ${hm(dn.hoanLuc)}.`;if(dn&&/còn nợ/.test(dn.ttCoc||""))return ` Khách còn nợ, quầy liên hệ thu.`;return d.fee.no?` Phí vượt cọc ${money(d.fee.no)}, quầy liên hệ khách.`:` Chờ quầy hoàn cọc ${money(d.fee.hoan)}${dn?" qua "+esc(window.CherieData.hoanTxt(window.CherieData.hoanCuaDon(dn))):""}.`})():""}</div>`}
   <section><h2>Các lần quét của chuyến</h2><div class="list">${rows.map(l=>`<div class="row"><span class="time">${hm(l.t)}</span><span class="main"><span class="t">${esc(l.loai)} · ${esc(byId("sp",l.sp).ten)}</span><span class="s">${esc(l.noi)}</span></span><span class="r">${ttPill(l.tt)}</span></div>`).join("")||'<div class="empty">Không có lần quét.</div>'}</div></section>
-  ${d.signImg?`<section><h2>Chữ ký</h2><div class="box"><img src="${d.signImg}" alt="Chữ ký của khách" style="width:100%;height:auto"></div></section>`:""}`;
+  ${d.newDon&&byId("don",d.newDon)?`<section><h2>Đơn ${esc(d.newDon)}</h2>${window.CherieData.ytBanner(byId("don",d.newDon))}</section>`:""}${d.signImg?`<section><h2>Chữ ký</h2><div class="box"><img src="${d.signImg}" alt="Chữ ký của khách" style="width:100%;height:auto"></div></section>`:""}`;
 }
 
 render();

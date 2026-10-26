@@ -73,7 +73,7 @@ function base(){return {
  noidung:[
   {id:"ND001",kh:"KH-T44",ngay:"2026-10-28",dang:"2026-11-17",kenh:"TikTok/Reels",dinhDang:"Video 30 giây",chuDe:"Hậu trường như mới",angle:"Vệ sinh 5 bước",mau:["CH-DT-001-M"],tt:"Chờ duyệt cuối",vong:1,phanHoi:"",
    ban:{hook:"Cận cảnh hơi nước phun từ máy hấp. Chữ: Đồ thuê có sạch không?",canh:[["0–3s","Hơi nước phun, quay chậm","Đồ thuê có sạch không?"],["3–8s","Tay đeo găng kiểm đường may, lớp lót","1. Kiểm từng đường may"],["8–13s","Đầm vào túi giặt riêng","2. Giặt riêng từng chiếc"],["13–18s","Hấp từ trên xuống, quay chậm tà váy","3. Hấp phẳng"],["18–22s","Xịt khử khuẩn, góc ngang","4. Khử khuẩn"],["22–28s","Gấp vào túi niêm phong, cận tem ngày","5. Niêm phong. Nàng tự tay xé tem."],["28–32s","Treo lên giá, lùi máy","Chérie · Đồ luôn như mới"]],
-    caption:"Đồ thuê có sạch không? Câu nàng hỏi nhiều nhất, tụi mình trả lời bằng 5 bước. Mỗi chiếc đầm giặt riêng, hấp, khử khuẩn và niêm phong có tem ngày. Bordeaux Bustier 250k/lượt, cọc 500k, hoàn trong 24h. (khi đăng thêm emoji: lấp lánh, tim trắng)",
+    caption:"Đồ thuê có sạch không? Câu nàng hỏi nhiều nhất, tụi mình trả lời bằng 5 bước. Mỗi chiếc đầm giặt riêng, hấp, khử khuẩn và niêm phong có tem ngày. Bordeaux Bustier 250k/lượt, cọc 500k, hoàn ngay khi trả đồ. (khi đăng thêm emoji: lấp lánh, tim trắng)",
     hashtag:["Chérie","CherieGirl","ThueDamNhaTrang"],cta:"Còn thắc mắc gì về vệ sinh, comment để tụi mình trả lời bằng video.",
     quay:"Ánh sáng cửa sổ buổi sáng, nền Ivory, góc ngang ngực; cảnh treo giá dùng đèn vàng ấm.",anh:"Close-up of a wine-red silk bustier gown in a clear sealed garment bag with a cream label showing the cleaning date, warm window light, ivory background, editorial still life, vertical 9:16."},
    qa:{diem:9.3,ai:"Agent Kiểm duyệt",tieuChi:[["Giọng thương hiệu",9,"Xưng tụi mình, gọi nàng"],["Hook 3 giây",9,"Câu hỏi đúng nỗi lo của khách"],["Đúng kế hoạch và giai đoạn",10,"Video kho giai đoạn 1"],["Giá và thông tin rõ",10,"Có giá, cọc, thời gian hoàn"],["Màu và bố cục",9,"Nền Ivory, đầm Ruby là điểm nhấn"],["Ảnh và video",9,"Cận chất liệu, chuyển động chậm"],["Không vi phạm",10,"Không nhạc bản quyền, không từ cấm"],["Lời kêu gọi",9,"Comment để hỏi"],["Mẫu có thật và trống lịch",10,"CH-DT-001-M sẵn sàng"],["Chính tả và độ dài",8,"Caption 52 chữ, hợp TikTok"]],canSua:[]},
@@ -126,7 +126,7 @@ function gen(o){
       const id="D"+String(dId++).padStart(3,"0");let hu=0;
       items.forEach(s=>{const h=rnd()<0.07;const ph=h?(rnd()<0.7?100000:300000):0;hu+=ph;o.ct.push({id:"CT"+String(cId++).padStart(3,"0"),don:id,mac:kh,sp:s.id,gia:s.gia,hu:h,moTa:h?(ph===100000?"L2 Vết bẩn khó":"L3 Sút đường may, cần thợ"):"",phiHu:ph})});
       const phi=phiTre(late);const coc=items.reduce((x,s)=>x+s.coc,0);
-      o.don.push({id,dat:kh,nhom:"",dip:pick(dips),nhan:ymd(nhan)+"T15:00",tra:ymd(tra)+"T12:00",traTT:ymd(traTT)+"T"+pad(traTT.getHours())+":"+pad(traTT.getMinutes()),tt:"Đã trả",coc,hinhThuc:rnd()<0.8?"Chuyển khoản":"Tiền mặt",ttCoc:phi||hu?"Hoàn một phần":"Đã hoàn",phi,note:late?`Trả trễ ${late} giờ`:""});
+      o.don.push({id,dat:kh,nhom:"",dip:pick(dips),nhan:ymd(nhan)+"T15:00",tra:ymd(tra)+"T12:00",traTT:ymd(traTT)+"T"+pad(traTT.getHours())+":"+pad(traTT.getMinutes()),tt:"Đã trả",coc,hinhThuc:rnd()<0.8?"Chuyển khoản":"Tiền mặt",ttCoc:phi+hu>coc?"Khách còn nợ":phi||hu?"Hoàn một phần":"Đã hoàn",phi,note:late?`Trả trễ ${late} giờ`:""});
     }});
   const nOrders=m=>o.don.filter(d=>d.nhan.slice(5,7)===pad(m+1)).length;
   const cp=[];const add=(d,nhom,tien,note)=>cp.push({id:"CP"+String(cp.length+1).padStart(3,"0"),ngay:d,nhom,tien,note});
@@ -232,8 +232,8 @@ function kinhTe(sp,luotList,today){/* luotList: các dòng ct đã thuê (không
 /* Gói Yên tâm: bảo vệ hư hỏng do chính Chérie bảo đảm (không phải hợp đồng của công ty bảo hiểm). */
 /* Gói Yên tâm (chủ tiệm chốt 26/10/2026): 1% giá trị chiếc đầm, tối thiểu 20.000đ, làm tròn lên 10.000đ. Đơn cũ không có phiYenTam thì giữ 20.000đ mỗi chiếc. */
 const YEN_TAM={phi:20000,tyLe:0.01,toiThieu:20000,ten:"Gói Yên tâm",
-  gom:["Vết bẩn khó giặt: rượu vang, son, kem nền, nước sốt","Sút chỉ, bung đường may, tuột khoá, rơi cúc hay hạt đính","Rách nhỏ cần thợ vá (dưới 3 cm), móc sợi"],
-  khong:["Mất đồ hoặc hư nặng không sửa được: nàng đền 50% giá trị chiếc đầm thay vì 100%","Tự ý cắt, may sửa, nhuộm đầm","Trả trễ: vẫn tính 20.000đ mỗi giờ"]};
+  gom:["Vết bẩn khó giặt: rượu vang, son, kem nền, nước sốt","Sút chỉ, bung đường may, tuột khoá, rơi cúc hay hạt đính","Rách, hỏng cần thợ sửa (mức L3), móc sợi"],
+  khong:["Mất đồ hoặc hư nặng không sửa được: nàng đền 50% giá trị chiếc đầm thay vì 100%","Tự ý cắt, may sửa, nhuộm đầm","Trả trễ: vẫn tính phí như thường (miễn giờ đầu, từ giờ thứ hai 20.000đ mỗi giờ, tối đa 24 giờ)"]};
 function phiYenTam(sp){const v=(sp&&sp.giaTri!=null?+sp.giaTri:giaTri(sp))||0;return Math.max(YEN_TAM.toiThieu,Math.ceil(v*YEN_TAM.tyLe/10000)*10000)}
 function phiYenTamDs(sps){return (sps||[]).reduce((a,s)=>a+(s?phiYenTam(s):YEN_TAM.toiThieu),0)}
 /* phí gói của một món trong đơn: đơn cũ (trước 26/10, không có phiYenTam) là 20.000đ mỗi chiếc */
@@ -244,9 +244,52 @@ function ytCuaDon(d,sps){if(!d||!d.yenTam)return 0;if(d.phiYenTam!=null)return +
 /* ---------- Gói Yên tâm và quy tắc đền: dùng chung cho Quầy, Stylist, Marketing để ai cũng thấy giống nhau ---------- */
 const DEN_CSS=`.den-rules{margin-top:8px;border:1px solid var(--line,#E2D6C6);border-radius:12px;padding:10px 12px;background:var(--surface,#fff)}.den-rules summary{font-weight:600;cursor:pointer}.den-w{overflow-x:auto}.den-t{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}.den-t th,.den-t td{text-align:left;padding:6px;border-bottom:1px solid var(--line,#E2D6C6);vertical-align:top}.den-t .on{background:var(--good-soft,#E6F2EA);font-weight:600}.den-b{border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45}.den-b.co{background:var(--good-soft,#E6F2EA);color:var(--good,#2F6B47)}.den-b.khong{background:var(--warn-soft,#FBF0DC);color:var(--warn,#8A5A12)}`;
 function denCss(){if(!document.getElementById("den-css")){const st=document.createElement("style");st.id="den-css";st.textContent=DEN_CSS;document.head.appendChild(st)}}
-function kk(n){n=+n||0;return n>=1e6?(Math.round(n/1e5)/10).toString().replace(".",",")+" tr":Math.round(n/1000)+"k"}
+function kk(n){n=+n||0;const a=Math.abs(n);return a<1e6&&a%1000===0?(n<0?"−":"")+a/1000+"k":(n<0?"−":"")+a.toLocaleString("vi-VN").replace(/,/g,".")+"đ"}
 function vnd(n){return Math.round(+n||0).toLocaleString("vi-VN")+"đ"}
 function ctCuaDon(d){return (db.ct||[]).filter(c=>c.don===d.id)}
+/* ==== Hoàn cọc: cách hoàn, tài khoản khách, ảnh chụp giao dịch. Lấy từ lúc lập hợp đồng, dùng chung mọi app ==== */
+const NGAN_HANG=["Vietcombank","VietinBank","BIDV","Agribank","Techcombank","MB Bank","ACB","VPBank","TPBank","Sacombank","VIB","HDBank","SHB","OCB","MSB","SeABank","Eximbank","LPBank","Nam A Bank","Bac A Bank","Cake by VPBank","Timo","Khác"];
+function hoanCuaDon(d){const h=(d&&d.hoan)||{},k=(db.kh||[]).find(x=>x.id===(d&&d.dat))||{};return {cach:h.cach||(d&&d.hinhThuc==="Tiền mặt"&&!k.stk?"Tiền mặt":"Chuyển khoản"),nh:h.nh||k.nganHang||"",stk:h.stk||k.stk||"",chu:h.chu||k.chuTk||""}}
+function hoanThieu(h){return !h||(h.cach!=="Tiền mặt"&&(!h.nh||!/^\d{6,19}$/.test(String(h.stk||"").replace(/\s/g,""))||!String(h.chu||"").trim()))}
+function hoanTxt(h){if(!h)return "chưa có";return h.cach==="Tiền mặt"?"tiền mặt":`chuyển khoản ${h.nh||"?"} · ${h.stk||"?"} · ${h.chu||"?"}`}
+function hoanFields(h,p){h=h||{cach:"Chuyển khoản"};const e=hdEsc;return `<div class="hoanf" data-hoanf="${p}" style="display:flex;flex-direction:column;gap:8px">
+ <label class="f">Hoàn cọc cho khách qua<select data-h="cach"><option ${h.cach!=="Tiền mặt"?"selected":""}>Chuyển khoản</option><option ${h.cach==="Tiền mặt"?"selected":""}>Tiền mặt</option></select></label>
+ <div data-hck style="display:${h.cach==="Tiền mặt"?"none":"flex"};flex-direction:column;gap:8px">
+ <label class="f">Ngân hàng của khách<input type="text" data-h="nh" list="nh-${p}" value="${e(h.nh||"")}" placeholder="Ví dụ: Vietcombank" autocomplete="off"><datalist id="nh-${p}">${NGAN_HANG.map(x=>`<option value="${x}">`).join("")}</datalist></label>
+ <label class="f">Số tài khoản<input type="tel" data-h="stk" inputmode="numeric" value="${e(h.stk||"")}" placeholder="Chỉ số, 6–19 chữ số"></label>
+ <label class="f">Tên chủ tài khoản<input type="text" data-h="chu" value="${e(h.chu||"")}" placeholder="Viết hoa không dấu như trên app ngân hàng" style="text-transform:uppercase"></label></div></div>`}
+function hoanDoc(root,p){const w=root.querySelector(`[data-hoanf="${p}"]`);if(!w)return null;const g=k=>(w.querySelector(`[data-h="${k}"]`)||{}).value||"";
+  const h={cach:g("cach"),nh:g("nh").trim(),stk:g("stk").replace(/\D/g,""),chu:g("chu").trim().toUpperCase()};return h.cach==="Tiền mặt"?{cach:"Tiền mặt"}:h}
+function hoanBind(root,p,cb){const w=root.querySelector(`[data-hoanf="${p}"]`);if(!w)return;const s=w.querySelector('[data-h="cach"]');s.onchange=()=>{w.querySelector("[data-hck]").style.display=s.value==="Tiền mặt"?"none":"flex";cb&&cb()};w.querySelectorAll("input").forEach(i=>i.oninput=()=>cb&&cb())}
+function hoanLuu(d,h){if(!d||!h)return;d.hoan=h;const k=(db.kh||[]).find(x=>x.id===d.dat);if(k&&h.cach!=="Tiền mặt"&&h.stk){k.nganHang=h.nh;k.stk=h.stk;k.chuTk=h.chu}}
+function hoanAnhCua(d){const b=bbOf(d.id,"hoan");return b&&b.mon&&b.mon.CK&&b.mon.CK.anh&&b.mon.CK.anh[0]||""}
+function xemAnhHoan(d){const v=hoanAnhCua(d);if(!v)return;ttCss();ttSrc(v).then(x=>{if(x)ttXem(x)})}
+/* Màn hoàn cọc. o:{don, nv, onDone}. Hoàn bằng chuyển khoản bắt buộc có ảnh chụp giao dịch; tiền mặt bắt buộc xác nhận khách đã nhận đủ. */
+function hoanCoc(o){const d=o.don,ls=ctCuaDon(d),q=quyetToan(d,ls);ttCss();const el=hdLayer(),pn=el.querySelector(".pn");const close=()=>el.remove();
+  let h=hoanCuaDon(d),anh="",busy=0,loi="",dongY=false;
+  const draw=()=>{const ck=h.cach!=="Tiền mặt",ok=!busy&&(ck?!hoanThieu(h)&&!!anh:dongY);
+    pn.innerHTML=`<div class="hd"><h2>Hoàn cọc đơn ${hdEsc(d.id)}</h2><button class="x" type="button" data-x aria-label="Đóng">×</button></div>
+    <p style="font-size:26px;font-weight:700;margin:4px 0">${hdMoney(q.hoan)}</p>
+    <p class="note">= cọc ${hdMoney(q.coc)} − phí trễ ${hdMoney(q.tre)} − hư, mất ${hdMoney(q.hu)}${d.yenTam?" (đơn có Gói Yên tâm)":""}. Hoàn ngay cho khách, không để qua ngày.</p>
+    ${hoanFields(h,"hc")}
+    ${ck?`<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="cpStk" ${h.stk?"":"disabled"}>Chép STK</button><button class="btn" type="button" id="cpNd">Chép nội dung</button></div>
+    <p class="note">Nội dung chuyển khoản: <b>CHERIE HOAN COC ${hdEsc(d.id)}</b></p>
+    <label class="shot" style="aspect-ratio:auto;min-height:120px">${anh?`<img src="${anh}" alt="Ảnh chụp giao dịch hoàn cọc" style="position:static;max-height:46vh;object-fit:contain"><span class="lb">Chạm để đổi ảnh</span>`:"Ảnh chụp màn hình giao dịch thành công<br>chạm để chụp hoặc chọn từ album"}<input type="file" accept="image/*" id="anhCk"></label>`
+    :`<label class="ck"><input type="checkbox" id="tmOk" ${dongY?"checked":""}> Khách đã nhận đủ ${hdMoney(q.hoan)} tiền mặt, đã đếm trước mặt khách.</label>`}
+    <p class="note ${loi?"bad":""}" role="status">${busy?"Đang gửi ảnh lên Drive…":loi}</p>
+    <div class="row"><button class="btn" type="button" data-x>Để sau</button><button class="btn p" type="button" id="okH" ${ok?"":"disabled"}>${ck?(anh?"Xác nhận đã chuyển":hoanThieu(h)?"Nhập đủ tài khoản khách":"Thêm ảnh giao dịch"):"Xác nhận đã trả tiền mặt"}</button></div>`;
+    pn.querySelectorAll("[data-x]").forEach(b=>b.onclick=close);
+    hoanBind(pn,"hc",()=>{const n=hoanDoc(pn,"hc");const doi=n.cach!==h.cach;h=Object.assign({},h,n);if(doi)draw();else{const b=pn.querySelector("#okH");b.disabled=!(!busy&&(h.cach!=="Tiền mặt"?!hoanThieu(h)&&!!anh:dongY))}});
+    const cs=pn.querySelector("#cpStk");if(cs)cs.onclick=()=>{try{navigator.clipboard.writeText(h.stk).then(()=>{cs.textContent="Đã chép"})}catch(e){}};
+    const cn=pn.querySelector("#cpNd");if(cn)cn.onclick=()=>{try{navigator.clipboard.writeText("CHERIE HOAN COC "+d.id).then(()=>{cn.textContent="Đã chép"})}catch(e){}};
+    const tm=pn.querySelector("#tmOk");if(tm)tm.onchange=()=>{dongY=tm.checked;draw()};
+    const fi=pn.querySelector("#anhCk");if(fi)fi.onchange=()=>{const f=fi.files&&fi.files[0];if(!f)return;nenAnh(f,1400,0.82).then(x=>{anh=x;loi="";draw()},e=>{loi=e.message||"Không đọc được ảnh";draw()})};
+    pn.querySelector("#okH").onclick=()=>{h=Object.assign({},h,hoanDoc(pn,"hc"));if(h.cach!=="Tiền mặt"&&(hoanThieu(h)||!anh))return;
+      hoanLuu(d,h);d.hoanLuc=hdNow();d.hoanNv=o.nv||"";d.hoanSo=q.hoan;
+      if(h.cach!=="Tiền mặt"){let b=bbOf(d.id,"hoan");if(!b){b={id:bbId(d.id,"hoan"),don:d.id,phase:"hoan",mon:{},tao:hdNow()};db.bb.push(b)}b.mon.CK={anh:[anh],them:[],luc:hdNow(),nv:o.nv||""};d.hoanAnh=true}
+      busy=1;draw();try{CherieData.save()}catch(e){}
+      Promise.resolve(CherieData.flush&&CherieData.flush()).then(()=>{close();o.onDone&&o.onDone(h)},()=>{close();o.onDone&&o.onDone(h)})};
+  };draw()}
 /* ==== Quyết toán đơn: MỘT nguồn duy nhất cho Quầy, Stylist, CS, Admin ==== */
 function luotDon(d){return Math.max(1,+(d&&d.luot)||(d&&d.nhan&&d.tra?soLuot(d.nhan,d.tra):1)||1)}
 function tienThue(d,ls){ls=ls||ctCuaDon(d);return ls.reduce((a,c)=>a+(+c.gia||0),0)*luotDon(d)}
@@ -256,12 +299,12 @@ function tongHu(d,ls){ls=ls||ctCuaDon(d);return ls.reduce((a,c)=>a+huMon(d,c),0)
 function quyetToan(d,ls){ls=ls||ctCuaDon(d);const coc=+d.coc||0,hu=tongHu(d,ls),tre=+d.phi||0,tong=hu+tre;return {coc,hu,tre,tong,hoan:Math.max(0,coc-tong),conNo:Math.max(0,tong-coc)}}
 function daKiemXong(d,ls){ls=ls||ctCuaDon(d);return d.tt==="Đã trả"&&(d.ttCoc!=="Chờ hoàn"||ls.every(c=>c.kiemLuc))}
 /* banner nói rõ đơn có hay không có gói và hệ quả */
-function ytBanner(d){if(!d)return "";denCss();const ls=ctCuaDon(d);return d.yenTam?`<div class="den-b co"><b>Đơn này CÓ Gói Yên tâm</b> (khách đã trả ${vnd(ytCuaDon(d,ls))}). Vết bẩn khó, sút chỉ, rách nhỏ: miễn phí. Mất hoặc hư nặng: khách đền 50% giá trị chiếc đầm.</div>`:`<div class="den-b khong"><b>Đơn này KHÔNG mua Gói Yên tâm.</b> Vết bẩn khó, sút chỉ: 100k. Rách cần thợ: 300k. Mất hoặc hư nặng: khách đền 100% giá trị chiếc đầm.</div>`}
+function ytBanner(d){if(!d)return "";denCss();const ls=ctCuaDon(d);return d.yenTam?`<div class="den-b co"><b>Đơn này CÓ Gói Yên tâm</b> (khách đã trả ${vnd(ytCuaDon(d,ls))}). Vết bẩn khó, sút chỉ, rách cần thợ sửa: miễn phí. Mất hoặc hư nặng: khách đền 50% giá trị chiếc đầm.</div>`:`<div class="den-b khong"><b>Đơn này KHÔNG mua Gói Yên tâm.</b> Vết bẩn khó, sút chỉ: 100k. Rách cần thợ: 300k. Mất hoặc hư nặng: khách đền 100% giá trị chiếc đầm.</div>`}
 /* bảng quy tắc đền, tô cột áp dụng cho đơn; kèm số tiền đền nếu mất từng món */
 function quyTacDen(d){denCss();const yt=!!(d&&d.yenTam);const ten={L0:"Như mới",L1:"Bẩn nhẹ, giặt thường",L2:"Vết bẩn khó, sút chỉ",L3:"Rách, hỏng cần thợ",L4:"Hư nặng hoặc mất"};
   const o=(L,co)=>L[0]==="L4"?(co?"50% giá trị":"100% giá trị"):co&&L[0]!=="L0"&&L[0]!=="L1"?"Miễn phí":L[2]?kk(L[2]):"Miễn phí";const on=c=>c===yt?' class="on"':"";
   const mon=d?ctCuaDon(d).map(c=>{const sp=(db.sp||[]).find(x=>x.id===c.sp)||{};const gt=giaTri(sp);return gt?`<li>${sp.ten||c.sp} (giá trị ${vnd(gt)}): mất hoặc hư nặng đền ${vnd(phiHu("L4",sp,yt))}</li>`:""}).join(""):"";
-  return `<details class="den-rules"><summary>Quy tắc đền khi hư, mất</summary><div class="den-w"><table class="den-t"><tr><th>Mức</th><th>Tình trạng</th><th${on(false)}>Không có gói</th><th${on(true)}>Có Gói Yên tâm</th></tr>${MUC_HU.map(L=>`<tr><td>${L[0]}</td><td>${ten[L[0]]}</td><td${on(false)}>${o(L,false)}</td><td${on(true)}>${o(L,true)}</td></tr>`).join("")}</table></div>${mon?`<p style="margin:8px 0 2px;font-size:13px"><b>Đơn này, nếu mất hoặc hư nặng:</b></p><ul style="margin:0;padding-left:18px;font-size:13px">${mon}</ul>`:""}<p style="font-size:12.5px;opacity:.8;margin:8px 0 0">Cột tô màu là cột áp dụng cho đơn này. Trả trễ: từ giờ thứ hai 20.000đ mỗi giờ, có gói hay không đều tính. Phí là đề xuất, quầy duyệt khi kiểm đồ rồi mới trừ cọc.</p></details>`}
+  return `<details class="den-rules"><summary>Quy tắc đền khi hư, mất</summary><div class="den-w"><table class="den-t"><tr><th>Mức</th><th>Tình trạng</th><th${on(false)}>Không có gói</th><th${on(true)}>Có Gói Yên tâm</th></tr>${MUC_HU.map(L=>`<tr><td>${L[0]}</td><td>${ten[L[0]]}</td><td${on(false)}>${o(L,false)}</td><td${on(true)}>${o(L,true)}</td></tr>`).join("")}</table></div>${mon?`<p style="margin:8px 0 2px;font-size:13px"><b>Đơn này, nếu mất hoặc hư nặng:</b></p><ul style="margin:0;padding-left:18px;font-size:13px">${mon}</ul>`:""}<p style="font-size:12.5px;opacity:.8;margin:8px 0 0">Cột tô màu là cột áp dụng cho đơn này. Trả trễ: từ giờ thứ hai 20.000đ mỗi giờ, tối đa 24 giờ, có gói hay không đều tính. Phí là đề xuất, quầy duyệt khi kiểm đồ rồi mới trừ cọc.</p></details>`}
 
 const MUC_HU=[["L0","Như mới",0],["L1","Bẩn nhẹ, giặt thường",0],["L2","Vết bẩn khó hoặc sút chỉ",100000],["L3","Rách, hỏng cần thợ",300000],["L4","Hư nặng hoặc mất",null]];
 function phiHu(muc,sp,yenTam){const m=MUC_HU.find(x=>x[0]===muc);if(!m)return 0;if(muc==="L4"){const v=giaTri(sp)||(+sp.coc||0);return yenTam?Math.round(v*0.5):v}return yenTam?0:m[2]}
@@ -328,7 +371,7 @@ function kmGiam(m,thue){if(!m||!(thue>0))return 0;if(m.toiThieu&&thue<+m.toiThie
 function kmMoTa(m){const vnd=n=>Math.round(+n||0).toLocaleString("vi-VN")+"đ";return (m.loai==="pt"?`Giảm ${m.giaTri}% tiền thuê${+m.toiDa?`, tối đa ${vnd(m.toiDa)}`:""}`:`Giảm ${vnd(m.giaTri)} tiền thuê`)+(+m.toiThieu?` · đơn từ ${vnd(m.toiThieu)}`:"")+(m.den?` · đến ${m.den.slice(8,10)}/${m.den.slice(5,7)}`:"")}
 /* ô chọn khuyến mãi dùng chung: chỉ hiện chương trình đang chạy; giữ lại chương trình đã chọn dù vừa hết hạn */
 function kmOptions(kenh,sel,thue){const ds=kmChay(kenh);if(sel&&!ds.some(m=>m.id===sel)){const m=(db.km||[]).find(x=>x.id===sel);if(m)ds.push(m)}
-  return `<option value="">Không áp dụng</option>`+ds.map(m=>{const g=kmGiam(m,thue);return `<option value="${m.id}" ${m.id===sel?"selected":""}>${String(m.ten).replace(/[<>&"]/g,"")} · ${g?"−"+Math.round(g/1000)+"k":"chưa đủ điều kiện"}</option>`}).join("")}
+  return `<option value="">Không áp dụng</option>`+ds.map(m=>{const g=kmGiam(m,thue);return `<option value="${m.id}" ${m.id===sel?"selected":""}>${String(m.ten).replace(/[<>&"]/g,"")} · ${g?"−"+kk(g):"chưa đủ điều kiện"}</option>`}).join("")}
 function anhCua(spId,congKhai){return (db.anh||[]).filter(a=>a.sp===spId&&!a.an&&(!congKhai||a.loai!=="Lookbook khách"||a.dongY)).sort((a,b)=>(HANG_ANH(a)-HANG_ANH(b))||(a.thuTu||0)-(b.thuTu||0)||(a.tao<b.tao?-1:1))}
 /* Nhân sự: admin thêm trong Nhập liệu > Nhân sự. vaiTro: Stylist, Quầy, Marketing */
 /* ai làm được việc của một vai trò: đúng vai trò, hoặc được cấp quyền Sửa app đó (theo vai trò hay riêng từng người) */
@@ -380,7 +423,7 @@ function hdDieuKhoan(o){/* o: {so, tao, ben, sdt, items:[{id,ten,size,giaTri,gia
   <table class="hd-t"><tr><th>Mã</th><th>Tên mẫu</th><th>Size</th><th>Giá trị</th><th>Giá thuê/lượt</th></tr>${o.items.map(x=>`<tr><td>${hdEsc(x.id)}</td><td>${hdEsc(x.ten)}</td><td>${hdEsc(x.size)}</td><td>${hdMoney(x.giaTri)}</td><td>${hdMoney(x.gia)}</td></tr>`).join("")}</table>
   <p>Bên B đã kiểm tra trang phục khi nhận: tình trạng như mới (mức L0), có ảnh chụp tình trạng lúc giao do Bên A lưu.</p>
   <p><b>Điều 2. Thời gian thuê</b><br>Nhận lúc ${hdWhen(o.nhan)}, hẹn trả trước ${hdWhen(o.tra)} (${o.luot||1} lượt, mỗi lượt 24 giờ). Trả trễ: miễn 1 giờ đầu, từ giờ thứ hai tính 20.000đ mỗi giờ, tối đa 24 giờ.</p>
-  <p><b>Điều 3. Chi phí và tiền cọc</b><br>Tiền thuê: ${hdMoney(tienThue)}${giam?` · Giảm giá${o.kmTen?" ("+hdEsc(o.kmTen)+")":""}: −${hdMoney(giam)} · Tiền thuê sau giảm: ${hdMoney(Math.max(0,tienThue-giam))}`:""}${o.phiGiao?` · Phí đến tận nơi: ${hdMoney(o.phiGiao)}`:""}${yt?` · ${YEN_TAM.ten}: ${hdMoney(yt)}`:""}.<br>Tiền cọc: ${hdMoney(o.coc)}${o.hinhThuc?` (${hdEsc(o.hinhThuc)})`:""}. Bên A hoàn cọc trong 24 giờ sau khi kiểm tra trang phục, trừ các khoản tại Điều 2 và Điều 4 nếu có. Bên A không giữ CCCD bản cứng của Bên B.</p>
+  <p><b>Điều 3. Chi phí và tiền cọc</b><br>Tiền thuê: ${hdMoney(tienThue)}${giam?` · Giảm giá${o.kmTen?" ("+hdEsc(o.kmTen)+")":""}: −${hdMoney(giam)} · Tiền thuê sau giảm: ${hdMoney(Math.max(0,tienThue-giam))}`:""}${o.phiGiao?` · Phí đến tận nơi: ${hdMoney(o.phiGiao)}`:""}${yt?` · ${YEN_TAM.ten}: ${hdMoney(yt)}`:""}.<br>Tiền cọc: ${hdMoney(o.coc)}${o.hinhThuc?` (${hdEsc(o.hinhThuc)})`:""}. Bên A hoàn cọc ngay khi Bên B trả đồ và kiểm xong trang phục, trừ các khoản tại Điều 2 và Điều 4 nếu có${o.hoan?`, hoàn qua ${hdEsc(hoanTxt(o.hoan))}`:""}. Nếu các khoản này lớn hơn tiền cọc, Bên B thanh toán phần còn thiếu khi trả đồ. Bên A không giữ CCCD bản cứng của Bên B.</p>
   <p><b>Điều 4. Hư hỏng, mất mát</b>${o.yenTam?` · Bên B có ${YEN_TAM.ten}`:""}</p>
   <table class="hd-t"><tr><th>Mức</th><th>Tình trạng khi trả</th><th>Không có ${YEN_TAM.ten}</th><th>Có ${YEN_TAM.ten}</th></tr>${hu}</table>
   <p>Bên B không tự ý cắt, may sửa, nhuộm, tẩy, giặt bằng hoá chất mạnh, không cho người khác thuê lại. Mức hư hỏng do Bên A đánh giá khi nhận lại, đối chiếu ảnh lúc giao; Bên B được xem ảnh và biên bản.</p>
@@ -392,7 +435,7 @@ const HD_CSS=`.hdx{position:fixed;inset:0;z-index:9000;background:rgba(20,20,20,
 .hdx h2{font:500 22px "Playfair Display",Georgia,serif;margin:0}.hdx .hd{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .hdx .x{border:0;background:#EFE7DB;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer}
 .hdx .st{display:flex;gap:6px;font-size:12px;color:#6B635A}.hdx .st b{color:#8E1B2E}
-.hdx label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#6B635A}.hdx input[type=text],.hdx input[type=tel]{font:inherit;font-size:16px;padding:10px 12px;border:1px solid #E2D6C6;border-radius:12px;background:#fff;color:#141414}
+.hdx label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#6B635A}.hdx select,.hdx input[type=text],.hdx input[type=tel]{font:inherit;font-size:16px;padding:10px 12px;border:1px solid #E2D6C6;border-radius:12px;background:#fff;color:#141414}
 .hdx .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:480px){.hdx .two{grid-template-columns:1fr}}
 .hdx .shots{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hdx .shot{border:1px dashed #C8A97E;border-radius:14px;aspect-ratio:1.58;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;color:#6B635A;overflow:hidden;position:relative;background:#fff;cursor:pointer}
 .hdx .shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.hdx .shot input{position:absolute;inset:0;opacity:0;cursor:pointer}.hdx .seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#EFE7DB;padding:4px;border-radius:999px}.hdx .seg2 button{font:inherit;font-size:13px;border:0;border-radius:999px;padding:9px 6px;background:transparent;color:#4A2A33;cursor:pointer}.hdx .seg2 button[aria-pressed="true"]{background:#fff;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}.hdx .shot .lb{position:absolute;left:0;right:0;bottom:0;background:rgba(20,20,20,.55);color:#fff;font-size:12px;padding:4px}.hdx .thumbs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hdx .thumbs img{width:100%;border-radius:10px;border:1px solid #E2D6C6;aspect-ratio:1.58;object-fit:cover}.hdx .miss input{border-color:#C0392B!important;background:#FFF6F4!important}.hdx .spin{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 0;text-align:center}.hdx .spin i{width:34px;height:34px;border:3px solid #E2D6C6;border-top-color:#8E1B2E;border-radius:50%;animation:hdsp 1s linear infinite}@keyframes hdsp{to{transform:rotate(360deg)}}
@@ -413,7 +456,8 @@ function lapHopDong(opts){
   const el=hdLayer(),pn=el.querySelector(".pn");const close=()=>el.remove();
   const luu=(db.cccd||[]).find(c=>c.id===opts.kh.id);
   const st={buoc:1,ben:luu?{so:luu.so,ten:luu.ten,ngaySinh:luu.ngaySinh,gioiTinh:luu.gioiTinh,diaChi:luu.diaChi,ngayCap:luu.ngayCap}:{so:"",ten:opts.kh.ten||"",ngaySinh:"",gioiTinh:"",diaChi:"",ngayCap:""},
-    loai:luu&&luu.loai||"CCCD",truoc:luu?luu.truoc:"",sau:luu?luu.sau:"",dungLuu:!!luu,sdt:opts.kh.sdt||"",ky:"",dongY1:false,dongY2:false,msg:""};
+    loai:luu&&luu.loai||"CCCD",truoc:luu?luu.truoc:"",sau:luu?luu.sau:"",dungLuu:!!luu,sdt:opts.kh.sdt||"",ky:"",dongY1:false,dongY2:false,msg:"",
+    hoan:opts.hoan||hoanCuaDon(opts.don?((db.don||[]).find(x=>x.id===opts.don)||{dat:opts.kh.id}):{dat:opts.kh.id})};
   const so="HD"+Date.now().toString(36).toUpperCase();const tao=hdNow();
   function draw(){
     const BUOC=["Ảnh CCCD","Thông tin","Điều khoản","Ký"];const stp=n=>`<div class="st">${BUOC.map((t,i)=>i+1===n?`<b>${i+1}. ${t}</b>`:`<span>${i+1}. ${t}</span>`).join("›")}</div>`;
@@ -449,19 +493,21 @@ function lapHopDong(opts){
       <div class="thumbs" ${st.loai==="VNeID"?'style="grid-template-columns:1fr"':""}><img data-src="${hdEsc(st.truoc)}" alt="Ảnh giấy tờ" ${st.loai==="VNeID"?'style="aspect-ratio:auto;max-height:46vh;object-fit:contain;background:#fff"':""}>${st.loai==="VNeID"?"":`<img data-src="${hdEsc(st.sau)}" alt="Mặt sau CCCD">`}</div>
       ${F.map(([k,t,ty])=>`<label class="f ${st.ben[k]?"":"miss"}">${t}<input type="${ty}" ${ty==="tel"?'inputmode="numeric"':""} data-k="${k}" value="${hdEsc(st.ben[k])}" ${/ngay/.test(k)?'placeholder="dd/mm/yyyy"':""}></label>`).join("")}
       <label class="f">Số điện thoại / Zalo<input type="tel" inputmode="tel" data-sdt value="${hdEsc(st.sdt)}"></label>
+      <p class="note" style="margin-top:6px"><b>Tài khoản nhận lại cọc.</b> Hỏi khách ngay bây giờ để trả đồ xong là chuyển liền, không phải nhắn hỏi lại.</p>
+      ${hoanFields(st.hoan,"hd")}
       <p class="note bad" id="e2"></p>
       <div class="row"><button class="btn" type="button" id="b1">Quay lại</button><button class="btn p" type="button" id="n2b">Tiếp: điều khoản</button></div>`;
       pn.querySelectorAll("img[data-src]").forEach(i=>anhRieng(i.dataset.src).then(s=>{if(s)i.src=s}));
-      pn.querySelectorAll("[data-k]").forEach(i=>i.oninput=()=>{st.ben[i.dataset.k]=i.value.trim();i.parentNode.classList.toggle("miss",!i.value.trim())});pn.querySelector("[data-sdt]").oninput=e=>{st.sdt=e.target.value.trim()};
+      pn.querySelectorAll("[data-k]").forEach(i=>i.oninput=()=>{st.ben[i.dataset.k]=i.value.trim();i.parentNode.classList.toggle("miss",!i.value.trim())});hoanBind(pn,"hd",()=>{st.hoan=hoanDoc(pn,"hd")});pn.querySelector("[data-sdt]").oninput=e=>{st.sdt=e.target.value.trim()};
       pn.querySelector("#b1").onclick=()=>{st.buoc=1;draw()};
       pn.querySelector("#n2b").onclick=()=>{const e=pn.querySelector("#e2");const b=st.ben;b.so=String(b.so).replace(/\D/g,"");
-        const bad=!b.ten?"Nhập họ tên.":!/^\d{12}$/.test(b.so)?"Số CCCD gồm 12 chữ số.":!b.ngaySinh?"Nhập ngày sinh.":!b.diaChi?"Nhập nơi thường trú.":!/^0\d{9}$/.test(String(st.sdt).replace(/\D/g,""))?"Số điện thoại gồm 10 số.":"";
+        const bad=!b.ten?"Nhập họ tên.":!/^\d{12}$/.test(b.so)?"Số CCCD gồm 12 chữ số.":!b.ngaySinh?"Nhập ngày sinh.":!b.diaChi?"Nhập nơi thường trú.":!/^0\d{9}$/.test(String(st.sdt).replace(/\D/g,""))?"Số điện thoại gồm 10 số.":(st.hoan=hoanDoc(pn,"hd"),hoanThieu(st.hoan))?"Nhập đủ ngân hàng, số tài khoản (chỉ số) và tên chủ tài khoản để hoàn cọc, hoặc chọn hoàn tiền mặt.":"";
         if(bad){e.textContent=bad;return}st.buoc=3;draw()};
     } else if(st.buoc===3){
       pn.innerHTML=`<div class="hd"><h2>Điều khoản</h2><button class="x" type="button" data-x aria-label="Đóng">✕</button></div>
       ${stp(3)}
       <p class="note">Đưa máy cho khách đọc. Kéo trong khung để xem hết.</p>
-      ${hdDieuKhoan(Object.assign({},opts,{so,tao,ben:st.ben,sdt:st.sdt,loai:st.loai}))}
+      ${hdDieuKhoan(Object.assign({},opts,{so,tao,ben:st.ben,sdt:st.sdt,loai:st.loai,hoan:st.hoan}))}
       <label class="ck"><input type="checkbox" id="c1" ${st.dongY1?"checked":""}> Tôi đã đọc và đồng ý các điều khoản thuê, mức phí hư hỏng và trả trễ.</label>
       <label class="ck"><input type="checkbox" id="c2" ${st.dongY2?"checked":""}> Tôi đồng ý để Chérie chụp, lưu ảnh CCCD và chữ ký theo Điều 5 (lưu tối đa ${HD_LUU_THANG} tháng, không giữ thẻ bản cứng).</label>
       <div class="row"><button class="btn" type="button" id="b2">Quay lại</button><button class="btn p" type="button" id="n2" ${st.dongY1&&st.dongY2?"":"disabled"}>Tiếp: khách ký</button></div>`;
@@ -481,11 +527,12 @@ function lapHopDong(opts){
       pn.querySelector("#b3").onclick=()=>{st.buoc=3;draw()};
       pn.querySelector("#ok3").onclick=()=>{if(moved<8){pn.querySelector("#e3").textContent="Khách chưa ký.";return}
         const ky=c.toDataURL("image/png"),luc=hdNow(),sdt=String(st.sdt).replace(/\D/g,"");
-        const hd={id:so,don:opts.don||"",kh:opts.kh.id,tao,kyLuc:luc,nv:opts.nv||"",ben:Object.assign({},st.ben),sdt,items:opts.items,nhan:opts.nhan,tra:opts.tra,luot:opts.luot||1,phiGiao:opts.phiGiao||0,giam:+opts.giam||0,kmTen:opts.kmTen||"",yenTam:!!opts.yenTam,phiYenTam:opts.phiYenTam!=null?+opts.phiYenTam:undefined,coc:+opts.coc||0,hinhThuc:opts.hinhThuc||"",
+        const hd={id:so,don:opts.don||"",kh:opts.kh.id,tao,kyLuc:luc,nv:opts.nv||"",ben:Object.assign({},st.ben),sdt,items:opts.items,nhan:opts.nhan,tra:opts.tra,luot:opts.luot||1,phiGiao:opts.phiGiao||0,giam:+opts.giam||0,kmTen:opts.kmTen||"",yenTam:!!opts.yenTam,phiYenTam:opts.phiYenTam!=null?+opts.phiYenTam:undefined,coc:+opts.coc||0,hinhThuc:opts.hinhThuc||"",hoan:st.hoan,
           loai:st.loai,truoc:st.truoc,sau:st.sau,chuKy:ky,dongY:{dieuKhoan:true,duLieu:true,luc},luuDen:"",tt:"Đã ký",phienBan:1};
         db.hd=db.hd||[];db.hd.push(hd);
         db.cccd=db.cccd||[];const cur=db.cccd.find(z=>z.id===opts.kh.id);const rec={id:opts.kh.id,so:st.ben.so,ten:st.ben.ten,ngaySinh:st.ben.ngaySinh,gioiTinh:st.ben.gioiTinh,diaChi:st.ben.diaChi,ngayCap:st.ben.ngayCap,loai:st.loai,truoc:st.truoc,sau:st.sau,cap:luc.slice(0,10),hd:so};
         if(cur)Object.assign(cur,rec);else db.cccd.push(rec);
+        {const dn=opts.don&&(db.don||[]).find(x=>x.id===opts.don);if(dn)hoanLuu(dn,st.hoan);else{const k=(db.kh||[]).find(x=>x.id===opts.kh.id);if(k&&st.hoan.cach!=="Tiền mặt"){k.nganHang=st.hoan.nh;k.stk=st.hoan.stk;k.chuTk=st.hoan.chu}}}
         try{window.CherieData.save()}catch(e){}close();if(opts.onDone)opts.onDone(hd)};
     }
     pn.querySelectorAll("[data-x]").forEach(b=>b.onclick=close);
@@ -493,7 +540,7 @@ function lapHopDong(opts){
   draw();
 }
 function xemHopDong(id){const h=(db.hd||[]).find(x=>x.id===id);if(!h)return;const el=hdLayer(),pn=el.querySelector(".pn");
-  const tom=[`Chérie gửi nàng tóm tắt hợp đồng ${h.id}`,`Bên thuê: ${h.ben.ten}`,`Đồ thuê: ${h.items.map(x=>`${x.ten} (${x.id})`).join(", ")}`,`Nhận: ${hdWhen(h.nhan)} · Hẹn trả: ${hdWhen(h.tra)}`,`Cọc: ${hdMoney(h.coc)}${h.yenTam?` · Có ${YEN_TAM.ten}`:""}`,`Trả trễ: miễn 1 giờ đầu, sau đó 20.000đ mỗi giờ.`,`Ký lúc ${hdWhen(h.kyLuc)}.`].join("\n");
+  const tom=[`Chérie gửi nàng tóm tắt hợp đồng ${h.id}`,`Bên thuê: ${h.ben.ten}`,`Đồ thuê: ${h.items.map(x=>`${x.ten} (${x.id})`).join(", ")}`,`Nhận: ${hdWhen(h.nhan)} · Hẹn trả: ${hdWhen(h.tra)}`,`Cọc: ${hdMoney(h.coc)}${h.yenTam?` · Có ${YEN_TAM.ten}`:""}`,`Trả trễ: miễn 1 giờ đầu, sau đó 20.000đ mỗi giờ, tối đa 24 giờ.`,`Ký lúc ${hdWhen(h.kyLuc)}.`].join("\n");
   pn.innerHTML=`<div class="hd"><h2>Hợp đồng ${hdEsc(h.id)}</h2><button class="x" type="button" data-x aria-label="Đóng">✕</button></div>
   <p class="note">Ký lúc ${hdWhen(h.kyLuc)}${h.nv?` · nhân sự ${hdEsc(h.nv)}`:""}${h.don?` · đơn ${hdEsc(h.don)}`:""}</p>
   ${hdDieuKhoan(Object.assign({},h,{so:h.id}))}
@@ -556,7 +603,7 @@ function soAnhTinhTrang(o){ttCss();const el=hdLayer(),pn=el.querySelector(".pn")
 window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
   KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
-  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
+  db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,NGAN_HANG,hoanCuaDon,hoanThieu,hoanTxt,hoanFields,hoanDoc,hoanBind,hoanLuu,hoanAnhCua,xemAnhHoan,hoanCoc,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
   init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},
   reset(){/* bản chính thức: tắt nạp lại dữ liệu mẫu để không ghi đè dữ liệu thật */},
