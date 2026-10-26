@@ -230,7 +230,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=52890b55"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d2d9eaf"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -642,7 +642,7 @@ function openKhach(id){
 function nvTen(){try{const m=JSON.parse(localStorage.getItem("cherie-gas-me")||"null");if(m&&m.ten)return m.ten}catch(e){}return "Quầy"}
 function hdOpts(d,done){const kh=byId("kh",d.dat)||{id:d.dat,ten:"",sdt:""};const CD=window.CherieData;
   return {don:d.id,kh:{id:kh.id,ten:kh.ten,sdt:kh.sdt||""},items:lines(d).map(c=>{const s=byId("sp",c.sp)||{};return {id:c.sp,ten:s.ten||c.sp,size:s.size||"",giaTri:CD.giaTri(s),gia:c.gia}}),
-    nhan:d.nhan,tra:d.tra,luot:d.luot||CD.soLuot(d.nhan,d.tra),phiGiao:d.phiGiao||0,giam:d.giam||0,kmTen:d.kmTen||"",yenTam:!!d.yenTam,phiYenTam:d.yenTam?CD.ytCuaDon(d,lines(d)):0,coc:d.coc,hinhThuc:d.hinhThuc||"",nv:nvTen(),
+    nhan:d.nhan,tra:d.tra,luot:d.luot||CD.soLuot(d.nhan,d.tra),phiGiao:d.phiGiao||0,giam:d.giam||0,kmAp:d.kmAp||"",kmTen:d.kmTen||"",yenTam:!!d.yenTam,phiYenTam:d.yenTam?CD.ytCuaDon(d,lines(d)):0,coc:d.coc,hinhThuc:d.hinhThuc||"",nv:nvTen(),
     onDone:h=>{d.hd=h.id;save();render();if(done)done(h);else openDon(d.id);toast("Đã lưu hợp đồng "+h.id)}}}
 function openDon(id){nextSheet=()=>openDon(id);
   const d=byId("don",id);const kh=byId("kh",d.dat);const ls=lines(d);
@@ -809,11 +809,11 @@ function openDonForm(pre){
         box.innerHTML=msg?`<span class="err">${esc(msg)}</span>`:`<span class="ok">Trống lịch, tính cả ${s.giat} ngày giặt${esc(sizeNote)}</span>`;});
       const sps=st.lines.map(l=>l.sp).filter(Boolean);
       const L=(nhan&&tra&&tra>nhan)?window.CherieData.soLuot(nhan,tra):1;$("#luotTxt").textContent=`${L} lượt`;const thue=sps.reduce((a,s)=>a+byId("sp",s).gia,0)*L;$("#sum").textContent=money(thue);
-      {const sel=$("#km");const cur=sel.value||st.km||"";sel.innerHTML=CD.kmOptions("Trực tiếp",cur,thue);st.km=sel.value;const m=(db.km||[]).find(x=>x.id===st.km);st.giam=CD.kmGiam(m,thue);
-       $("#kmNote").textContent=m?CD.kmMoTa(m)+(m.dk?" · "+m.dk:""):CD.kmChay("Trực tiếp").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam):"Không";$("#netTxt").innerHTML="<b>"+money(thue-st.giam)+"</b>"}
+      {const ytk=$("#yt").checked?window.CherieData.phiYenTamDs(sps.map(i=>byId("sp",i))):0;const sel=$("#km");const cur=sel.value||st.km||"";sel.innerHTML=CD.kmOptions("Trực tiếp",cur,thue,ytk);st.km=sel.value;const m=(db.km||[]).find(x=>x.id===st.km);st.giam=CD.kmGiam(m,thue,ytk);st.kmAp=CD.kmAp(m);
+       $("#kmNote").textContent=m?CD.kmMoTa(m)+(m.dk?" · "+m.dk:""):CD.kmChay("Trực tiếp").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam)+(st.kmAp==="yt"?" phí gói":""):"Không";$("#netTxt").innerHTML="<b>"+money(thue-(st.kmAp==="yt"?0:st.giam))+"</b>"}
       $("#ytSum").textContent=$("#yt").checked?money(window.CherieData.phiYenTamDs(sps.map(i=>byId("sp",i)))):"Không";
       const dx=cocDeXuat(pk.id,sps);$("#cocDx").textContent=money(dx);if(st.coc===null)$("#coc").placeholder=String(dx);
-      {const ytv=$("#yt").checked?window.CherieData.phiYenTamDs(sps.map(i=>byId("sp",i))):0,cocv=st.coc===null||st.coc===""?dx:+st.coc,net=Math.max(0,thue-(st.giam||0)),tong=net+ytv+cocv;
+      {const gy=st.kmAp==="yt"?(st.giam||0):0,ytv=Math.max(0,($("#yt").checked?window.CherieData.phiYenTamDs(sps.map(i=>byId("sp",i))):0)-gy),cocv=st.coc===null||st.coc===""?dx:+st.coc,net=Math.max(0,thue-(gy?0:(st.giam||0))),tong=net+ytv+cocv;
        $("#tongBox").innerHTML=sps.length?`<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b>Khách trả khi nhận đồ</b><b style="font-size:22px">${money(tong)}</b></div><div class="note" style="margin-top:4px">Thuê ${money(net)}${ytv?` + Gói Yên tâm ${money(ytv)}`:""} + cọc ${money(cocv)}. Cọc hoàn lại ngay khi trả đồ, nên khách thực trả ${money(net+ytv)}.</div>`:""}
       const r=pk.id;$("#riskBox").innerHTML=r&&phanKhuc(r)==="Rủi ro"?`<div class="banner bad">${esc(byId("kh",r).ten)} là khách rủi ro: cọc đề xuất +50%.</div>`:r&&hang(r)==="Muse"?`<div class="banner info">Khách hạng Muse: cọc giảm 50%.</div>`:"";
     }
@@ -835,7 +835,7 @@ function openDonForm(pre){
       if(CD.hoanThieu(hq))return fail("Nhập tài khoản hoàn cọc của khách ngay bây giờ: ngân hàng, số tài khoản (chỉ số), tên chủ tài khoản. Khách muốn nhận tiền mặt thì chọn Tiền mặt.");
       const dat=pk.luu("Tại quầy");const moi={};ls.forEach(l=>{if(l.mac==="@dat")l.macId=dat;else if(l.mac==="@moi"){const t=l.ten.trim().toLowerCase();l.macId=moi[t]||(moi[t]=khMoiTen(l.ten))}else l.macId=l.mac});
       const id=nextId("don","D");const dx=cocDeXuat(dat,ls.map(l=>l.sp));const coc=st.coc===null||st.coc===""?dx:+st.coc;
-      db.don.push({id,dat,nhom:$("#nhom").value,dip:$("#dip").value,nhan,tra,luot:window.CherieData.soLuot(nhan,tra),traTT:"",tt:"Đã đặt",tao:iso(new Date()),nv:(()=>{try{return JSON.parse(localStorage.getItem("cherie-gas-me")||"{}").ten||""}catch(e){return ""}})(),coc,hinhThuc:$("#ht").value,ttCoc:coc>0?"Chưa thu":"Chưa cọc",phi:0,note:"",yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?window.CherieData.phiYenTamDs(ls.map(l=>byId("sp",l.sp))):0,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",giam:st.giam||0});
+      db.don.push({id,dat,nhom:$("#nhom").value,dip:$("#dip").value,nhan,tra,luot:window.CherieData.soLuot(nhan,tra),traTT:"",tt:"Đã đặt",tao:iso(new Date()),nv:(()=>{try{return JSON.parse(localStorage.getItem("cherie-gas-me")||"{}").ten||""}catch(e){return ""}})(),coc,hinhThuc:$("#ht").value,ttCoc:coc>0?"Chưa thu":"Chưa cọc",phi:0,note:"",yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?window.CherieData.phiYenTamDs(ls.map(l=>byId("sp",l.sp))):0,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",kmAp:st.giam?st.kmAp:"",giam:st.giam||0});
       ls.forEach(l=>db.ct.push({id:nextId("ct","CT"),don:id,mac:l.macId,sp:l.sp,gia:byId("sp",l.sp).gia,hu:false,moTa:"",phiHu:0}));
       if(coTk)CD.hoanLuu(byId("don",id),hq);
       const thuNgay=$("#thuNgay").checked;save();closeSheet();go("don");toast(`Đã lưu đơn ${id} · khách trả khi nhận đồ ${money(CD.tongDon(byId("don",id),lines(byId("don",id))).tong)}`);

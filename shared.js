@@ -415,20 +415,22 @@ function maMoi(nhom,size){let m=0;db.sp.forEach(s=>{const x=String(s.id).split("
 /* Ảnh tự chụp (shooting, lookbook khách) và ảnh dựng bằng AI. Ảnh khách chỉ hiện khi đã có đồng ý; ảnh AI luôn xếp sau ảnh thật và có nhãn. */
 const HANG_ANH=a=>a.loai==="Ảnh AI"?2:a.loai==="Ảnh hãng"?1:0;
 /* Khuyến mãi: chủ tiệm tạo trong Admin (bảng km). Quầy, stylist và CS online chỉ chọn chương trình đang chạy cho kênh của mình.
-   Giảm trên tiền thuê; không trừ cọc, phí đến tận nơi, Gói Yên tâm. Đơn lưu km (mã), kmTen, giam (số tiền đã giảm). */
+   Chương trình giảm trên tiền thuê (apDung "thue", mặc định) hoặc trên phí Gói Yên tâm (apDung "yt", ví dụ giảm 50% hay miễn phí gói). Không trừ cọc, phí đến tận nơi.
+   Đơn lưu km (mã), kmTen, kmAp ("thue"|"yt"), giam (số tiền đã giảm). */
 const KM_KENH=[["Trực tiếp","Quầy và stylist"],["Online","CS online"]];
 function ngayNay(){const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())}
 function kmTrangThai(m,ngay){ngay=ngay||ngayNay();if(m.tt==="Tắt")return"Tắt";if(m.tu&&m.tu>ngay)return"Sắp chạy";if(m.den&&m.den<ngay)return"Hết hạn";return"Đang chạy"}
 function kmChay(kenh,ngay){return (db.km||[]).filter(m=>kmTrangThai(m,ngay)==="Đang chạy"&&(!m.kenh||!m.kenh.length||m.kenh.includes(kenh)))}
-function kmGiam(m,thue){if(!m||!(thue>0))return 0;if(m.toiThieu&&thue<+m.toiThieu)return 0;let g=m.loai==="pt"?Math.round(thue*(+m.giaTri||0)/100/1000)*1000:(+m.giaTri||0);if(m.loai==="pt"&&+m.toiDa)g=Math.min(g,+m.toiDa);return Math.max(0,Math.min(g,thue))}
-function kmMoTa(m){const vnd=n=>Math.round(+n||0).toLocaleString("vi-VN")+"đ";return (m.loai==="pt"?`Giảm ${m.giaTri}% tiền thuê${+m.toiDa?`, tối đa ${vnd(m.toiDa)}`:""}`:`Giảm ${vnd(m.giaTri)} tiền thuê`)+(+m.toiThieu?` · đơn từ ${vnd(m.toiThieu)}`:"")+(m.den?` · đến ${m.den.slice(8,10)}/${m.den.slice(5,7)}`:"")}
+function kmAp(m){return m&&m.apDung==="yt"?"yt":"thue"}
+function kmGiam(m,thue,yt){if(!m||!(thue>0))return 0;if(m.toiThieu&&thue<+m.toiThieu)return 0;const goc=kmAp(m)==="yt"?(+yt||0):thue;if(!(goc>0))return 0;let g=m.loai==="pt"?(+m.giaTri>=100?goc:Math.round(goc*(+m.giaTri||0)/100/1000)*1000):(+m.giaTri||0);if(m.loai==="pt"&&+m.toiDa)g=Math.min(g,+m.toiDa);return Math.max(0,Math.min(g,goc))}
+function kmMoTa(m){const vnd=n=>Math.round(+n||0).toLocaleString("vi-VN")+"đ",yt=kmAp(m)==="yt",cai=yt?"phí Gói Yên tâm":"tiền thuê";return (yt&&m.loai==="pt"&&+m.giaTri>=100?"Miễn phí Gói Yên tâm":m.loai==="pt"?`Giảm ${m.giaTri}% ${cai}${+m.toiDa?`, tối đa ${vnd(m.toiDa)}`:""}`:`Giảm ${vnd(m.giaTri)} ${cai}`)+(yt?" (khi khách mua gói)":"")+(+m.toiThieu?` · đơn từ ${vnd(m.toiThieu)}`:"")+(m.den?` · đến ${m.den.slice(8,10)}/${m.den.slice(5,7)}`:"")}
 /* ô chọn khuyến mãi dùng chung: chỉ hiện chương trình đang chạy; giữ lại chương trình đã chọn dù vừa hết hạn */
-function kmOptions(kenh,sel,thue){const ds=kmChay(kenh);if(sel&&!ds.some(m=>m.id===sel)){const m=(db.km||[]).find(x=>x.id===sel);if(m)ds.push(m)}
-  return `<option value="">Không áp dụng</option>`+ds.map(m=>{const g=kmGiam(m,thue);return `<option value="${m.id}" ${m.id===sel?"selected":""}>${String(m.ten).replace(/[<>&"]/g,"")} · ${g?"−"+kk(g):"chưa đủ điều kiện"}</option>`}).join("")}
+function kmOptions(kenh,sel,thue,yt){const ds=kmChay(kenh);if(sel&&!ds.some(m=>m.id===sel)){const m=(db.km||[]).find(x=>x.id===sel);if(m)ds.push(m)}
+  return `<option value="">Không áp dụng</option>`+ds.map(m=>{const g=kmGiam(m,thue,yt);return `<option value="${m.id}" ${m.id===sel?"selected":""}>${String(m.ten).replace(/[<>&"]/g,"")} · ${g?"−"+kk(g):kmAp(m)==="yt"&&!(yt>0)?"cần mua Gói Yên tâm":"chưa đủ điều kiện"}</option>`}).join("")}
 /* ảnh nhỏ để chọn món: ảnh tiệm tự chụp hoặc đã tải về, chưa có thì lấy ảnh hãng (anhBrand) */
 function anhThumb(spId,w,h){const u=anhDau(spId);w=w||44;h=h||58;const e=hdEsc;return u?`<img src="${e(u)}" alt="" loading="lazy" style="width:${w}px;height:${h}px;object-fit:cover;border-radius:8px;flex:none;background:#E9E2D8">`:`<span style="width:${w}px;height:${h}px;border-radius:8px;flex:none;background:#E9E2D8;display:inline-block"></span>`}
 /* Tổng khách trả khi nhận đồ: tiền thuê sau giảm + Gói Yên tâm + phí đến tận nơi + cọc (cọc hoàn lại ngay khi trả đồ) */
-function tongDon(d,ls){ls=ls||ctCuaDon(d);const thue=Math.max(0,tienThue(d,ls)-(+d.giam||0)),yt=ytCuaDon(d,ls),giao=+d.phiGiao||0,coc=+d.coc||0;return {thue,yt,giao,coc,dichVu:thue+yt+giao,tong:thue+yt+giao+coc}}
+function tongDon(d,ls){ls=ls||ctCuaDon(d);const gy=d.kmAp==="yt",thue=Math.max(0,tienThue(d,ls)-(gy?0:(+d.giam||0))),yt=Math.max(0,ytCuaDon(d,ls)-(gy?(+d.giam||0):0)),giao=+d.phiGiao||0,coc=+d.coc||0;return {thue,yt,giao,coc,dichVu:thue+yt+giao,tong:thue+yt+giao+coc}}
 function tongHtml(d,ls){const t=tongDon(d,ls),v=vnd;return `<div style="margin-top:8px;padding:12px;border-radius:12px;background:#F3E6E8;color:#141414"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b>Khách trả khi nhận đồ</b><b style="font-size:20px">${v(t.tong)}</b></div><div style="font-size:12.5px;margin-top:4px;color:#4A4440">Thuê ${v(t.thue)}${t.yt?` + Gói Yên tâm ${v(t.yt)}`:""}${t.giao?` + phí đến tận nơi ${v(t.giao)}`:""} + cọc ${v(t.coc)}. Cọc hoàn ngay khi trả đồ, khách thực trả ${v(t.dichVu)}.</div>${d.daThu?`<div style="font-size:12.5px;margin-top:6px;color:#2F6B4F"><b>Đã thu ${v(d.daThu.so!=null?d.daThu.so:t.dichVu)}</b> tiền thuê, gói, phí giao${d.daThu.luc?` lúc ${String(d.daThu.luc).slice(11,16)} ${String(d.daThu.luc).slice(8,10)}/${String(d.daThu.luc).slice(5,7)}`:""}${d.daThu.nv?` · ${hdEsc(d.daThu.nv)}`:""}</div>`:d.tt&&d.tt!=="Đã đặt"?`<div style="font-size:12.5px;margin-top:6px;color:#B42318">Chưa ghi nhận đã thu tiền thuê</div>`:""}</div>`}
 /* ==== BẢNG TIỀN của một đơn: một mẫu duy nhất cho Quầy, Stylist, CS, Admin ====
    1. Khách trả khi nhận đồ = phí dịch vụ (không hoàn) + cọc (hoàn lại)
@@ -446,13 +448,13 @@ const BT_CSS=`.bt{border:1px solid #E2D6C6;border-radius:14px;background:#FFFDF9
 .bt .gap{height:6px}`;
 function btCss(){if(!document.getElementById("bt-css")){const st=document.createElement("style");st.id="bt-css";st.textContent=BT_CSS;document.head.appendChild(st)}}
 function bangTien(d,ls,o){o=o||{};btCss();ls=ls||ctCuaDon(d);const v=vnd,e=hdEsc,spOf=id=>(db.sp||[]).find(x=>x.id===id)||{};
-  const L=luotDon(d),goc=tienThue(d,ls),giam=Math.min(goc,+d.giam||0),t=tongDon(d,ls),q=quyetToan(d,ls),daTra=d.tt==="Đã trả",coPhi=q.tre>0||q.hu>0||ls.some(c=>c.hu);
+  const L=luotDon(d),goc=tienThue(d,ls),giam=d.kmAp==="yt"?0:Math.min(goc,+d.giam||0),gYt=d.kmAp==="yt"?(+d.giam||0):0,t=tongDon(d,ls),q=quyetToan(d,ls),daTra=d.tt==="Đã trả",coPhi=q.tre>0||q.hu>0||ls.some(c=>c.hu);
   const row=(a,b,cls,sub)=>`<div class="btr ${cls||""}"><span>${a}${sub?`<small>${sub}</small>`:""}</span><span>${b}</span></div>`;
   const thu=d.daThu?`<span class="tag ok">Đã thu</span>`:`<span class="tag cho">Chưa thu</span>`;
   let h=`<div class="bt"><h4>1 · Khách trả khi nhận đồ ${d.tt==="Đã đặt"||o.luonHien?"":""}</h4>`;
   h+=row(`Tiền thuê`,v(goc),"",`${ls.length} món × ${L} lượt (${ls.map(c=>v(+c.gia||0)).join(" + ")} mỗi lượt)`);
   if(giam)h+=row(`Giảm giá${d.kmTen?" · "+e(d.kmTen):""}`,"−"+v(giam),"tru");
-  h+=row(`Gói Yên tâm`,d.yenTam?v(t.yt):"Không mua");
+  h+=row(`Gói Yên tâm`,d.yenTam?v(t.yt+gYt):"Không mua");if(gYt&&d.yenTam)h+=row(`Giảm Gói Yên tâm${d.kmTen?" · "+e(d.kmTen):""}`,"−"+v(Math.min(gYt,t.yt+gYt)),"tru");
   if(t.giao)h+=row(`Phí đến tận nơi`,v(t.giao));
   h+=row(`Phí dịch vụ (không hoàn)`,v(t.dichVu),"sub");
   h+=row(`Tiền cọc (hoàn lại khi trả đồ)`,v(t.coc),"",d.hinhThuc?e(d.hinhThuc)+" · "+e(d.ttCoc||""):e(d.ttCoc||""));
@@ -569,7 +571,7 @@ function hdQuetAnh(file){return new Promise((ok,no)=>{const r=new FileReader();r
 function anhRieng(v){if(!v)return Promise.resolve("");if(/^data:/.test(v))return Promise.resolve(v);
   const m=/^drive:(.+)$/.exec(v);if(m&&window.GASDB)return window.GASDB.call("anhRieng",{id:m[1]}).then(r=>r.src||"").catch(()=>"");return Promise.resolve("")}
 function hdDieuKhoan(o){/* o: {so, tao, ben, sdt, items:[{id,ten,size,giaTri,gia}], nhan, tra, luot, phiGiao, yenTam, coc, hinhThuc, nv} */
-  const tienThue=o.items.reduce((a,x)=>a+(+x.gia||0),0)*(o.luot||1),giam=+o.giam||0,yt=o.yenTam?(o.phiYenTam!=null?+o.phiYenTam:o.items.reduce((a,x)=>a+Math.max(YEN_TAM.toiThieu,Math.ceil((+x.giaTri||0)*YEN_TAM.tyLe/10000)*10000),0)):0;
+  const tienThue=o.items.reduce((a,x)=>a+(+x.gia||0),0)*(o.luot||1),giamY=o.kmAp==="yt"?(+o.giam||0):0,giam=o.kmAp==="yt"?0:(+o.giam||0),yt0=o.yenTam?(o.phiYenTam!=null?+o.phiYenTam:o.items.reduce((a,x)=>a+Math.max(YEN_TAM.toiThieu,Math.ceil((+x.giaTri||0)*YEN_TAM.tyLe/10000)*10000),0)):0;const yt=Math.max(0,yt0-giamY);
   const hu=MUC_HU.slice(1).map(([c,t,p])=>`<tr><td>${c}</td><td>${hdEsc(t)}</td><td>${p==null?"Đền 100% giá trị chiếc đầm":p?hdMoney(p):"Miễn phí"}</td><td>${p==null?"Đền 50% giá trị":"Miễn phí"}</td></tr>`).join("");
   return `<div class="hd-doc">
   <p class="hd-c">CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập – Tự do – Hạnh phúc</p>
@@ -580,7 +582,7 @@ function hdDieuKhoan(o){/* o: {so, tao, ben, sdt, items:[{id,ten,size,giaTri,gia
   <table class="hd-t"><tr><th>Mã</th><th>Tên mẫu</th><th>Size</th><th>Giá trị</th><th>Giá thuê/lượt</th></tr>${o.items.map(x=>`<tr><td>${hdEsc(x.id)}</td><td>${hdEsc(x.ten)}</td><td>${hdEsc(x.size)}</td><td>${hdMoney(x.giaTri)}</td><td>${hdMoney(x.gia)}</td></tr>`).join("")}</table>
   <p>Bên B đã kiểm tra trang phục khi nhận: tình trạng như mới (mức L0), có ảnh chụp tình trạng lúc giao do Bên A lưu.</p>
   <p><b>Điều 2. Thời gian thuê</b><br>Nhận lúc ${hdWhen(o.nhan)}, hẹn trả trước ${hdWhen(o.tra)} (${o.luot||1} lượt, mỗi lượt 24 giờ). Trả trễ: miễn 1 giờ đầu, từ giờ thứ hai tính 20.000đ mỗi giờ, tối đa 24 giờ.</p>
-  <p><b>Điều 3. Chi phí và tiền cọc</b><br>Tiền thuê: ${hdMoney(tienThue)}${giam?` · Giảm giá${o.kmTen?" ("+hdEsc(o.kmTen)+")":""}: −${hdMoney(giam)} · Tiền thuê sau giảm: ${hdMoney(Math.max(0,tienThue-giam))}`:""}${o.phiGiao?` · Phí đến tận nơi: ${hdMoney(o.phiGiao)}`:""}${yt?` · ${YEN_TAM.ten}: ${hdMoney(yt)}`:""}.<br>Tiền cọc: ${hdMoney(o.coc)}${o.hinhThuc?` (${hdEsc(o.hinhThuc)})`:""}. <b>Tổng Bên B thanh toán khi nhận đồ: ${hdMoney(Math.max(0,tienThue-giam)+(+yt||0)+(+o.phiGiao||0)+(+o.coc||0))}</b>, trong đó tiền cọc được hoàn lại. Bên A hoàn cọc ngay khi Bên B trả đồ và kiểm xong trang phục, trừ các khoản tại Điều 2 và Điều 4 nếu có${o.hoan?`, hoàn qua ${hdEsc(hoanTxt(o.hoan))}`:""}. Nếu các khoản này lớn hơn tiền cọc, Bên B thanh toán phần còn thiếu khi trả đồ. Bên A không giữ CCCD bản cứng của Bên B.</p>
+  <p><b>Điều 3. Chi phí và tiền cọc</b><br>Tiền thuê: ${hdMoney(tienThue)}${giam?` · Giảm giá${o.kmTen?" ("+hdEsc(o.kmTen)+")":""}: −${hdMoney(giam)} · Tiền thuê sau giảm: ${hdMoney(Math.max(0,tienThue-giam))}`:""}${o.phiGiao?` · Phí đến tận nơi: ${hdMoney(o.phiGiao)}`:""}${yt0?` · ${YEN_TAM.ten}: ${hdMoney(yt0)}${giamY?` · Giảm gói${o.kmTen?" ("+hdEsc(o.kmTen)+")":""}: −${hdMoney(Math.min(giamY,yt0))}`:""}`:""}.<br>Tiền cọc: ${hdMoney(o.coc)}${o.hinhThuc?` (${hdEsc(o.hinhThuc)})`:""}. <b>Tổng Bên B thanh toán khi nhận đồ: ${hdMoney(Math.max(0,tienThue-giam)+(+yt||0)+(+o.phiGiao||0)+(+o.coc||0))}</b>, trong đó tiền cọc được hoàn lại. Bên A hoàn cọc ngay khi Bên B trả đồ và kiểm xong trang phục, trừ các khoản tại Điều 2 và Điều 4 nếu có${o.hoan?`, hoàn qua ${hdEsc(hoanTxt(o.hoan))}`:""}. Nếu các khoản này lớn hơn tiền cọc, Bên B thanh toán phần còn thiếu khi trả đồ. Bên A không giữ CCCD bản cứng của Bên B.</p>
   <p><b>Điều 4. Hư hỏng, mất mát</b>${o.yenTam?` · Bên B có ${YEN_TAM.ten}`:""}</p>
   <table class="hd-t"><tr><th>Mức</th><th>Tình trạng khi trả</th><th>Không có ${YEN_TAM.ten}</th><th>Có ${YEN_TAM.ten}</th></tr>${hu}</table>
   <p>Bên B không tự ý cắt, may sửa, nhuộm, tẩy, giặt bằng hoá chất mạnh, không cho người khác thuê lại. Mức hư hỏng do Bên A đánh giá khi nhận lại, đối chiếu ảnh lúc giao; Bên B được xem ảnh và biên bản.</p>
@@ -694,7 +696,7 @@ function lapHopDong(opts){try{const me=window.GASDB&&window.GASDB.me&&window.GAS
       pn.querySelector("#b3").onclick=()=>{st.buoc=3;draw()};
       pn.querySelector("#ok3").onclick=()=>{if(moved<8){pn.querySelector("#e3").textContent="Khách chưa ký.";return}
         const ky=c.toDataURL("image/png"),luc=hdNow(),sdt=String(st.sdt).replace(/\D/g,"");
-        const hd={id:so,don:opts.don||"",kh:opts.kh.id,tao,kyLuc:luc,nv:opts.nv||"",nvMa:opts.nvMa||"",ben:Object.assign({},st.ben),sdt,items:opts.items,nhan:opts.nhan,tra:opts.tra,luot:opts.luot||1,phiGiao:opts.phiGiao||0,giam:+opts.giam||0,kmTen:opts.kmTen||"",yenTam:!!opts.yenTam,phiYenTam:opts.phiYenTam!=null?+opts.phiYenTam:undefined,coc:+opts.coc||0,hinhThuc:opts.hinhThuc||"",hoan:st.hoan,
+        const hd={id:so,don:opts.don||"",kh:opts.kh.id,tao,kyLuc:luc,nv:opts.nv||"",nvMa:opts.nvMa||"",ben:Object.assign({},st.ben),sdt,items:opts.items,nhan:opts.nhan,tra:opts.tra,luot:opts.luot||1,phiGiao:opts.phiGiao||0,giam:+opts.giam||0,kmAp:opts.kmAp||"",kmTen:opts.kmTen||"",yenTam:!!opts.yenTam,phiYenTam:opts.phiYenTam!=null?+opts.phiYenTam:undefined,coc:+opts.coc||0,hinhThuc:opts.hinhThuc||"",hoan:st.hoan,
           loai:st.loai,truoc:st.truoc,sau:st.sau,chuKy:ky,dongY:{dieuKhoan:true,duLieu:true,luc},luuDen:"",tt:"Đã ký",phienBan:1};
         db.hd=db.hd||[];db.hd.push(hd);
         db.cccd=db.cccd||[];const cur=db.cccd.find(z=>z.id===opts.kh.id);const rec={id:opts.kh.id,so:st.ben.so,ten:st.ben.ten,ngaySinh:st.ben.ngaySinh,gioiTinh:st.ben.gioiTinh,diaChi:st.ben.diaChi,ngayCap:st.ben.ngayCap,loai:st.loai,truoc:st.truoc,sau:st.sau,cap:luc.slice(0,10),hd:so};
@@ -798,7 +800,7 @@ function soAnhTinhTrang(o){ttCss();ttqKhoiDong();const el=hdLayer(),pn=el.queryS
 
 window.CherieData={
   lapHopDong,xemHopDong,anhRieng,chupTinhTrang,TTQ,soAnhTinhTrang,ttDu,ttSo,bbOf,TT_GOC,
-  KM_KENH,kmChay,kmGiam,kmMoTa,kmOptions,kmTrangThai,
+  KM_KENH,kmChay,kmAp,kmGiam,kmMoTa,kmOptions,kmTrangThai,
   db,TABLES,KT,NHOM_LOAI,ANH_TOI_THIEU,BRIEF_CHUP,canChup,anhThat,nhanSu,today:()=>(()=>{const d=new Date(),p=x=>String(x).padStart(2,"0");return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())})(),goiYGia,maMoi,anhCua,anhDau,anhThumb,tongDon,tongHtml,ghiThu,bangTien,canThu,thuTien,anhThuCua,TK_TIEM,vietQR,qrSvg,ckTiemHtml,ckTiemBind,ckTiemTxt,ndCK,nenAnh,tyLeThue,LUOT,hanTra,soLuot,phiTre,VUNG,NGOAI_VUNG,phiVung,giaTri,laiGop,khauHaoLuot,kinhTe,YEN_TAM,phiYenTam,phiYenTamDs,ytCuaDon,ytMon,denGiaiThich,LY_DO_XOA,idDaXoa,xoaDon,khoiPhucDon,xoaDonUI,NGAN_HANG,hoanCuaDon,hoanThieu,hoanTxt,hoanFields,hoanDoc,hoanBind,hoanLuu,hoanAnhCua,xemAnhHoan,hoanCoc,hoanDong,hoanBindDong,suaTkHoan,luotDon,tienThue,mucMon,huMon,tongHu,quyetToan,daKiemXong,ytBanner,quyTacDen,MUC_HU,phiHu,SIZES,BANG_SIZE,goiYSize,doVua,
   init(o){changeCb=o.onChange||changeCb;statusCb=o.onStatus||statusCb;setTimeout(ttqKhoiDong,2500);statusCb(window.claude&&state==="local"?"connecting":state);connect();return db},
   save(){saveLocal();push()},

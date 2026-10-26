@@ -64,6 +64,33 @@ h2{font-size:14px;font-weight:600;margin:0}
 .custom input::-webkit-date-and-time-value{text-align:left}
 .prow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.nlg{display:flex;flex-direction:column;gap:8px}.nlg>h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 0 0;font-weight:600}
+.nltiles{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.nlt{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;color:var(--ink);font:inherit;cursor:pointer;min-width:0;position:relative}
+.nlt:hover{border-color:var(--wine)}.nlt:active{transform:scale(.99)}
+.nli{flex:none;width:40px;height:40px;border-radius:12px;background:var(--wine-soft);color:var(--wine);display:grid;place-items:center}.nli svg{width:22px;height:22px}
+.nltx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.nltx b{font-size:15px;font-weight:600}.nltx small{color:var(--muted);font-size:12.5px;line-height:1.35}
+.nlb{flex:none;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.nlb.new{background:var(--wine-soft);color:var(--wine)}.nlb.warn{background:var(--warn-soft);color:var(--warn)}.nlb.bad{background:var(--bad-soft);color:var(--bad)}.nlb.ok{background:var(--good-soft);color:var(--good)}
+.nlgo{flex:none;color:var(--muted);font-size:20px;line-height:1}
+.nltx .nlb{align-self:flex-start;margin-top:4px}
+.nlhead{display:flex;flex-direction:column;gap:2px}.nlback{align-self:flex-start;border:0;background:none;color:var(--wine);font:inherit;font-weight:600;padding:4px 0;cursor:pointer}
+.nlchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:2px max(16px,env(safe-area-inset-left,0px))}.nlchips::-webkit-scrollbar{display:none}
+.nlchips .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:4px;vertical-align:1px}.nlchips .dot.new{background:var(--wine)}.nlchips .dot.bad{background:var(--bad)}
+.chip[aria-pressed="true"] .dot{background:var(--surface)}
+.szg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}.sz{border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface);color:var(--ink)}.sz.on{border-color:var(--wine);background:var(--wine-soft)}
+.sz b{font-size:15px}.szc{display:flex;align-items:center;gap:8px}.szc button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:17px;line-height:1;color:var(--ink)}.szc button:disabled{opacity:.35}.szc output{min-width:14px;text-align:center;font-weight:700;font-size:15px}
+.kmseg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px}.kmseg button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 10px;font:inherit;font-weight:600;color:var(--ink);display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left}
+.kmseg button small{font-weight:400;font-size:11.5px;color:var(--muted)}.kmseg button[aria-pressed="true"]{border-color:var(--wine);background:var(--wine-soft);color:var(--wine)}
+.kmq{display:flex;flex-wrap:wrap;gap:6px}.kmvd{margin:0;padding:10px 12px;border-radius:10px;background:var(--sunk);font-size:13px}
+details.more>summary{cursor:pointer;color:var(--wine);font-weight:600;font-size:13px}
+.anhcan{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}.ac{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 10px}.acx{flex:1;min-width:0;display:flex;flex-direction:column}.acx small{color:var(--muted);font-size:12px}
+label.upl{position:relative;overflow:hidden;cursor:pointer;display:inline-flex;align-items:center;white-space:nowrap}label.upl input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.loisum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.loisum div{background:var(--sunk);border-radius:12px;padding:10px;display:flex;flex-direction:column}.loisum b{font-size:22px}.loisum span{font-size:12px;color:var(--muted)}
+.lh{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:6px 0 0}
+details.loi{border:1px solid var(--line);border-radius:12px;background:var(--surface)}details.loi>summary{list-style:none;display:flex;gap:10px;align-items:center;padding:10px 12px;cursor:pointer}details.loi>summary::-webkit-details-marker{display:none}
+details.loi .lt{flex:1;min-width:0;display:flex;flex-direction:column}details.loi .lt small{color:var(--muted);font-size:12px}
+details.loi .lb{padding:0 12px 12px;display:flex;flex-direction:column;gap:6px;font-size:13.5px}details.loi .lb p{margin:0}details.loi .lk{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
 .seg button{border:0;background:none;padding:5px 10px;font-size:12.5px}
 .seg button[aria-pressed="true"]{background:var(--sunk);font-weight:600}
 
@@ -152,6 +179,7 @@ h2{font-size:14px;font-weight:600;margin:0}
 .btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 14px;font-weight:600}
 .btn.primary{background:var(--wine);border-color:var(--wine);color:var(--wine-ink)}
 .btn.sm{padding:6px 10px;font-size:12.5px;border-radius:8px}
+.btn.danger{color:var(--bad);border-color:var(--bad-soft);background:var(--bad-soft)}
 .code{font-family:ui-monospace,Menlo,monospace;background:var(--sunk);padding:6px 10px;border-radius:8px;font-size:15px;font-weight:600;letter-spacing:.02em}
 .err{color:var(--bad);font-size:12.5px}
 .banner{border-radius:var(--r);padding:10px 14px;font-size:13px;background:var(--sunk)}.banner.bad{background:var(--wine-soft);color:var(--wine)}
@@ -209,7 +237,7 @@ header .homebtn{text-decoration:none;color:var(--ink)}
   <button type="button" data-tab="nl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>Nhập liệu</button>
 </nav>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=52890b55"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d2d9eaf"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -372,9 +400,9 @@ function kpi(l,v,cur,prev,opt){opt=opt||{};let d="";if(prev!=null){if(!prev&&!cu
   return`<div class="kpi ${opt.hero?"hero":""}"><span class="l">${l}</span><span class="v">${v}</span>${d}${opt.extra?`<span class="d">${opt.extra}</span>`:""}</div>`}
 
 /* ---------------- màn hình ---------------- */
-let tab="tq",nl="ln";
+let tab="tq",nl="";
 function render(){charts=[];document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===tab?"page":"false"));({tq:renderTQ,pl:renderPL,dt:renderDT,don:renderDon,kho:renderKho,cp:renderCP,nl:renderNL})[tab]()}
-document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();window.scrollTo(0,0)});
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{if(b.dataset.tab==="nl")nl="";tab=b.dataset.tab;render();window.scrollTo(0,0)});
 
 function series(a,b,g){const ks=buckets(a,b,g);const idx={};ks.forEach((k,i)=>idx[k]=i);const r=ks.map(()=>0),c=ks.map(()=>0),n=ks.map(()=>0);
   orders(a,b).forEach(d=>{const i=idx[bucketKey(ngayGN(d),g)];if(i!=null){r[i]+=rev(d).tong;n[i]++}});
@@ -504,13 +532,30 @@ const MAU=["Đen","Đỏ rượu","Đỏ","Champagne","Bạc","Trắng","Ngà","
 const PC=["Sang trọng","Quyến rũ","Thanh lịch","Cá tính"];
 let fd={};
 function nextSo(g){let m=0;db.sp.forEach(s=>{const x=s.id.split("-");if(x[1]===g)m=Math.max(m,+x[2]||0)});return String(m+1).padStart(3,"0")}
-function renderNL(){
-  const nloi=(db.loi||[]).filter(x=>x.tt!=="Đã sửa"&&x.tt!=="Bỏ qua").length,nln=(db.nhap||[]).filter(x=>x.tt==="Chờ duyệt").length,nyc=db.yc.filter(y=>y.tt==="Mới").length,ndg=(db.review||[]).filter(r=>r.tt==="Chờ duyệt").length;
-  view.innerHTML=`<div><h1>Nhập liệu</h1><p class="sub">Nhập ở đây thay cho gõ tay vào Google Sheets. Quầy và báo cáo cập nhật ngay.</p></div>
-  <div class="seg" role="group" aria-label="Loại nhập liệu" style="align-self:flex-start">${[["ln",`Nhập từ link${nln?` (${nln})`:""}`],["sp","Món trong kho"],["anh","Ảnh lookbook"],["dg",`Đánh giá${ndg?` (${ndg})`:""}`],["km","Khuyến mãi"],["loi",`Lỗi hệ thống${nloi?` (${nloi})`:""}`],["ns","Nhân sự"],["pq","Phân quyền"],["yc",`Yêu cầu web${nyc?` (${nyc})`:""}`]].map(([k,n])=>`<button type="button" data-nl="${k}" aria-pressed="${nl===k}">${n}</button>`).join("")}</div>
+/* Nhập liệu: màn đầu là các ô theo nhóm (hàng hoá, bán hàng, đội ngũ, hệ thống), bấm ô để vào; trong mục có nút quay lại và thanh chuyển nhanh một hàng */
+const NL_IC={ln:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',sp:'<path d="M12 3c1.5 0 2.5 1 2.5 2.3 0 1-.7 1.7-1.6 2.1L12 8l9 7.5c.6.5.3 1.5-.5 1.5h-17c-.8 0-1.1-1-.5-1.5L12 8"/>',
+  anh:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/>',km:'<path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="7.5" r="1.5"/>',dg:'<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  ns:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c1.8.8 3 2.6 3.5 5.2"/>',pq:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',loi:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17h.01"/>'};
+function nlMuc(){const nloi=(db.loi||[]).filter(x=>!/^RS-/.test(x.id)&&loiMo(x)).length,ncan=(db.loi||[]).filter(x=>x.tt==="Cần chủ tiệm").length,nln=(db.nhap||[]).filter(x=>x.tt==="Chờ duyệt").length,ndg=(db.review||[]).filter(r=>r.tt==="Chờ duyệt").length,
+    nchup=CD.canChup().length,nkm=(db.km||[]).filter(m=>CD.kmTrangThai(m,TODAY)==="Đang chạy").length,nns=(db.nv||[]).filter(n=>!n.nghi).length,nsp=db.sp.filter(x=>x.tt!=="Ngưng"&&x.tt!=="Mất").length;
+  return [["Hàng hoá",[["ln","Nhập từ link","Dán link sản phẩm của hãng, agent điền sẵn để bạn duyệt",nln?[nln+" chờ duyệt","new"]:null],["sp","Món trong kho","Sửa giá, cọc, trạng thái từng chiếc",[nsp+" món",""]],["anh","Ảnh lookbook","Ảnh tự chụp cho website",nchup?[nchup+" mẫu cần ảnh","warn"]:null]]],
+    ["Bán hàng",[["km","Khuyến mãi","Giảm tiền thuê hoặc phí Gói Yên tâm",nkm?[nkm+" đang chạy","ok"]:null],["dg","Đánh giá","Duyệt lời khách trước khi lên web",ndg?[ndg+" chờ duyệt","new"]:null]]],
+    ["Đội ngũ",[["ns","Nhân sự","Thêm người, đặt mã PIN, xoá người đã nghỉ",[nns+" người",""]],["pq","Phân quyền","Ai được mở và sửa app nào",null]]],
+    ["Hệ thống",[["loi","Lỗi hệ thống","Agent tự theo dõi và xử lý mỗi giờ",ncan?[ncan+" cần bạn","bad"]:nloi?[nloi+" agent đang xử lý","warn"]:["Ổn định","ok"]]]]]}
+function renderNL(){const G=nlMuc(),all=G.flatMap(g=>g[1]);if(nl&&!all.some(m=>m[0]===nl))nl="";
+  const ic=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NL_IC[k]||""}</svg>`;
+  const bdg=b=>b?`<span class="nlb ${b[1]}">${b[0]}</span>`:"";
+  if(!nl){view.innerHTML=`<div><h1>Nhập liệu</h1><p class="sub">Mọi thứ nhập ở đây cập nhật ngay cho Quầy, Stylist, CS và website.</p></div>
+    ${G.map(([g,ms])=>`<section class="nlg"><h2>${g}</h2><div class="nltiles">${ms.map(([k,t,d,b])=>`<button type="button" class="nlt" data-nl="${k}"><span class="nli">${ic(k)}</span><span class="nltx"><b>${t}</b><small>${d}</small>${bdg(b)}</span><span class="nlgo" aria-hidden="true">›</span></button>`).join("")}</div></section>`).join("")}`;
+    view.querySelectorAll("[data-nl]").forEach(b=>b.onclick=()=>{nl=b.dataset.nl;renderNL();window.scrollTo(0,0)});return}
+  const cur=all.find(m=>m[0]===nl);
+  view.innerHTML=`<div class="nlhead"><button type="button" class="nlback" id="nlBack" aria-label="Về Nhập liệu">‹ Nhập liệu</button><h1>${cur[1]}</h1><p class="sub">${cur[2]}</p></div>
+  <div class="nlchips" role="group" aria-label="Chuyển mục">${all.map(([k,t,,b])=>`<button type="button" class="chip" data-nl="${k}" aria-pressed="${nl===k}">${t}${b&&(b[1]==="new"||b[1]==="bad")?` <i class="dot ${b[1]}"></i>`:""}</button>`).join("")}</div>
   <div id="nlb"></div>`;
+  view.querySelector("#nlBack").onclick=()=>{nl="";renderNL();window.scrollTo(0,0)};
   view.querySelectorAll("[data-nl]").forEach(b=>b.onclick=()=>{nl=b.dataset.nl;renderNL()});
-  ({loi:nlLoi,km:nlKM,ns:nlNS,pq:nlPQ,ln:nlLN,anh:nlAnh,cp:nlCP,sp:nlSP,dg:nlDG,yc:nlYC})[nl](document.getElementById("nlb"));
+  {const a=view.querySelector('.nlchips [aria-pressed="true"]');if(a)try{a.scrollIntoView({inline:"center",block:"nearest"})}catch(e){}}
+  ({loi:nlLoi,km:nlKM,ns:nlNS,pq:nlPQ,ln:nlLN,anh:nlAnh,sp:nlSP,dg:nlDG})[nl](document.getElementById("nlb"));
 }
 /* ---------------- Chi phí: nhập như nói, tự phân loại ---------------- */
 const CP_DM=[
@@ -661,35 +706,41 @@ function nlLN(el){const all=[...(db.nhap||[])].sort((a,b)=>a.tao<b.tao?1:-1);
   const pill=t=>`<span class="pill ${t==="Chờ duyệt"?"new":t==="Đã đăng"?"ok":t==="Lỗi"?"bad":""}">${esc(t)}</span>`;
   el.innerHTML=`<div class="grid2"><section class="card"><h2>Gửi link sản phẩm</h2><form class="form" id="fln" novalidate>
    <label class="f">Link trang sản phẩm của thương hiệu<input type="url" id="lLink" inputmode="url" placeholder="https://dchic.vn/vi/products/..." value="${esc(fd.lLink||"")}"></label>
-   <div class="two"><label class="f">Size đã mua<select id="lSize">${CD.SIZES.map(x=>`<option ${(fd.lSize||"S")===x?"selected":""}>${x}</option>`).join("")}</select></label><label class="f">Số chiếc<input type="number" id="lSl" min="1" max="5" value="${fd.lSl||1}"></label></div>
+   <div class="f"><span>Size và số chiếc đã mua (cùng một mẫu, chọn được nhiều size)</span><div class="szg">${CD.SIZES.map(z=>{const n=(fd.lSz||{})[z]||0;return `<div class="sz ${n?"on":""}"><b>${z}</b><span class="szc"><button type="button" data-sz="${z}" data-d="-1" aria-label="Bớt size ${z}" ${n?"":"disabled"}>−</button><output>${n}</output><button type="button" data-sz="${z}" data-d="1" aria-label="Thêm size ${z}">+</button></span></div>`}).join("")}</div>
+   <p class="note" id="lSzTxt">${lnSzTxt(fd.lSz)}</p></div>
    <label class="f">Giá mua thực tế (đ), bỏ trống nếu mua đúng giá niêm yết<input type="number" id="lGia" inputmode="numeric" step="10000" value="${esc(fd.lGia||"")}"></label>
    <label class="f">Dặn thêm cho AI (không bắt buộc)<input type="text" id="lNote" value="${esc(fd.lNote||"")}" placeholder="Ví dụ: mua kèm thắt lưng, sale 30%"></label>
    <p class="err" id="lErr" hidden></p><button class="btn primary" type="submit">Gửi cho Agent Nhập hàng</button>
    <p class="note">Agent chạy mỗi giờ từ 8:00 đến 22:00: đọc trang thương hiệu, điền tên, thương hiệu, chất liệu, giá niêm yết, ảnh, rồi đề xuất tên mẫu Chérie, giá thuê, cọc và mã món. Món chỉ lên website sau khi bạn bấm Duyệt.</p></form></section>
-   <section class="card"><h2>Hàng đợi · ${all.length}</h2>${(()=>{const c=all.filter(x=>x.tt==="Chờ duyệt"&&x.draft&&!lnLoi(x.draft));return c.length>1?`<div class="banner info" style="margin-bottom:12px"><b>${c.length} món chờ duyệt.</b> Đã xem qua hết thì duyệt một lần, giữ nguyên giá agent đề xuất. Món nào cần sửa thì mở riêng trước. <span id="bulkC"><button class="btn sm primary" type="button" id="bulk">Duyệt tất cả ${c.length} món</button></span></div>`:""})()}<div class="list">${all.map(x=>`<div class="it"><span class="t">${esc((x.draft&&x.draft.ten)||x.link.replace(/^https?:\/\/(www\.)?/,"").slice(0,48))} · size ${esc(x.size)}${x.sl>1?` × ${x.sl}`:""}</span><span class="s">${esc(x.draft&&x.draft.brand||"")}${x.draft&&x.draft.brand?" · ":""}gửi ${dm(x.tao.slice(0,10))}${x.loi?" · "+esc(x.loi):""}${x.spIds?" · "+x.spIds.join(", "):""}</span><span class="r">${pill(x.tt)}${x.tt==="Chờ duyệt"?`<button class="btn sm" type="button" data-rv="${x.id}">Xem và duyệt</button>`:""}</span></div>`).join("")||'<p class="empty">Chưa có link nào.</p>'}</div></section></div>
+   <section class="card"><h2>Hàng đợi · ${all.length}</h2>${(()=>{const c=all.filter(x=>x.tt==="Chờ duyệt"&&x.draft&&!lnLoi(x.draft));return c.length>1?`<div class="banner info" style="margin-bottom:12px"><b>${c.length} món chờ duyệt.</b> Đã xem qua hết thì duyệt một lần, giữ nguyên giá agent đề xuất. Món nào cần sửa thì mở riêng trước. <span id="bulkC"><button class="btn sm primary" type="button" id="bulk">Duyệt tất cả ${c.length} món</button></span></div>`:""})()}<div class="list">${all.map(x=>`<div class="it"><span class="t">${esc((x.draft&&x.draft.ten)||x.link.replace(/^https?:\/\/(www\.)?/,"").slice(0,48))} · ${esc(lnSizes(x).map(z=>`size ${z.size}${z.sl>1?" × "+z.sl:""}`).join(", "))}</span><span class="s">${esc(x.draft&&x.draft.brand||"")}${x.draft&&x.draft.brand?" · ":""}gửi ${dm(x.tao.slice(0,10))}${x.loi?" · "+esc(x.loi):""}${x.spIds?" · "+x.spIds.join(", "):""}</span><span class="r">${pill(x.tt)}${x.tt==="Chờ duyệt"?`<button class="btn sm" type="button" data-rv="${x.id}">Xem và duyệt</button>`:""}</span></div>`).join("")||'<p class="empty">Chưa có link nào.</p>'}</div></section></div>
    <div id="rv"></div>`;
-  const f=el.querySelector("#fln");const ids=["lLink","lSize","lSl","lGia","lNote"];f.oninput=()=>ids.forEach(i=>fd[i]=f.querySelector("#"+i).value);
+  const f=el.querySelector("#fln");const ids=["lLink","lGia","lNote"];
+  el.querySelectorAll("[data-sz]").forEach(b=>b.onclick=()=>{ids.forEach(i=>fd[i]=f.querySelector("#"+i).value);const z=b.dataset.sz,m=Object.assign({},fd.lSz||{});m[z]=Math.max(0,Math.min(10,(m[z]||0)+(+b.dataset.d)));if(!m[z])delete m[z];fd.lSz=m;nlLN(el)});f.oninput=()=>ids.forEach(i=>fd[i]=f.querySelector("#"+i).value);
   f.onsubmit=e=>{e.preventDefault();ids.forEach(i=>fd[i]=f.querySelector("#"+i).value);const err=f.querySelector("#lErr");const L=(fd.lLink||"").trim();
     if(!/^https?:\/\/[^\s]+\.[^\s]+/.test(L)){err.textContent="Dán link đầy đủ, bắt đầu bằng https://";err.hidden=false;return}
-    if((db.nhap||[]).some(x=>x.link===L&&x.size===fd.lSize&&!["Bỏ","Lỗi"].includes(x.tt))){err.textContent="Link này với size này đã có trong hàng đợi.";err.hidden=false;return}
-    db.nhap.push({id:CD.newId("NH"),link:L,size:fd.lSize||"S",sl:Math.max(1,+fd.lSl||1),giaMua:+fd.lGia||0,note:(fd.lNote||"").trim(),tt:"Chờ AI",tao:new Date().toISOString().slice(0,16),nguoiGui:"Admin"});
-    CD.save();fd={};lnOpen=null;nlLN(el);toast("Đã gửi, agent sẽ điền trong giờ tới")};
+    const szs=CD.SIZES.filter(z=>(fd.lSz||{})[z]>0).map(z=>({size:z,sl:fd.lSz[z]}));if(!szs.length){err.textContent="Bấm + ở size đã mua (ví dụ S và M nếu mua 2 size).";err.hidden=false;return}
+    const trung=szs.filter(z=>(db.nhap||[]).some(x=>x.link===L&&lnSizes(x).some(y=>y.size===z.size)&&!["Bỏ","Lỗi"].includes(x.tt)));if(trung.length){err.textContent=`Link này với size ${trung.map(z=>z.size).join(", ")} đã có trong hàng đợi.`;err.hidden=false;return}
+    db.nhap.push({id:CD.newId("NH"),link:L,size:szs[0].size,sl:szs[0].sl,sizes:szs,giaMua:+fd.lGia||0,note:(fd.lNote||"").trim(),tt:"Chờ AI",tao:new Date().toISOString().slice(0,16),nguoiGui:"Admin"});
+    CD.save();fd={};lnOpen=null;nlLN(el);toast(`Đã gửi ${szs.reduce((a,z)=>a+z.sl,0)} chiếc (${lnSzTxt(Object.fromEntries(szs.map(z=>[z.size,z.sl])),1)}), agent sẽ điền trong giờ tới`)};
   el.querySelectorAll("[data-rv]").forEach(b=>b.onclick=()=>{lnOpen=b.dataset.rv;nlLN(el)});
   const bk=el.querySelector("#bulk");if(bk)bk.onclick=()=>{const c=(db.nhap||[]).filter(x=>x.tt==="Chờ duyệt"&&x.draft&&!lnLoi(x.draft));el.querySelector("#bulkC").innerHTML=`Đăng ${c.length} món lên website? <button class="btn sm primary" type="button" id="bulkY">Đăng</button> <button class="btn sm" type="button" id="bulkN">Thôi</button>`;
     el.querySelector("#bulkN").onclick=()=>nlLN(el);el.querySelector("#bulkY").onclick=()=>{let n=0;c.sort((a,b)=>a.tao<b.tao?-1:1).forEach(x=>{n+=duyetMon(x).length});CD.save();lnOpen=null;nlLN(el);toast("Đã đăng "+n+" món lên website")}};
   if(lnOpen)lnReview(el.querySelector("#rv"),lnOpen,()=>nlLN(el));
 }
 function lnLoi(d){return !(d.ten||"").trim()?"Nhập tên mẫu.":!(+d.von>0)?"Nhập giá gốc.":!(+d.gia>0)?"Nhập giá thuê.":!(+d.coc>0)?"Nhập cọc.":""}
-function duyetMon(x){const d=x.draft;const g=CD.goiYGia({von:+d.von,giaNiemYet:+d.giaNiemYet,markup:+d.markup,loai:d.loai});const ids=[];
-  for(let i=0;i<(x.sl||1);i++){const id=CD.maMoi(g.nhom,x.size);ids.push(id);
-    db.sp.push({id,ten:d.ten.trim(),mo:(d.mo||"").trim(),loai:d.loai,size:x.size,mau:d.mau||"",pc:d.pc||"Thanh lịch",gia:+d.gia,coc:+d.coc,tt:"Sẵn sàng",giat:1,von:+d.von,markup:+d.markup,co:d.co||"Co giãn nhẹ",nhap:TODAY,
-      brand:d.brand||"",tenGoc:d.tenGoc||"",link:x.link,briefChup:d.briefChup||CD.BRIEF_CHUP,anhHang:(d.anhBrand||[]).length,anhBrand:d.anhBrand||[],giaNiemYet:+d.giaNiemYet||0,chatLieu:d.chatLieu||"",moTa:d.moTa||"",nguon:"Nhập từ link"})}
-  let m=0;db.chiphi.forEach(c=>m=Math.max(m,+String(c.id).replace(/\D/g,"")||0));db.chiphi.push({id:"CP"+String(m+1).padStart(3,"0"),ngay:TODAY,nhom:"Nhập hàng",tien:+d.von*(x.sl||1),note:`Nhập ${ids.join(", ")} (${d.brand||"link"})`});
+/* một link có thể mua nhiều size: x.sizes = [{size, sl}] (link cũ chỉ có size + sl) */
+function lnSizes(x){return Array.isArray(x.sizes)&&x.sizes.length?x.sizes:[{size:x.size||"S",sl:+x.sl||1}]}
+function lnSzTxt(m,ngan){const ds=CD.SIZES.filter(z=>(m||{})[z]>0);if(!ds.length)return ngan?"":"Chưa chọn size nào.";const n=ds.reduce((a,z)=>a+m[z],0);return (ngan?"":`${n} chiếc: `)+ds.map(z=>`${m[z]} size ${z}`).join(", ")+(ngan?"":". Mỗi chiếc được cấp một mã riêng, chung tên mẫu và giá.")}
+function duyetMon(x){const d=x.draft;const g=CD.goiYGia({von:+d.von,giaNiemYet:+d.giaNiemYet,markup:+d.markup,loai:d.loai});const ids=[];let tong=0;
+  lnSizes(x).forEach(z=>{for(let i=0;i<(z.sl||1);i++){const id=CD.maMoi(g.nhom,z.size);ids.push(id);tong++;
+    db.sp.push({id,ten:d.ten.trim(),mo:(d.mo||"").trim(),loai:d.loai,size:z.size,mau:d.mau||"",pc:d.pc||"Thanh lịch",gia:+d.gia,coc:+d.coc,tt:"Sẵn sàng",giat:1,von:+d.von,markup:+d.markup,co:d.co||"Co giãn nhẹ",nhap:TODAY,
+      brand:d.brand||"",tenGoc:d.tenGoc||"",link:x.link,briefChup:d.briefChup||CD.BRIEF_CHUP,anhHang:(d.anhBrand||[]).length,anhBrand:d.anhBrand||[],giaNiemYet:+d.giaNiemYet||0,chatLieu:d.chatLieu||"",moTa:d.moTa||"",nguon:"Nhập từ link"})}});
+  let m=0;db.chiphi.forEach(c=>m=Math.max(m,+String(c.id).replace(/\D/g,"")||0));db.chiphi.push({id:"CP"+String(m+1).padStart(3,"0"),ngay:TODAY,nhom:"Nhập hàng",tien:+d.von*tong,note:`Nhập ${ids.join(", ")} (${d.brand||"link"})`});
   x.tt="Đã đăng";x.spIds=ids;x.duyetLuc=new Date().toISOString().slice(0,16);return ids}
 function lnReview(box,id,back){const x=(db.nhap||[]).find(n=>n.id===id);if(!x||!x.draft){box.innerHTML="";return}const d=x.draft;
   const v=k=>d[k]==null?"":d[k];
   const draw=()=>{const g=CD.goiYGia({von:+d.von,giaNiemYet:+d.giaNiemYet,markup:+d.markup,loai:d.loai})||{};const sp={von:+d.von,gia:+d.gia,markup:+d.markup,giaNiemYet:+d.giaNiemYet,nhap:TODAY};const e=CD.kinhTe(sp,[],TODAY);const gt=CD.giaTri(sp);
-    box.querySelector("#rvEco").innerHTML=gt?`<dl class="kv"><dt>Giá trị hiện trên website</dt><dd><b>${money(gt)}</b>${+d.giaNiemYet>0&&gt>=Math.round(+d.giaNiemYet/1e4)*1e4?" (bằng giá niêm yết của hãng)":""}</dd><dt>Gợi ý giá thuê</dt><dd>${money(g.gia)} · ${pct(g.tyLe)} giá trị</dd><dt>Gợi ý cọc</dt><dd>${money(g.coc)}</dd><dt>Lợi nhuận mỗi lượt</dt><dd>${money(e.loiLuot)}</dd><dt>Hoà vốn</dt><dd><b>${e.hoaVon} lượt</b></dd><dt>Mã sẽ cấp</dt><dd>${CD.maMoi(g.nhom||"DT",x.size)}${x.sl>1?` đến ${x.sl} mã`:""}</dd></dl>`:'<p class="note">Thiếu giá gốc.</p>'};
+    box.querySelector("#rvEco").innerHTML=gt?`<dl class="kv"><dt>Giá trị hiện trên website</dt><dd><b>${money(gt)}</b>${+d.giaNiemYet>0&&gt>=Math.round(+d.giaNiemYet/1e4)*1e4?" (bằng giá niêm yết của hãng)":""}</dd><dt>Gợi ý giá thuê</dt><dd>${money(g.gia)} · ${pct(g.tyLe)} giá trị</dd><dt>Gợi ý cọc</dt><dd>${money(g.coc)}</dd><dt>Lợi nhuận mỗi lượt</dt><dd>${money(e.loiLuot)}</dd><dt>Hoà vốn</dt><dd><b>${e.hoaVon} lượt</b></dd><dt>Mã sẽ cấp</dt><dd>${lnSizes(x).map(z=>`${z.sl} mã size ${z.size}`).join(", ")} (ví dụ ${CD.maMoi(g.nhom||"DT",lnSizes(x)[0].size)})</dd></dl>`:'<p class="note">Thiếu giá gốc.</p>'};
   box.innerHTML=`<section class="card" style="margin-top:16px"><h2>Duyệt món từ ${esc(v("brand"))}</h2>
    <p class="note src">Nguồn: ${esc(x.link)}${d.tenGoc?` · tên gốc: ${esc(d.tenGoc)}`:""}${d.ma?` · mã hãng ${esc(d.ma)}`:""}</p>
    ${d.ghiChuAI?`<div class="banner info">Agent lưu ý: ${esc(d.ghiChuAI)}</div>`:""}
@@ -722,29 +773,34 @@ function lnReview(box,id,back){const x=(db.nhap||[]).find(n=>n.id===id);if(!x||!
     const bad=lnLoi(d);if(bad){er.textContent=bad;er.hidden=false;return}
     const ids=duyetMon(x);CD.save();lnOpen=null;back();toast("Đã đăng "+ids.join(", ")+" lên website")};
 }
-/* ---------- Ảnh lookbook: ảnh tự chụp, team marketing và admin cùng thêm ---------- */
-let anhSp="";
+/* ---------- Ảnh lookbook: ảnh tự chụp, team marketing và admin cùng thêm ----------
+   Bấm "Thêm ảnh" ở mẫu nào là mở ngay thư viện ảnh và tải lên cho đúng mẫu đó (không phải kéo xuống form). */
+let anhSp="",anhLoai="Shooting",anhDY=false,anhDang="";
 function nlAnh(el){const sps=[...db.sp].filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất").sort((a,b)=>(b.nhap||"")<(a.nhap||"")?-1:1);if(!anhSp&&sps[0])anhSp=sps[0].id;
-  const list=CD.anhCua(anhSp,false);
-  const can=CD.canChup();const cur=db.sp.find(x=>x.id===anhSp);
-  el.innerHTML=`${can.length?`<section class="card" style="margin-bottom:16px"><h2>Cần chụp · ${can.length} mẫu chưa đủ ${CD.ANH_TOI_THIEU} ảnh</h2><div class="list">${can.slice(0,12).map(s=>`<div class="it"><span class="t">${esc(s.ten)} · ${s.id}</span><span class="s">${CD.anhThat(s.id).length}/${CD.ANH_TOI_THIEU} ảnh thật${s.brand?" · "+esc(s.brand):""}</span><span class="r"><button class="btn sm" type="button" data-pick="${s.id}">Thêm ảnh</button></span></div>`).join("")}</div></section>`:""}
-  <div class="grid2"><section class="card"><h2>Thêm ảnh tự chụp</h2>${cur?`<div class="banner info"><b>Brief chụp ${esc(cur.ten)}:</b> ${esc((cur.briefChup||CD.BRIEF_CHUP).join("; "))}.</div>`:""}<form class="form" id="fa" novalidate>
-   <label class="f">Mẫu đầm<select id="aSp">${sps.map(s=>`<option value="${s.id}" ${s.id===anhSp?"selected":""}>${esc(s.ten)} · ${s.id}${CD.anhCua(s.id,false).length?` · ${CD.anhCua(s.id,false).length} ảnh`:" · chưa có ảnh"}</option>`).join("")}</select></label>
-   <label class="f">Loại ảnh<select id="aLoai"><option>Shooting</option><option>Lookbook khách</option><option value="Ảnh AI">Ảnh AI (dựng từ ảnh có sẵn, đã duyệt)</option></select></label>
-   <label class="consent" id="aOkBox" hidden><input type="checkbox" id="aOk"> Khách đã đồng ý cho Chérie đăng ảnh này (đã lưu trong tab Đồng ý)</label>
-   <label class="f">Chọn ảnh (nhiều ảnh cùng lúc)<input type="file" id="aFile" accept="image/*" multiple></label>
-   <p class="err" id="aErr" hidden></p><p class="note">Ảnh được nén còn khoảng 200 KB. Ảnh khách chỉ hiện trên website khi có đồng ý; ảnh shooting hiện ngay. Mỗi mẫu tối đa 8 ảnh.</p></form></section>
-   <section class="card"><h2>Ảnh của mẫu này · ${list.length}</h2><div class="ag">${list.map((a,i)=>`<figure><img src="${a.src}" alt="${esc(a.loai)}"><figcaption>${esc(a.loai)}${a.loai==="Lookbook khách"&&!a.dongY?" · chưa đồng ý, đang ẩn":""}</figcaption><div class="btns">${i?`<button class="btn sm" type="button" data-up="${a.id}">Lên đầu</button>`:'<span class="pill ok">Ảnh bìa</span>'}<button class="btn sm" type="button" data-rm="${a.id}">Xoá</button></div></figure>`).join("")||'<p class="empty">Chưa có ảnh. Website đang hiện hình minh hoạ.</p>'}</div></section></div>`;
+  const list=CD.anhCua(anhSp,false),can=CD.canChup(),cur=db.sp.find(x=>x.id===anhSp);
+  const upBtn=(id,txt,cls)=>`<label class="btn sm ${cls||""} upl">${anhDang===id?"Đang tải…":txt}<input type="file" accept="image/*" multiple data-up="${id}" ${anhDang?"disabled":""}></label>`;
+  el.innerHTML=`<section class="card" style="display:flex;flex-direction:column;gap:10px"><h2>Loại ảnh sắp tải</h2>
+   <div class="seg" role="group" aria-label="Loại ảnh">${[["Shooting","Shooting của tiệm"],["Lookbook khách","Ảnh khách mặc"],["Ảnh AI","Ảnh AI đã duyệt"]].map(([v,t])=>`<button type="button" data-al="${v}" aria-pressed="${anhLoai===v}">${t}</button>`).join("")}</div>
+   ${anhLoai==="Lookbook khách"?`<label class="consent"><input type="checkbox" id="aOk" ${anhDY?"checked":""}> Khách đã đồng ý cho Chérie đăng ảnh (đã lưu trong tab Đồng ý). Chưa tick thì ảnh lưu nhưng ẩn khỏi website.</label>`:""}
+   <p class="note">Chọn được nhiều ảnh một lần. Ảnh được nén còn khoảng 200 KB rồi lưu lên Drive của tiệm. Mỗi mẫu tối đa 8 ảnh.</p><p class="err" id="aErr" hidden></p></section>
+  ${can.length?`<section class="card" style="margin-top:16px"><h2>Cần chụp · ${can.length} mẫu chưa đủ ${CD.ANH_TOI_THIEU} ảnh</h2><div class="anhcan">${can.slice(0,24).map(s=>`<div class="ac">${CD.anhThumb(s.id,52,68)}<span class="acx"><b>${esc(s.ten)}</b><small>${s.id}${s.brand?" · "+esc(s.brand):""}</small><small>${CD.anhThat(s.id).length}/${CD.ANH_TOI_THIEU} ảnh tự chụp</small></span>${upBtn(s.id,"Thêm ảnh")}</div>`).join("")}</div>${can.length>24?`<p class="note">Còn ${can.length-24} mẫu, chọn ở ô bên dưới.</p>`:""}</section>`:""}
+  <section class="card" style="margin-top:16px;display:flex;flex-direction:column;gap:10px"><h2>Ảnh từng mẫu</h2>
+   <label class="f">Mẫu đầm<select id="aSp">${sps.map(s=>`<option value="${s.id}" ${s.id===anhSp?"selected":""}>${esc(s.ten)} · ${s.id} · ${CD.anhCua(s.id,false).length} ảnh</option>`).join("")}</select></label>
+   ${cur?`<div class="banner info"><b>Brief chụp ${esc(cur.ten)}:</b> ${esc((cur.briefChup||CD.BRIEF_CHUP).join("; "))}.</div>`:""}
+   <div>${upBtn(anhSp,`Thêm ảnh cho ${esc(cur?cur.ten:"")}`,"primary")}</div>
+   <div class="ag">${list.map((a,i)=>`<figure><img src="${a.th||a.src}" alt="${esc(a.loai)}" loading="lazy"><figcaption>${esc(a.loai)}${a.loai==="Lookbook khách"&&!a.dongY?" · chưa đồng ý, đang ẩn":""}</figcaption><div class="btns">${i?`<button class="btn sm" type="button" data-top="${a.id}">Lên đầu</button>`:'<span class="pill ok">Ảnh bìa</span>'}<button class="btn sm" type="button" data-rm="${a.id}">Xoá</button></div></figure>`).join("")||'<p class="empty">Chưa có ảnh. Website đang dùng ảnh của hãng hoặc hình minh hoạ.</p>'}</div></section>`;
   const $$=q=>el.querySelector(q);
   $$("#aSp").onchange=e=>{anhSp=e.target.value;nlAnh(el)};
-  el.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{anhSp=b.dataset.pick;nlAnh(el)});
-  $$("#aLoai").onchange=e=>{$$("#aOkBox").hidden=e.target.value!=="Lookbook khách"};
-  $$("#aFile").onchange=async e=>{const fs=[...e.target.files];const err=$$("#aErr");err.hidden=true;const loai=$$("#aLoai").value;
-    if(CD.anhCua(anhSp,false).length+fs.length>8){err.textContent="Mỗi mẫu tối đa 8 ảnh. Xoá bớt ảnh cũ trước.";err.hidden=false;return}
-    let n=0;for(const file of fs){try{const src=await CD.nenAnh(file);db.anh.push({id:CD.newId("A"),sp:anhSp,src,loai,dongY:loai==="Lookbook khách"?$$("#aOk").checked:true,nguoi:"Admin",tao:new Date().toISOString().slice(0,16),thuTu:CD.anhCua(anhSp,false).length+1});n++}catch(x){err.textContent=x.message;err.hidden=false}}
-    CD.save();nlAnh(el);if(n)toast(`Đã thêm ${n} ảnh`)};
+  el.querySelectorAll("[data-al]").forEach(b=>b.onclick=()=>{anhLoai=b.dataset.al;nlAnh(el)});
+  const ok=$$("#aOk");if(ok)ok.onchange=()=>{anhDY=ok.checked};
+  el.querySelectorAll("[data-up]").forEach(inp=>inp.onchange=async()=>{const sp=inp.dataset.up,fs=[...(inp.files||[])],err=$$("#aErr");err.hidden=true;if(!fs.length)return;
+    if(CD.anhCua(sp,false).length+fs.length>8){err.textContent="Mỗi mẫu tối đa 8 ảnh. Xoá bớt ảnh cũ trước.";err.hidden=false;err.scrollIntoView({block:"center"});return}
+    anhDang=sp;nlAnh(el);let n=0,loi="";
+    for(const file of fs){try{const src=await CD.nenAnh(file,1400,0.78);db.anh.push({id:CD.newId("A"),sp,src,loai:anhLoai,dongY:anhLoai==="Lookbook khách"?anhDY:true,nguoi:"Admin",tao:new Date().toISOString().slice(0,16),thuTu:CD.anhCua(sp,false).length+1});n++}catch(x){loi=x.message||"Không đọc được ảnh"}}
+    anhDang="";anhSp=sp;if(n)CD.save();nlAnh(el);const e2=el.querySelector("#aErr");if(loi){e2.textContent=loi;e2.hidden=false}
+    if(n){const sx=db.sp.find(x=>x.id===sp);toast(`Đã thêm ${n} ảnh cho ${sx?sx.ten:sp}`)}});
   el.querySelectorAll("[data-rm]").forEach(b=>{let armed=false;b.onclick=()=>{if(!armed){armed=true;b.textContent="Chắc chắn?";setTimeout(()=>{armed=false;b.textContent="Xoá"},2500);return}const i=db.anh.findIndex(a=>a.id===b.dataset.rm);if(i>=0){db.anh.splice(i,1);CD.save();nlAnh(el)}}});
-  el.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const a=db.anh.find(x=>x.id===b.dataset.up);CD.anhCua(anhSp,false).forEach(x=>x.thuTu=(x.thuTu||0)+1);a.thuTu=0;CD.save();nlAnh(el)});
+  el.querySelectorAll("[data-top]").forEach(b=>b.onclick=()=>{const a=db.anh.find(x=>x.id===b.dataset.top);CD.anhCua(anhSp,false).forEach(x=>x.thuTu=(x.thuTu||0)+1);a.thuTu=0;CD.save();nlAnh(el)});
 }
 
 /* Nhân sự: mỗi người đăng nhập app bằng tên + mã PIN do chủ tiệm đặt. Không cần email. */
@@ -753,8 +809,8 @@ function nlNS(el){const ns=[...(db.nv||[])].sort((x,y)=>(!!x.nghi)-(!!y.nghi));c
    <div class="two"><label class="f">Tên gọi<input type="text" id="nTen" placeholder="Ví dụ: Mai" autocomplete="off"></label><label class="f">Vai trò<select id="nVt"><option>Stylist</option><option>Quầy</option><option>Marketing</option><option>Admin</option></select></label></div>
    ${G?`<label class="f">Mã PIN đăng nhập (4–8 số)<input type="text" id="nPin" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="Ví dụ: 2580"></label>`:""}
    <p class="err" id="nErr" hidden></p><button class="btn primary" type="submit">Thêm</button>
-   <p class="note">Nhân viên mở link trang nhân sự (?p=home), chọn tên mình và nhập mã PIN này. Không cần email hay tài khoản Google. Nghỉ việc thì bấm "Đánh dấu nghỉ", mã PIN mất hiệu lực ngay.</p></form></section>
-   <section class="card"><h2>Đội ngũ · ${ns.filter(n=>!n.nghi).length}</h2><div class="list">${ns.map(n=>{const self=n.id===me.id;return `<div class="it"><span class="t">${esc(n.ten)}${self?" · bạn":""}${n.nghi?" · đã nghỉ":""}</span><span class="s">${esc(n.vaiTro)} <span data-pst="${n.id}"></span></span><span class="r">${G&&!n.nghi?`<button class="btn sm" type="button" data-pin="${n.id}">Đặt PIN</button>`:""}${self?"":`<button class="btn sm" type="button" data-ns="${n.id}">${n.nghi?"Cho làm lại":"Đánh dấu nghỉ"}</button>`}</span></div><div data-pbox="${n.id}" style="display:none;gap:8px;padding:0 0 10px"><input type="text" inputmode="numeric" maxlength="8" placeholder="PIN mới 4–8 số" style="flex:1;min-width:0"><button class="btn sm primary" type="button">Lưu</button></div>`}).join("")||'<p class="empty">Chưa có ai.</p>'}</div></section></div>`;
+   <p class="note">Nhân viên mở link trang nhân sự (?p=home), chọn tên mình và nhập mã PIN này. Không cần email hay tài khoản Google. Nghỉ việc thì bấm "Đánh dấu nghỉ", mã PIN mất hiệu lực ngay. Người đã nghỉ có nút Xoá để dọn khỏi danh sách; đơn, chuyến và lịch sử họ đã làm vẫn giữ nguyên tên.</p></form></section>
+   <section class="card"><h2>Đội ngũ · ${ns.filter(n=>!n.nghi).length}</h2><div class="list">${ns.map(n=>{const self=n.id===me.id;return `<div class="it"><span class="t">${esc(n.ten)}${self?" · bạn":""}${n.nghi?" · đã nghỉ":""}</span><span class="s">${esc(n.vaiTro)} <span data-pst="${n.id}"></span></span><span class="r">${G&&!n.nghi?`<button class="btn sm" type="button" data-pin="${n.id}">Đặt PIN</button>`:""}${self?"":`<button class="btn sm" type="button" data-ns="${n.id}">${n.nghi?"Cho làm lại":"Đánh dấu nghỉ"}</button>`}${n.nghi&&!self?`<button class="btn sm danger" type="button" data-nsx="${n.id}">Xoá</button>`:""}</span></div><div data-pbox="${n.id}" style="display:none;gap:8px;padding:0 0 10px"><input type="text" inputmode="numeric" maxlength="8" placeholder="PIN mới 4–8 số" style="flex:1;min-width:0"><button class="btn sm primary" type="button">Lưu</button></div>`}).join("")||'<p class="empty">Chưa có ai.</p>'}</div></section></div>`;
   const f=el.querySelector("#fns");
   f.onsubmit=e=>{e.preventDefault();const t=f.querySelector("#nTen").value.trim(),vt=f.querySelector("#nVt").value,err=f.querySelector("#nErr");const fail=m=>{err.textContent=m;err.hidden=false};
     if(!t)return fail("Nhập tên gọi.");
@@ -764,45 +820,82 @@ function nlNS(el){const ns=[...(db.nv||[])].sort((x,y)=>(!!x.nghi)-(!!y.nghi));c
     const btn=f.querySelector("button[type=submit]");btn.disabled=true;btn.textContent="Đang thêm…";
     G.call("themNv",{ten:t,vaiTro:vt,pin}).then(r=>{if(!db.nv.some(x=>x.id===r.nv.id))db.nv.push(r.nv);nlNS(el);toast(`Đã thêm ${t}. Báo PIN cho ${t} qua Zalo hoặc nói trực tiếp.`)},x=>{btn.disabled=false;btn.textContent="Thêm";fail(x.message||"Không thêm được, thử lại.")})};
   el.querySelectorAll("[data-ns]").forEach(b=>b.onclick=()=>{const n=db.nv.find(x=>x.id===b.dataset.ns);n.nghi=!n.nghi;CD.save();if(G&&n.nghi)G.call("setPin",{nv:n.id,xoa:true}).catch(()=>{});nlNS(el);toast(n.nghi?`${n.ten} đã nghỉ, không đăng nhập được nữa`:`Đặt lại PIN để ${n.ten} đăng nhập`)});
+  el.querySelectorAll("[data-nsx]").forEach(b=>{let armed=false;b.onclick=()=>{const n=db.nv.find(x=>x.id===b.dataset.nsx);if(!n)return;if(!armed){armed=true;b.textContent="Bấm lần nữa để xoá";setTimeout(()=>{armed=false;b.textContent="Xoá"},3000);return}
+    db.nv=db.nv.filter(x=>x.id!==n.id);CD.save();if(G)G.call("setPin",{nv:n.id,xoa:true}).catch(()=>{});nlNS(el);toast(`Đã xoá ${n.ten} khỏi danh sách nhân sự`)}});
   el.querySelectorAll("[data-pin]").forEach(b=>b.onclick=()=>{const box=el.querySelector(`[data-pbox="${b.dataset.pin}"]`);const op=box.style.display!=="flex";box.style.display=op?"flex":"none";if(op)box.querySelector("input").focus()});
   el.querySelectorAll("[data-pbox]").forEach(box=>{const i=box.querySelector("input"),s=box.querySelector("button");s.onclick=()=>{const v=i.value.trim();if(!/^\d{4,8}$/.test(v)){i.value="";i.placeholder="PIN phải 4–8 số";return}
     s.disabled=true;G.call("setPin",{nv:box.dataset.pbox,pin:v}).then(()=>{box.style.display="none";i.value="";s.disabled=false;pinOf[box.dataset.pbox]=true;showPin();toast("Đã lưu PIN")},x=>{s.disabled=false;i.value="";i.placeholder=x.message||"Lỗi, thử lại"})}});
   function showPin(){el.querySelectorAll("[data-pst]").forEach(sp=>{const id=sp.dataset.pst;if(id in pinOf)sp.innerHTML=pinOf[id]?'· <b style="color:var(--ok,#2e7d4f)">đã có PIN</b>':'· <b style="color:var(--bad,#b3261e)">chưa có PIN</b>';const pb=el.querySelector(`[data-pin="${id}"]`);if(pb&&id in pinOf)pb.textContent=pinOf[id]?"Đổi PIN":"Đặt PIN"})}
   if(G)G.call("pinStatus").then(r=>{(r.staff||[]).forEach(x=>pinOf[x.id]=!!x.pin);showPin()}).catch(()=>{});
 }
-/* Lỗi hệ thống: máy nhân viên và website tự báo (ảnh hỏng, lỗi JS, tải chậm, lưu không được). Agent kiểm tra định kỳ và gửi email tóm tắt. */
-function nlLoi(el){const L=[...(db.loi||[])].sort((a,b)=>(a.tt==="Đã sửa"||a.tt==="Bỏ qua")-(b.tt==="Đã sửa"||b.tt==="Bỏ qua")||(a.cuoi<b.cuoi?1:-1));
-  const TR={quay:"Quầy",stylist:"Stylist",marketing:"Marketing",admin:"Admin",web:"Website",home:"Trang nhân sự"};
-  el.innerHTML=`<section class="card"><h2>Lỗi hệ thống · ${L.filter(x=>x.tt!=="Đã sửa"&&x.tt!=="Bỏ qua").length} chưa xử lý</h2><p class="note">Mỗi khi nhân viên hoặc khách gặp lỗi (ảnh không hiện, nút bấm lỗi, tải chậm, lưu không được), app tự ghi lại ở đây, gộp các lần giống nhau. Agent kiểm tra định kỳ và gửi email tóm tắt cho chủ tiệm. Không ghi thông tin khách.</p>
-   <div class="list">${L.map(x=>`<div class="it"><span class="t">${esc(x.loai)} · ${esc(TR[x.trang]||x.trang||"")} <span class="pill ${x.tt==="Đã sửa"?"ok":x.tt==="Bỏ qua"?"":"new"}">${esc(x.tt||"Mới")}</span></span><span class="s">${esc(x.ct)}<br>${x.n||1} lần · gần nhất ${esc(String(x.cuoi||"").replace("T"," "))} · ${esc(x.ai||"")}</span><span class="r">${x.tt==="Đã sửa"||x.tt==="Bỏ qua"?"":`<button class="btn sm" type="button" data-loi="${x.id}" data-to="Đã sửa">Đã sửa</button><button class="btn sm" type="button" data-loi="${x.id}" data-to="Bỏ qua">Bỏ qua</button>`}</span></div>`).join("")||'<p class="empty">Chưa ghi nhận lỗi nào.</p>'}</div></section>`;
-  el.querySelectorAll("[data-loi]").forEach(b=>b.onclick=()=>{const x=db.loi.find(y=>y.id===b.dataset.loi);x.tt=b.dataset.to;CD.save();renderNL()});
+/* Lỗi hệ thống: máy nhân viên và website tự báo. Agent Kiểm lỗi (mỗi giờ) đọc từng lỗi, tìm nguyên nhân, tự sửa nếu sửa được,
+   ghi lại cách xử lý vào x.xuLy {luc, ai, giaiThich, cachSua}. Chủ tiệm chỉ cần làm khi lỗi ở trạng thái "Cần chủ tiệm". */
+const LOI_DONG={"Lưu không được":"Bấm lưu nhưng dữ liệu chưa lên máy chủ","Không tải được dữ liệu":"Mở app nhưng không lấy được dữ liệu","Tải dữ liệu chậm":"App mở lâu hơn bình thường","Lỗi JS":"Một nút hoặc màn hình bị lỗi khi bấm","Lỗi JS (promise)":"Một thao tác chạy nền bị lỗi","Ảnh hỏng":"Có ảnh không hiện","Ảnh hỏng đã dùng ảnh dự phòng":"Ảnh không hiện, app đã tự thay ảnh khác"};
+const LOI_APP={quay:"Quầy",stylist:"Stylist",marketing:"CS, Marketing",admin:"Admin",web:"Website",home:"Trang nhân sự"};
+function loiMo(x){return !x.tt||["Mới","Tái diễn","Đã báo"].includes(x.tt)}
+let loiXem="";
+function nlLoi(el){const L=[...(db.loi||[])].filter(x=>!/^RS-/.test(x.id)&&x.loai!=="Rà soát hệ thống").sort((a,b)=>(a.cuoi<b.cuoi?1:-1));
+  const can=L.filter(x=>x.tt==="Cần chủ tiệm"),mo=L.filter(loiMo),xong=L.filter(x=>!loiMo(x)&&x.tt!=="Cần chủ tiệm");
+  const w=t=>String(t||"").replace("T"," ").slice(5,16).replace(/^(\d\d)-(\d\d)/,"$2/$1");
+  const card=(x,open)=>{const xl=x.xuLy||{},tag=x.tt==="Cần chủ tiệm"?["Cần bạn","bad"]:loiMo(x)?["Agent đang xem","warn"]:x.tt==="Bỏ qua"?["Đã bỏ qua",""]:x.tt==="Tự hết"?["Tự hết, không cần sửa","ok"]:["Đã sửa","ok"];
+    return `<details class="loi" ${open?"open":""}><summary><span class="lt"><b>${esc(LOI_DONG[x.loai]||x.loai)}</b><small>${esc(LOI_APP[x.trang]||x.trang||"")} · ${x.n||1} lần · gần nhất ${esc(w(x.cuoi))}</small></span><span class="nlb ${tag[1]}">${tag[0]}</span></summary>
+      <div class="lb"><p><span class="lk">Máy báo</span>${esc(String(x.ct||"").replace(/ · bảng [a-z,]+$/,""))}</p>
+      ${xl.giaiThich?`<p><span class="lk">Nguyên nhân</span>${esc(xl.giaiThich)}</p>`:loiMo(x)?`<p><span class="lk">Nguyên nhân</span>Agent Kiểm lỗi sẽ xem trong lượt chạy kế tiếp (mỗi giờ, phút 23).</p>`:""}
+      ${xl.cachSua?`<p><span class="lk">${x.tt==="Cần chủ tiệm"?"Bạn cần làm":"Đã xử lý"}</span>${esc(xl.cachSua)}</p>`:""}
+      ${xl.luc?`<p class="note">${esc(xl.ai||"Agent")} · ${esc(w(xl.luc))}</p>`:""}
+      ${x.tt==="Cần chủ tiệm"?`<div class="btns"><button class="btn sm primary" type="button" data-loi="${x.id}" data-to="Đã sửa">Mình đã làm xong</button></div>`:""}</div></details>`};
+  el.innerHTML=`<section class="card" style="display:flex;flex-direction:column;gap:12px">
+   <div class="loisum"><div><b>${can.length}</b><span>Cần bạn</span></div><div><b>${mo.length}</b><span>Agent đang xử lý</span></div><div><b>${xong.length}</b><span>Đã xong</span></div></div>
+   <p class="note">App tự ghi lại khi nhân viên hoặc khách gặp lỗi. Agent Kiểm lỗi đọc mỗi giờ, tìm nguyên nhân, tự sửa nếu được rồi ghi cách xử lý vào đây. Bạn chỉ cần làm với mục "Cần bạn".</p>
+   ${can.length?`<h3 class="lh">Cần bạn</h3>${can.map(x=>card(x,true)).join("")}`:""}
+   ${mo.length?`<h3 class="lh">Agent đang xử lý</h3>${mo.map(x=>card(x,false)).join("")}`:""}
+   ${xong.length?`<h3 class="lh">Đã xong</h3>${xong.slice(0,loiXem==="all"?999:8).map(x=>card(x,false)).join("")}${xong.length>8&&loiXem!=="all"?`<button class="btn sm" type="button" id="loiAll">Xem thêm ${xong.length-8} lỗi cũ</button>`:""}`:""}
+   ${L.length?"":'<p class="empty">Chưa ghi nhận lỗi nào.</p>'}</section>`;
+  el.querySelectorAll("[data-loi]").forEach(b=>b.onclick=()=>{const x=db.loi.find(y=>y.id===b.dataset.loi);x.tt=b.dataset.to;x.xuLy=Object.assign({},x.xuLy||{},{chuXong:new Date().toISOString().slice(0,16)});CD.save();renderNL()});
+  const la=el.querySelector("#loiAll");if(la)la.onclick=()=>{loiXem="all";nlLoi(el)};
 }
 /* Khuyến mãi: chủ tiệm tạo chương trình, Quầy, stylist và CS online chỉ chọn được chương trình đang chạy cho kênh của mình */
-let kmSua=null;
+let kmSua=null,kmF=null;
 function nlKM(el){const CDk=CD,ds=[...(db.km||[])].sort((a,b)=>(a.tu||"")<(b.tu||"")?1:-1);const T=TODAY;
   const dung=id=>db.don.filter(d=>!d.demo&&d.km===id&&d.tt!=="Hủy");
-  const cur=kmSua?(db.km||[]).find(x=>x.id===kmSua)||{}:{};const v=(k,d)=>esc(cur[k]!=null?cur[k]:d);
+  const cur=kmSua?(db.km||[]).find(x=>x.id===kmSua)||{}:{};
+  if(!kmF||kmF.id!==(kmSua||"")){kmF={id:kmSua||"",ten:cur.ten||"",ap:CDk.kmAp(cur),loai:cur.loai||"pt",giaTri:cur.giaTri!=null?cur.giaTri:"",toiDa:cur.toiDa||"",toiThieu:cur.toiThieu||"",tu:cur.tu||T,den:cur.den||"",kenh:cur.kenh||CDk.KM_KENH.map(x=>x[0]),dk:cur.dk||""}}
+  const f=kmF,yt=f.ap==="yt";
   const pill=m=>{const t=CDk.kmTrangThai(m,T);return `<span class="pill ${t==="Đang chạy"?"ok":t==="Sắp chạy"?"new":""}">${t}</span>`};
-  el.innerHTML=`<div class="grid2"><section class="card"><h2>${kmSua?"Sửa chương trình":"Tạo chương trình giảm giá"}</h2><form class="form" id="fkm" novalidate>
-   <label class="f">Tên chương trình<input type="text" id="kTen" value="${v("ten","")}" placeholder="Ví dụ: Khai trương giảm 20%"></label>
-   <div class="two"><label class="f">Kiểu giảm<select id="kLoai"><option value="pt" ${cur.loai!=="tien"?"selected":""}>Giảm % tiền thuê</option><option value="tien" ${cur.loai==="tien"?"selected":""}>Giảm số tiền cố định</option></select></label><label class="f"><span id="kGtL">Mức giảm (%)</span><input type="number" id="kGt" min="0" value="${v("giaTri","")}"></label></div>
-   <div class="two"><label class="f" id="kTdW">Giảm tối đa (đ, để trống nếu không giới hạn)<input type="number" id="kTd" min="0" step="10000" value="${v("toiDa","")}"></label><label class="f">Tiền thuê tối thiểu của đơn (đ)<input type="number" id="kTt" min="0" step="10000" value="${v("toiThieu","")}"></label></div>
-   <div class="two"><label class="f">Từ ngày<input type="date" id="kTu" value="${v("tu",T)}"></label><label class="f">Đến hết ngày<input type="date" id="kDen" value="${v("den","")}"></label></div>
-   <fieldset class="f" style="border:0;padding:0;margin:0"><span>Áp dụng cho</span>${CDk.KM_KENH.map(([k,n])=>`<label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" data-kk="${k}" style="width:auto" ${!cur.kenh||cur.kenh.includes(k)?"checked":""}> ${k} · ${n}</label>`).join("")}</fieldset>
-   <label class="f">Điều kiện, ghi chú cho nhân viên<input type="text" id="kDk" value="${v("dk","")}" placeholder="Ví dụ: áp dụng khách mới, không cộng dồn"></label>
+  const nhanh=yt?[["pt",50,"Giảm 50% gói"],["pt",100,"Miễn phí gói"],["tien",20000,"Giảm 20.000đ"]]:[["pt",10,"Giảm 10%"],["pt",20,"Giảm 20%"],["pt",30,"Giảm 30%"],["tien",50000,"Giảm 50.000đ"]];
+  const seg=(k,opts)=>`<div class="kmseg" role="group">${opts.map(([v,t,sm])=>`<button type="button" data-kf="${k}" data-v="${v}" aria-pressed="${String(f[k])===String(v)}">${t}${sm?`<small>${sm}</small>`:""}</button>`).join("")}</div>`;
+  const vd=()=>{const m={apDung:f.ap,loai:f.loai,giaTri:+f.giaTri||0,toiDa:+f.toiDa||0,toiThieu:+f.toiThieu||0};const thue=640000,ytv=40000,g=CDk.kmGiam(m,thue,ytv);
+    return +f.giaTri>0?`Ví dụ đơn 2 đầm, tiền thuê ${money(thue)}${yt?`, Gói Yên tâm ${money(ytv)}`:""}: khách được giảm <b>${money(g)}</b>${yt?`, trả gói còn ${money(ytv-g)}`:`, trả thuê còn ${money(thue-g)}`}.${yt?" Khách không mua gói thì chương trình không áp dụng.":""}`:"Chọn mức giảm để xem ví dụ."};
+  el.innerHTML=`<div class="grid2"><section class="card"><h2>${kmSua?"Sửa chương trình":"Tạo chương trình"}</h2><form class="form" id="fkm" novalidate>
+   <label class="f">Tên chương trình<input type="text" id="kTen" value="${esc(f.ten)}" placeholder="${yt?"Ví dụ: Tặng Gói Yên tâm tuần khai trương":"Ví dụ: Khai trương giảm 20%"}"></label>
+   <div class="f"><span>Giảm cho</span>${seg("ap",[["thue","Tiền thuê","giá thuê mỗi lượt"],["yt","Gói Yên tâm","phí gói khách mua thêm"]])}</div>
+   <div class="f"><span>Chọn nhanh</span><div class="kmq">${nhanh.map(([l,v,t])=>`<button type="button" class="chip" data-kq="${l}|${v}" aria-pressed="${f.loai===l&&+f.giaTri===v}">${t}</button>`).join("")}</div></div>
+   <div class="two"><div class="f"><span>Cách giảm</span>${seg("loai",[["pt","Theo %"],["tien","Số tiền"]])}</div><label class="f">${f.loai==="pt"?"Mức giảm (%)":"Số tiền giảm (đ)"}<input type="number" id="kGt" min="0" ${f.loai==="pt"?'max="100"':'step="10000"'} inputmode="numeric" value="${esc(f.giaTri)}"></label></div>
+   <p class="kmvd" id="kVd">${vd()}</p>
+   <div class="two"><label class="f">Từ ngày<input type="date" id="kTu" value="${esc(f.tu)}"></label><label class="f">Đến hết ngày<input type="date" id="kDen" value="${esc(f.den)}"></label></div>
+   <div class="f"><span>Áp dụng cho</span><div class="kmq">${CDk.KM_KENH.map(([k,n])=>`<button type="button" class="chip" data-kk="${k}" aria-pressed="${f.kenh.includes(k)}">${k} · ${n}</button>`).join("")}</div></div>
+   <details class="more"><summary>Điều kiện thêm (không bắt buộc)</summary><div class="form" style="padding-top:8px">
+    ${f.loai==="pt"?`<label class="f">Giảm tối đa (đ)<input type="number" id="kTd" min="0" step="10000" value="${esc(f.toiDa)}" placeholder="Để trống nếu không giới hạn"></label>`:""}
+    <label class="f">Chỉ áp dụng khi tiền thuê từ (đ)<input type="number" id="kTt" min="0" step="10000" value="${esc(f.toiThieu)}" placeholder="Để trống nếu đơn nào cũng được"></label>
+    <label class="f">Ghi chú cho nhân viên<input type="text" id="kDk" value="${esc(f.dk)}" placeholder="Ví dụ: chỉ khách mới, không cộng dồn"></label></div></details>
    <p class="err" id="kErr" hidden></p><div class="btns"><button class="btn primary" type="submit">${kmSua?"Lưu thay đổi":"Tạo chương trình"}</button>${kmSua?'<button class="btn" type="button" id="kHuy">Huỷ sửa</button>':""}</div>
-   <p class="note">Chỉ giảm trên tiền thuê, không trừ cọc, phí đến tận nơi và Gói Yên tâm. Nhân viên chỉ thấy chương trình đang chạy cho kênh của mình; đơn đã tạo giữ nguyên mức giảm dù chương trình hết hạn.</p></form></section>
+   <p class="note">Không trừ cọc và phí đến tận nơi. Nhân viên chỉ thấy chương trình đang chạy cho kênh của mình; đơn đã tạo giữ nguyên mức giảm dù chương trình hết hạn.</p></form></section>
    <section class="card"><h2>Các chương trình · ${ds.length}</h2><div class="list">${ds.map(m=>{const u=dung(m.id),g=u.reduce((a,d)=>a+(+d.giam||0),0);return `<div class="it"><span class="t">${esc(m.ten)} ${pill(m)}</span><span class="s">${esc(CDk.kmMoTa(m))} · ${m.tu?esc(m.tu.slice(8,10)+"/"+m.tu.slice(5,7)):"…"} → ${m.den?esc(m.den.slice(8,10)+"/"+m.den.slice(5,7)):"không hạn"} · ${(m.kenh||[]).join(", ")||"mọi kênh"}<br>${u.length} đơn đã dùng · đã giảm ${money(g)}${m.dk?" · "+esc(m.dk):""}</span><span class="r"><button class="btn sm" type="button" data-kms="${m.id}">Sửa</button><button class="btn sm" type="button" data-kmt="${m.id}">${m.tt==="Tắt"?"Bật lại":"Tắt"}</button></span></div>`}).join("")||'<p class="empty">Chưa có chương trình nào.</p>'}</div></section></div>`;
-  const $=q=>el.querySelector(q);const loai=()=>{const pt=$("#kLoai").value==="pt";$("#kGtL").textContent=pt?"Mức giảm (%)":"Số tiền giảm (đ)";$("#kTdW").hidden=!pt};loai();$("#kLoai").onchange=loai;
-  if($("#kHuy"))$("#kHuy").onclick=()=>{kmSua=null;nlKM(el)};
-  $("#fkm").onsubmit=e=>{e.preventDefault();const fail=m=>{$("#kErr").textContent=m;$("#kErr").hidden=false};
-    const ten=$("#kTen").value.trim(),lo=$("#kLoai").value,gt=+$("#kGt").value,tu=$("#kTu").value,den=$("#kDen").value,kenh=[...el.querySelectorAll("[data-kk]")].filter(x=>x.checked).map(x=>x.dataset.kk);
-    if(!ten)return fail("Nhập tên chương trình.");if(!(gt>0))return fail("Nhập mức giảm.");if(lo==="pt"&&gt>100)return fail("Giảm % tối đa 100.");
-    if(!tu)return fail("Chọn ngày bắt đầu.");if(den&&den<tu)return fail("Ngày kết thúc phải sau ngày bắt đầu.");if(!kenh.length)return fail("Chọn ít nhất một kênh.");
+  const $=q=>el.querySelector(q);
+  const doc=()=>{f.ten=$("#kTen").value;f.giaTri=$("#kGt").value;f.tu=$("#kTu").value;f.den=$("#kDen").value;const td=$("#kTd");if(td)f.toiDa=td.value;f.toiThieu=$("#kTt").value;f.dk=$("#kDk").value};
+  $("#fkm").oninput=()=>{doc();$("#kVd").innerHTML=vd()};
+  el.querySelectorAll("[data-kf]").forEach(b=>b.onclick=()=>{doc();f[b.dataset.kf]=b.dataset.v;if(b.dataset.kf==="loai")f.giaTri="";nlKM(el)});
+  el.querySelectorAll("[data-kq]").forEach(b=>b.onclick=()=>{doc();const [l,v]=b.dataset.kq.split("|");f.loai=l;f.giaTri=v;if(!f.ten.trim()&&f.ap==="yt")f.ten=+v>=100&&l==="pt"?"Tặng Gói Yên tâm":"Giảm phí Gói Yên tâm";nlKM(el)});
+  el.querySelectorAll("[data-kk]").forEach(b=>b.onclick=()=>{doc();const k=b.dataset.kk;f.kenh=f.kenh.includes(k)?f.kenh.filter(x=>x!==k):[...f.kenh,k];nlKM(el)});
+  if($("#kHuy"))$("#kHuy").onclick=()=>{kmSua=null;kmF=null;nlKM(el)};
+  $("#fkm").onsubmit=e=>{e.preventDefault();doc();const fail=m=>{$("#kErr").textContent=m;$("#kErr").hidden=false};
+    const ten=f.ten.trim(),gt=+f.giaTri;
+    if(!ten)return fail("Nhập tên chương trình.");if(!(gt>0))return fail("Nhập mức giảm.");if(f.loai==="pt"&&gt>100)return fail("Giảm % tối đa 100.");
+    if(!f.tu)return fail("Chọn ngày bắt đầu.");if(f.den&&f.den<f.tu)return fail("Ngày kết thúc phải sau ngày bắt đầu.");if(!f.kenh.length)return fail("Chọn ít nhất một kênh.");
     db.km=db.km||[];let m=kmSua&&db.km.find(x=>x.id===kmSua);if(!m){m={id:CD.newId("KM"),tao:TODAY,tt:"Bật"};db.km.push(m)}
-    Object.assign(m,{ten,loai:lo,giaTri:gt,toiDa:lo==="pt"?(+$("#kTd").value||0):0,toiThieu:+$("#kTt").value||0,tu,den,kenh,dk:$("#kDk").value.trim()});
-    CD.save();kmSua=null;nlKM(el);toast(`Đã lưu "${ten}". Quầy, stylist, CS online thấy ngay khi chương trình đang chạy.`)};
-  el.querySelectorAll("[data-kms]").forEach(b=>b.onclick=()=>{kmSua=b.dataset.kms;nlKM(el);el.scrollIntoView({behavior:"smooth"})});
+    Object.assign(m,{ten,apDung:f.ap,loai:f.loai,giaTri:gt,toiDa:f.loai==="pt"?(+f.toiDa||0):0,toiThieu:+f.toiThieu||0,tu:f.tu,den:f.den,kenh:f.kenh,dk:f.dk.trim()});
+    CD.save();kmSua=null;kmF=null;nlKM(el);toast(`Đã lưu "${ten}". Quầy, stylist, CS online thấy ngay khi chương trình đang chạy.`)};
+  el.querySelectorAll("[data-kms]").forEach(b=>b.onclick=()=>{kmSua=b.dataset.kms;kmF=null;nlKM(el);el.scrollIntoView({behavior:"smooth"})});
   el.querySelectorAll("[data-kmt]").forEach(b=>b.onclick=()=>{const m=db.km.find(x=>x.id===b.dataset.kmt);m.tt=m.tt==="Tắt"?"Bật":"Tắt";CD.save();nlKM(el);toast(m.tt==="Tắt"?`Đã tắt "${m.ten}"`:`Đã bật lại "${m.ten}"`)});
 }
 /* Phân quyền: mỗi vai trò có mức Không / Xem / Sửa cho từng app; có thể đặt riêng cho từng người. Máy chủ kiểm tra lại mọi lần mở trang và lưu. */
@@ -837,12 +930,6 @@ function nlDG(el){const rs=[...(db.review||[])].sort((x,y)=>x.tg<y.tg?1:-1);
     if(!d){err.textContent="Mã đơn không có trong hệ thống. Chỉ nhập đánh giá của khách đã thuê thật.";err.hidden=false;return}
     if(!v("gTen")||!v("gNd")){err.textContent="Nhập tên hiển thị và lời khách.";err.hidden=false;return}
     db.review.push({id:CD.newId("DG"),tg:new Date().toISOString().slice(0,16),ma:d.id,ten:v("gTen"),sao:+v("gSao"),noiDung:v("gNd"),sp:lines(d).map(c=>c.sp),xacThuc:true,nguon:"Zalo",tt:"Đã duyệt"});CD.save();renderNL();toast("Đã lưu đánh giá")};
-}
-function nlYC(el){const ys=[...db.yc].sort((x,y)=>x.tg<y.tg?1:-1);
-  el.innerHTML=`<section class="card"><h2>Yêu cầu từ website</h2><p class="note">Khách gửi lịch thử hoặc giữ đồ trên website. Gọi Zalo xác nhận rồi đánh dấu ở đây; quầy cũng thấy danh sách này.</p>
-  <div class="list">${ys.map(y=>`<div class="it"><span class="t">${esc(y.ten)} · ${esc(y.loai)}</span><span class="s">${esc(y.sdt)} · ${dm(y.nhan)} ${y.nhan.slice(11)} · ${esc(y.cach)}${y.noi?" · "+esc(y.noi):""}${(y.sp||[]).length?" · "+y.sp.map(id=>{const s=db.sp.find(x=>x.id===id);return s?s.ten:id}).join(", "):""}${y.note?" · "+esc(y.note):""}</span>
-   <span class="r"><span class="pill ${y.tt==="Mới"?"new":y.tt==="Đã chốt"?"ok":""}">${esc(y.tt)}</span>${y.tt==="Mới"?`<button class="btn sm" type="button" data-yc="${y.id}" data-to="Đã liên hệ">Đã liên hệ</button>`:y.tt==="Đã liên hệ"?`<button class="btn sm" type="button" data-yc="${y.id}" data-to="Đã chốt">Đã chốt</button>`:""}</span></div>`).join("")||'<p class="empty">Chưa có yêu cầu nào. Thử gửi một lịch hẹn trên trang Website.</p>'}</div></section>`;
-  el.querySelectorAll("[data-yc]").forEach(b=>b.onclick=()=>{const y=db.yc.find(x=>x.id===b.dataset.yc);if(y){y.tt=b.dataset.to;CD.save();renderNL()}});
 }
 
 render();

@@ -256,7 +256,7 @@ textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=52890b55"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6d2d9eaf"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -466,9 +466,9 @@ function openOrder(pre){
       root.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{st.items.splice(+b.dataset.rm,1);draw()});check()}
     function check(){st.items.forEach((id,i)=>{const m=root.querySelector(`[data-m="${i}"]`);if(!id){m.innerHTML="";return}const c=conflict(id,$("#nhan").value,$("#tra").value);m.innerHTML=c?`<span class="err">${esc(c)}</span>`:'<span class="ok">Trống lịch</span>'});
       const ss=st.items.map(i=>byId("sp",i)).filter(Boolean);const L=window.CherieData.soLuot($("#nhan").value,$("#tra").value);const CDk=window.CherieData,thue=ss.reduce((a,s)=>a+s.gia,0)*L,giao=st.giao?CDk.phiVung($("#vung").value):0;$("#sum").textContent=money(thue);
-      {const sel=$("#km");sel.innerHTML=CDk.kmOptions("Online",st.km||"",thue);st.km=sel.value;const m=(db.km||[]).find(x=>x.id===st.km);st.giam=CDk.kmGiam(m,thue);
-       $("#kmNote").textContent=m?CDk.kmMoTa(m)+(m.dk?" · "+m.dk:""):CDk.kmChay("Online").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam):"Không";$("#netTxt").innerHTML="<b>"+money(thue-st.giam+giao)+"</b>"}$("#coc").textContent=money(ss.reduce((a,s)=>a+s.coc,0));$("#ytSum").textContent=$("#yt").checked?money(CDk.phiYenTamDs(ss)):"Không";
-      $("#tongBox").innerHTML=ss.length?CDk.tongHtml({luot:L,giam:st.giam||0,yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?CDk.phiYenTamDs(ss):0,phiGiao:giao,coc:ss.reduce((a,s)=>a+s.coc,0)},ss.map(s=>({gia:s.gia}))):""}
+      {const ytv=$("#yt").checked?CDk.phiYenTamDs(ss):0;const sel=$("#km");sel.innerHTML=CDk.kmOptions("Online",st.km||"",thue,ytv);st.km=sel.value;const m=(db.km||[]).find(x=>x.id===st.km);st.giam=CDk.kmGiam(m,thue,ytv);st.kmAp=CDk.kmAp(m);
+       $("#kmNote").textContent=m?CDk.kmMoTa(m)+(m.dk?" · "+m.dk:""):CDk.kmChay("Online").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam)+(st.kmAp==="yt"?" phí gói":""):"Không";$("#netTxt").innerHTML="<b>"+money(thue-(st.kmAp==="yt"?0:st.giam)+giao)+"</b>"}$("#coc").textContent=money(ss.reduce((a,s)=>a+s.coc,0));$("#ytSum").textContent=$("#yt").checked?money(CDk.phiYenTamDs(ss)):"Không";
+      $("#tongBox").innerHTML=ss.length?CDk.tongHtml({luot:L,giam:st.giam||0,kmAp:st.kmAp||"",yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?CDk.phiYenTamDs(ss):0,phiGiao:giao,coc:ss.reduce((a,s)=>a+s.coc,0)},ss.map(s=>({gia:s.gia}))):""}
     $("#nhan").onchange=()=>{$("#tra").value=window.CherieData.hanTra($("#nhan").value,1);draw()};$("#tra").onchange=draw;$("#vung").onchange=check;$("#km").onchange=()=>{st.km=$("#km").value;check()};$("#add").onclick=()=>{st.items.push("");draw()};
     root.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{st.giao=b.dataset.g==="1";root.querySelectorAll("[data-g]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$("#noiBox").hidden=!st.giao;check()});
     draw();window.CherieData.hoanBind(root,"cs");
@@ -486,7 +486,7 @@ function openOrder(pre){
       let Lx=L||(p?(db.lead||[]).find(x=>x.id==="84"+p.slice(1)):null);
       if(!Lx&&p){Lx=upsertLead(p,kh.ten,$("#kenh").value,false)}
       const coc=items.reduce((a,i)=>a+byId("sp",i).coc,0);const id=nextId("don","D");
-      db.don.push({id,dat:khId,nhom:"",dip:$("#dip").value,nhan,tra,luot:window.CherieData.soLuot(nhan,tra),traTT:"",tt:"Đã đặt",coc,hinhThuc:"Chuyển khoản",ttCoc:$("#ttCoc").value,phi:0,note:$("#note").value.trim(),kenh:"Online",nguonDon:$("#kenh").value,nvTao:"CS online",taoLuc:nowIso(),giaoTanNoi:st.giao,vung:st.giao?$("#vung").value:"",phiGiao:st.giao?window.CherieData.phiVung($("#vung").value):0,noi:st.giao?$("#noi").value.trim():"",lead:Lx?Lx.id:"",quayDaNhan:false,yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?window.CherieData.phiYenTamDs(st.items.map(i=>byId("sp",i)).filter(Boolean)):0,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",giam:st.giam||0});
+      db.don.push({id,dat:khId,nhom:"",dip:$("#dip").value,nhan,tra,luot:window.CherieData.soLuot(nhan,tra),traTT:"",tt:"Đã đặt",coc,hinhThuc:"Chuyển khoản",ttCoc:$("#ttCoc").value,phi:0,note:$("#note").value.trim(),kenh:"Online",nguonDon:$("#kenh").value,nvTao:"CS online",taoLuc:nowIso(),giaoTanNoi:st.giao,vung:st.giao?$("#vung").value:"",phiGiao:st.giao?window.CherieData.phiVung($("#vung").value):0,noi:st.giao?$("#noi").value.trim():"",lead:Lx?Lx.id:"",quayDaNhan:false,yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?window.CherieData.phiYenTamDs(st.items.map(i=>byId("sp",i)).filter(Boolean)):0,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",kmAp:st.giam?st.kmAp:"",giam:st.giam||0});
       items.forEach(i=>db.ct.push({id:nextId("ct","CT"),don:id,mac:khId,sp:i,gia:byId("sp",i).gia,hu:false,moTa:"",phiHu:0}));
       if(coTk)window.CherieData.hoanLuu(byId("don",id),hq);
       if(Lx){Lx.giaiDoan="Đã thuê";Lx.kh=khId;Lx.don=id}
