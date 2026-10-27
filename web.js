@@ -588,3 +588,13 @@ renderHero();
 renderFilters();renderGrid();renderTeaser();
 (function(){const q=Object.assign({},Object.fromEntries(new URLSearchParams(location.search)),(window.CHERIE&&window.CHERIE.q)||{});if(q.bai)view("post",q.bai,{noPush:true});else if(q.v&&VIEWS[q.v])view(q.v,null,{noPush:true})})();
 })();
+
+/* ô ngày, giờ đẹp và gọn trên iPhone: bọc mọi input date/time, hiện "T4, 28/10/2026" hoặc "15:00" */
+(function(){const TH=["CN","T2","T3","T4","T5","T6","T7"];
+  const IC={date:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',time:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>'};
+  const txt=i=>{const v=i.value;if(!v)return i.type==="time"?"Chọn giờ":"Chọn ngày";if(i.type==="time")return v.slice(0,5);const d=new Date(v+"T00:00:00");return isNaN(d)?v:`${TH[d.getDay()]}, ${v.slice(8,10)}/${v.slice(5,7)}/${v.slice(0,4)}`};
+  const sync=i=>{const pv=i.parentNode&&i.parentNode.querySelector(".pv");if(!pv)return;const t=txt(i);if(pv.textContent!==t)pv.textContent=t;pv.classList.toggle("ph",!i.value)};
+  const wrap=i=>{if(i.dataset.pk||i.closest("[hidden]"))return;i.dataset.pk=1;const w=document.createElement("span");w.className="pick";w.innerHTML=`<span class="pv"></span>${IC[i.type]||""}`;i.parentNode.insertBefore(w,i);w.appendChild(i);["input","change","blur"].forEach(e=>i.addEventListener(e,()=>sync(i)));sync(i)};
+  const all=()=>document.querySelectorAll('input[type=date],input[type=time]').forEach(i=>{if(!i.dataset.pk)wrap(i);else sync(i)});
+  try{new MutationObserver(all).observe(document.body,{childList:true,subtree:true})}catch(e){}
+  setInterval(()=>document.querySelectorAll('input[data-pk]').forEach(sync),600);all()})();

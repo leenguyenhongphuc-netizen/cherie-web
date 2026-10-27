@@ -392,6 +392,17 @@ footer.foot{border-top:1px solid var(--line);margin-top:16px}
 .f input:focus,.f textarea:focus{border-color:var(--hair);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--hair) 25%,transparent)}
 .f.bad input{border-color:var(--no)}
 .two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px}
+/* ô ngày, giờ: hiện chữ gọn kiểu Chérie, ô chọn của máy nằm trong suốt bên trên (iPhone không còn chữ "ngày 28 thg 10, 2026" tràn ô) */
+.pick{position:relative;display:flex;align-items:center;gap:10px;min-width:0;width:100%;border:1px solid var(--line);background:var(--raised);border-radius:var(--r-sm);padding:12px 14px;min-height:50px;transition:border-color .2s}
+.pick:focus-within{border-color:var(--hair);box-shadow:0 0 0 3px color-mix(in srgb,var(--hair) 25%,transparent)}
+.pick .pv{flex:1;min-width:0;font-size:16px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0;text-transform:none}
+.pick .pv.ph{color:var(--muted)}
+.pick svg{flex:none;width:18px;height:18px;color:var(--muted)}
+.pick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;margin:0;-webkit-appearance:none;appearance:none;font-size:16px}
+.dates .pick{border:0;background:none;padding:2px 0 0;min-height:0}
+.dates .pick .pv{font-size:15px}
+.dates .pick svg{width:15px;height:15px}
+
 fieldset.q{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;min-width:0}
 fieldset.q legend{font-size:12.5px;font-weight:500;color:var(--muted);padding:0;margin-bottom:8px}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
