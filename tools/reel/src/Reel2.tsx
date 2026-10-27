@@ -86,6 +86,7 @@ const Photo: React.FC<{ s: Shot; dur: number; mode?: "push" | "drift" | "macro" 
 /* chớp flash trắng ở đầu cảnh: chữ ký "flash trực diện" của Chérie */
 const Flash: React.FC<{ at?: number; len?: number; color?: string }> = ({ at = 0, len = 4, color = "#FFFFFF" }) => {
   const f = useCurrentFrame();
+  if (f < at) return null; // chớp đặt giữa cảnh: trước thời điểm chớp không được phủ trắng
   const o = interpolate(f, [at, at + len], [0.9, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return o > 0 ? <AbsoluteFill style={{ backgroundColor: color, opacity: o }} /> : null;
 };
