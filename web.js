@@ -1,7 +1,7 @@
 (function(){
 "use strict";
 const CD=window.CherieData;
-const db=CD.init({onChange:()=>{try{renderFilters();renderHero();renderInfo();renderReviews();renderTeaser();if(curView==="blog")renderBlog();if(curView==="post")openPost(curArg)}catch(e){}renderGrid();refreshOpen()},onStatus:()=>{}});
+const db=CD.init({onChange:()=>{try{renderFilters();renderHero();renderInfo();renderReviews();renderTeaser();if(curView==="blog")renderBlog();if(curView==="post")openPost(curArg)}catch(e){}renderGrid();refreshOpen();moSpCho()},onStatus:()=>{}});
 const TODAY=CD.today();
 const COLOR={"Đỏ rượu":"#6E1630","Champagne":"#D9C3A0","Đen":"#1E1A1C","Hồng pastel":"#EBC3CF","Bạc":"#B9BCC2","Trắng":"#F4F1EC","Xanh navy":"#1F2E4F","Đỏ":"#B3202A","Xanh ngọc":"#2F7E73","Xanh lục":"#1F5A43","Ngà":"#EDE3CF","Xanh biển":"#3E7CA6","Tím nhạt":"#B9A3CF"};
 const LOAI=["Tất cả","Đầm dài","Đầm midi","Đầm ngắn","Đầm xoè"];
@@ -587,4 +587,8 @@ function startHero(){const hs=$("#hs");
 renderHero();
 renderFilters();renderGrid();renderTeaser();
 (function(){const q=Object.assign({},Object.fromEntries(new URLSearchParams(location.search)),(window.CHERIE&&window.CHERIE.q)||{});if(q.bai)view("post",q.bai,{noPush:true});else if(q.v&&VIEWS[q.v])view(q.v,null,{noPush:true})})();
+/* link mở thẳng một chiếc đầm: cherie.io.vn/?sp=<mã mẫu> (dùng cho phòng đầm 3D, tin nhắn, bài đăng). Dữ liệu về muộn thì chờ rồi mở. */
+var spCho=new URLSearchParams(location.search).get("sp")||((window.CHERIE&&window.CHERIE.q)||{}).sp||"";
+function moSpCho(){if(!spCho||!(db.sp||[]).some(x=>x.id===spCho))return;const id=spCho;spCho="";stack=[];go(()=>openSP(id),true)}
+moSpCho();
 })();
