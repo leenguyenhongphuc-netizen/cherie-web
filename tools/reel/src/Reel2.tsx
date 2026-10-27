@@ -45,7 +45,7 @@ const CHAMP = "#C8A97E";
 const NUDE = "#E8C7C3";
 
 export type Shot = { src: string; pos?: string; scale?: number };
-export type Dress2 = { ten: string; loai?: string; size?: string; gia: string; giaTri?: string; cau?: string; shots: Shot[] }; // cau: 1 câu cảm giác ngắn, đập vào giữa dải cắt
+export type Dress2 = { ten: string; loai?: string; size?: string; gia: string; giaTri?: string; cau?: string; shots: Shot[]; soCat?: number; cauViTri?: "tren" | "duoi" }; // soCat: số cú cắt của mẫu (2–5) để kéo dài video mà không cần cảnh dịch vụ; cauViTri: đặt câu cảm giác trên hay dưới // cau: 1 câu cảm giác ngắn, đập vào giữa dải cắt
 export type Reel2Props = {
   format: "lat-gia" | "chon-1" | "can-canh";
   dresses: Dress2[];
@@ -58,7 +58,13 @@ export type Reel2Props = {
   cta: string;
   ctaSub?: string;
   nguon?: string;
+  flash?: boolean; // false = bỏ chớp trắng giữa các cảnh (cắt thẳng có lực đẩy), để bài không giống bài trước
+  ket?: "ba" | "mot" | "chu"; // khung kết: 3 ảnh, 1 ảnh lớn, hay chỉ chữ trên nền Noir
+  dichVuKieu?: "chu" | "the"; // cảnh dịch vụ: chữ đè ảnh tối, hay thẻ Ivory bo 40px trên ảnh sáng
+  nhan?: string; // nhãn riêng của bài, ví dụ "LẦN ĐẦU HÉ TỦ", hiện dưới logo suốt video
 };
+/* props của video đang dựng: các mảnh nhỏ đọc tuỳ chọn chung (flash, nhãn) */
+let CUR: Partial<Reel2Props> = {};
 
 /* ---------- nhịp ---------- */
 const B = 15; // 1 phách
@@ -86,6 +92,7 @@ const Photo: React.FC<{ s: Shot; dur: number; mode?: "push" | "drift" | "macro" 
 /* chớp flash trắng ở đầu cảnh: chữ ký "flash trực diện" của Chérie */
 const Flash: React.FC<{ at?: number; len?: number; color?: string }> = ({ at = 0, len = 4, color = "#FFFFFF" }) => {
   const f = useCurrentFrame();
+  if (CUR.flash === false) return null;
   if (f < at) return null; // chớp đặt giữa cảnh: trước thời điểm chớp không được phủ trắng
   const o = interpolate(f, [at, at + len], [0.9, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return o > 0 ? <AbsoluteFill style={{ backgroundColor: color, opacity: o }} /> : null;
@@ -170,6 +177,7 @@ const Safe: React.FC<{ children: React.ReactNode; place?: "top" | "bottom" | "ce
 const Corner: React.FC<{ nguon?: string }> = ({ nguon }) => (
   <div style={{ position: "absolute", top: 250, left: 80, display: "flex", flexDirection: "column", gap: 8 }}>
     <Wordmark size={26} />
+    {CUR.nhan ? <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 22, letterSpacing: "0.16em", color: CHAMP }}>{CUR.nhan}</div> : null}
     {nguon ? <div style={{ fontFamily: SANS, fontSize: 22, color: IVORY, opacity: 0.8 }}>{nguon}</div> : null}
   </div>
 );
@@ -196,7 +204,7 @@ const montage = (d: Dress2, startShot: number, cuts: number, hold: number, nguon
         <Corner nguon={nguon} />
         <Safe><Tag d={d} at={2} /></Safe>
         {d.cau ? (
-          <Safe place="top" style={{ top: 360 }}>
+          <Safe place={d.cauViTri === "duoi" ? "bottom" : "top"} style={d.cauViTri === "duoi" ? { bottom: 700 } : { top: CUR.nhan ? 400 : 360 }}>
             <Slam at={Math.min(dur - 12, CUT + 2)} from={1.2}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: IVORY, textShadow: "0 2px 18px rgba(0,0,0,0.55)" }}>{d.cau}</div></Slam>
           </Safe>
         ) : null}
@@ -214,14 +222,22 @@ const serviceSeg = (p: Reel2Props): Seg | null => {
     el: (
       <AbsoluteFill>
         <Photo s={bg} dur={dur} mode="pull" />
-        <AbsoluteFill style={{ backgroundColor: "rgba(20,20,20,0.5)" }} />
-        <Safe place="center" style={{ right: 80 }}>
+        {p.dichVuKieu === "the" ? null : <AbsoluteFill style={{ backgroundColor: "rgba(20,20,20,0.5)" }} />}
+        {p.dichVuKieu === "the" ? (
+          <div style={{ position: "absolute", left: 72, right: 180, bottom: 440, background: IVORY, borderRadius: 40, padding: "36px 40px", display: "flex", flexDirection: "column", gap: 14 }}>
+            {p.dichVu.map((line, k) => (
+              <Slam key={k} at={k * 10} from={1.15}>
+                <div style={{ fontFamily: k === 0 ? SERIF : SANS, fontStyle: k === 0 ? "italic" : "normal", fontWeight: k === 2 ? 600 : 500, fontSize: k === 0 ? 64 : 42, lineHeight: 1.15, color: NOIR, ...(k === 2 ? { display: "inline-block", background: NUDE, borderRadius: 999, padding: "10px 26px" } : {}) }}>{line}</div>
+              </Slam>
+            ))}
+          </div>
+        ) : <Safe place="center" style={{ right: 80 }}>
           {p.dichVu.map((line, k) => (
             <Slam key={k} at={k * 10} from={1.2} style={{ marginBottom: 22 }}>
               <div style={{ fontFamily: k === 0 ? SERIF : SANS, fontStyle: k === 0 ? "italic" : "normal", fontWeight: k === 0 ? 400 : k === 2 ? 600 : 500, fontSize: k === 0 ? 92 : 60, lineHeight: 1.12, color: IVORY, ...(k === 2 ? { display: "inline-block", background: NUDE, color: NOIR, borderRadius: 999, padding: "14px 34px", marginTop: 8 } : {}) }}>{line}</div>
             </Slam>
           ))}
-        </Safe>
+        </Safe>}
       </AbsoluteFill>
     ),
   };
@@ -230,7 +246,17 @@ const serviceSeg = (p: Reel2Props): Seg | null => {
 const EndCard: React.FC<{ p: Reel2Props; dur: number }> = ({ p, dur }) => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const mot = p.format === "can-canh";
+  if (p.ket === "chu") return (
+    <AbsoluteFill style={{ backgroundColor: NOIR, alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 30, padding: "0 90px" }}>
+      {p.nguon ? <div style={{ position: "absolute", top: 226, left: 80, fontFamily: SANS, fontSize: 22, color: IVORY, opacity: 0.6 }}>{p.nguon}</div> : null}
+      <Slam at={0}><Wordmark color={IVORY} size={56} /></Slam>
+      <Slam at={0}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 70, color: IVORY, textAlign: "center" }}>Mỗi lần, một chiếc mới.</div></Slam>
+      <Slam at={3} from={1.2}><div style={{ background: IVORY, color: NOIR, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 44 }}>{p.cta}</div></Slam>
+      {p.ctaSub ? <Words at={6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: IVORY, justifyContent: "center" }} /> : null}
+      <AcuteRain f={f} />
+    </AbsoluteFill>
+  );
+  const mot = p.ket ? p.ket === "mot" : p.format === "can-canh";
   const n = mot ? 1 : Math.min(p.dresses.length, 3);
   return (
     <AbsoluteFill style={{ backgroundColor: IVORY }}>
@@ -308,8 +334,8 @@ const latGia = (p: Reel2Props): Seg[] => {
       </AbsoluteFill>
     ),
   });
-  segs.push(montage(d0, 2, Math.max(2, Math.min(4, d0.shots.length - 1)), 12, p.nguon));
-  p.dresses.slice(1, 3).forEach((d) => segs.push(montage(d, 0, Math.min(3, d.shots.length), 14, p.nguon)));
+  segs.push(montage(d0, 2, d0.soCat ?? Math.max(2, Math.min(4, d0.shots.length - 1)), 12, p.nguon));
+  p.dresses.slice(1, 3).forEach((d) => segs.push(montage(d, 0, d.soCat ?? Math.min(3, d.shots.length), 14, p.nguon)));
   return segs;
 };
 
@@ -355,7 +381,7 @@ const chon1 = (p: Reel2Props): Seg[] => {
     ),
   });
   p.dresses.slice(0, 3).forEach((d, k) => {
-    const m = montage(d, 0, Math.min(3, d.shots.length), 16, p.nguon);
+    const m = montage(d, 0, d.soCat ?? Math.min(3, d.shots.length), 16, p.nguon);
     segs.push({
       dur: m.dur,
       el: (
@@ -439,13 +465,14 @@ const canCanh = (p: Reel2Props): Seg[] => {
       </AbsoluteFill>
     ),
   });
-  p.dresses.slice(1, 3).forEach((d) => segs.push(montage(d, 0, Math.min(3, d.shots.length), 14, p.nguon)));
+  p.dresses.slice(1, 3).forEach((d) => segs.push(montage(d, 0, d.soCat ?? Math.min(3, d.shots.length), 14, p.nguon)));
   return segs;
 };
 
 const END = 2 * B + 15;
 
 export const buildSegs = (p: Reel2Props): Seg[] => {
+  CUR = p;
   const body = p.format === "chon-1" ? chon1(p) : p.format === "can-canh" ? canCanh(p) : latGia(p);
   const sv = serviceSeg(p);
   return [...body, ...(sv ? [sv] : [])];
