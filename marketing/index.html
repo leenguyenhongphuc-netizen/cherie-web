@@ -541,7 +541,7 @@ function renderHN(){
   const blog=(db.blog||[]).filter(b=>b.tt==="Nháp");
   const mai=ymd(addDays(new Date(),1));
   const dang=ND.filter(n=>n.tt==="Đã duyệt"&&(n.dang||n.ngay)&&(n.dang||n.ngay)<=mai).sort(byNgay);
-  const quay=ND.filter(n=>cachLam(n)==="Tự quay"&&n.tt!=="Đã đăng"&&n.ngay>=TODAY&&n.ngay<=ymd(addDays(new Date(),2))).sort(byNgay);
+  const quay=ND.filter(n=>cachLam(n)==="Tự quay"&&!["Đã đăng","Đã duyệt"].includes(n.tt)&&!clipDu(n)&&n.ngay<=ymd(addDays(new Date(),2))).sort(byNgay);
   const ten=x=>esc(tenNgan(x.chuDe));
   const C=[];
   if(duyet.length)C.push({n:duyet.length,t:duyet.length>1?"Bài chờ bạn duyệt":"Bài chờ bạn duyệt",s:`${ten(duyet[0])}${duyet.length>1?` và ${duyet.length-1} bài nữa`:""}`,b:"Duyệt",p:1,go:()=>openND(duyet[0].id)});
@@ -549,7 +549,7 @@ function renderHN(){
   if(moi.length+ycMoi.length)C.push({n:moi.length+ycMoi.length,hot:tre>0,t:"Khách chờ phản hồi",s:tre?`${tre} khách đã chờ quá 30 phút`:"Nhắn trong 30 phút",b:"Nhắn",go:()=>{tab="online";render();window.scrollTo(0,0)}});
   /* đơn chờ quầy nhận là việc của Quầy: chỉ báo để biết, không tính vào việc chờ bạn */
   if(dang.length)C.push({n:dang.length,t:"Bài đến ngày đăng",s:`${ten(dang[0])} · ${dm(dang[0].dang||dang[0].ngay)}`,b:"Đăng",go:()=>openND(dang[0].id)});
-  if(quay.length)C.push({n:quay.length,t:"Lịch tự quay 3 ngày tới",s:`${ten(quay[0])} · ${dm(quay[0].ngay)}`,b:"Xem",go:()=>openND(quay[0].id)});
+  if(quay.length)C.push({n:quay.length,t:"Cần quay trong 3 ngày tới",s:`${ten(quay[0])} · ${dm(quay[0].ngay)}${clipCanh(quay[0]).length?` · ${clipSo(quay[0])}/${clipCanh(quay[0]).length} cảnh đã có clip`:""}`,b:"Quay",go:()=>openND(quay[0].id)});
   if(blog.length)C.push({n:blog.length,t:"Bài blog nháp",s:"Điểm dưới 8, chờ bạn xem",b:"Xem",go:openBlog});
   const thang=(db.kehoach||[]).filter(p=>p.loai==="Tháng"&&p.dinhHuong&&p.tu<=TODAY&&p.den>=TODAY).sort((a,b)=>(a.tt==="Đã duyệt"?0:1)-(b.tt==="Đã duyệt"?0:1))[0];
   const kpi=thang?(Array.isArray(thang.dinhHuong.kpi)?thang.dinhHuong.kpi:[]).slice(0,3):[];
