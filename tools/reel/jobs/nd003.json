@@ -1,88 +1,88 @@
 {
- "format": "chon-1",
- "hookBig": "Chỉ được chọn 1.",
- "hookTop": "Đỏ mận, ngà hay vàng chanh?",
- "hookSub": "Nàng chọn số mấy?",
- "dresses": [
-  {
-   "ten": "Bordeaux Tricot",
-   "size": "L",
-   "gia": "950k",
-   "giaTri": "10.000.000đ",
-   "cau": "Trước kín đáo, sau lưng hở.",
-   "shots": [
+  "format": "chon-1",
+  "hookBig": "Chỉ được chọn 1.",
+  "hookTop": "Đỏ mận, ngà hay vàng chanh?",
+  "hookSub": "Nàng chọn số mấy?",
+  "dresses": [
     {
-     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-54.jpg",
-     "pos": "50% 30%",
-     "scale": 0.85
+      "ten": "Bordeaux Tricot",
+      "size": "L",
+      "gia": "950k",
+      "giaTri": "10.000.000đ",
+      "cau": "Trước kín đáo, sau lưng hở.",
+      "shots": [
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/Limited_10-54.jpg",
+          "pos": "50% 30%",
+          "scale": 0.85
+        },
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/Limited_10-50.jpg",
+          "pos": "50% 30%",
+          "scale": 1
+        },
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/Limited_10-51.jpg",
+          "pos": "50% 50%",
+          "scale": 1.6
+        }
+      ]
     },
     {
-     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-50.jpg",
-     "pos": "50% 30%",
-     "scale": 1
+      "ten": "Ivoire Brocart",
+      "size": "M",
+      "gia": "780k",
+      "giaTri": "8.000.000đ",
+      "cau": "Chân váy bung theo từng bước.",
+      "shots": [
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/Limited_10-5.jpg",
+          "pos": "50% 30%",
+          "scale": 0.94
+        },
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/Limited_10-4.jpg",
+          "pos": "50% 50%",
+          "scale": 1.7
+        },
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/Limited_10-3.jpg",
+          "pos": "50% 50%",
+          "scale": 1.6
+        }
+      ]
     },
     {
-     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-51.jpg",
-     "pos": "50% 50%",
-     "scale": 1.6
+      "ten": "Citron Drapé",
+      "size": "S",
+      "gia": "690k",
+      "giaTri": "7.000.000đ",
+      "cau": "Lụa vặn một vòng quanh eo.",
+      "shots": [
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/limited_10-37-1792556631.jpg",
+          "pos": "50% 30%",
+          "scale": 0.8
+        },
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/Limited_10-33.jpg",
+          "pos": "50% 50%",
+          "scale": 1.7
+        },
+        {
+          "src": "https://sixdo.vn/images/products/2026/original/Limited_10-34.jpg",
+          "pos": "45% 50%",
+          "scale": 1.6
+        }
+      ]
     }
-   ]
-  },
-  {
-   "ten": "Ivoire Brocart",
-   "size": "M",
-   "gia": "780k",
-   "giaTri": "8.000.000đ",
-   "cau": "Chân váy bung theo từng bước.",
-   "shots": [
-    {
-     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-5.jpg",
-     "pos": "50% 30%",
-     "scale": 0.94
-    },
-    {
-     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-4.jpg",
-     "pos": "50% 50%",
-     "scale": 1.7
-    },
-    {
-     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-3.jpg",
-     "pos": "50% 50%",
-     "scale": 1.6
-    }
-   ]
-  },
-  {
-   "ten": "Citron Drapé",
-   "size": "S",
-   "gia": "690k",
-   "giaTri": "7.000.000đ",
-   "cau": "Lụa vặn một vòng quanh eo.",
-   "shots": [
-    {
-     "src": "https://sixdo.vn/images/products/2026/original/limited_10-37-1792556631.jpg",
-     "pos": "50% 30%",
-     "scale": 0.8
-    },
-    {
-     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-33.jpg",
-     "pos": "50% 50%",
-     "scale": 1.7
-    },
-    {
-     "src": "https://sixdo.vn/images/products/2026/original/Limited_10-34.jpg",
-     "pos": "45% 50%",
-     "scale": 1.6
-    }
-   ]
-  }
- ],
- "dichVu": [
-  "Tủ mở 12/12, tụi mình mang tới.",
-  "Khách sạn hay nhà riêng đều được.",
-  "Phí mang tới từ 120k"
- ],
- "cta": "Comment số nàng chọn",
- "ctaSub": "Chiếc thắng được xoay thật tuần sau.",
- "nguon": "Ảnh lookbook: SIXDO"
+  ],
+  "dichVu": [
+    "Tủ mở 12/12, tụi mình mang tới.",
+    "Khách sạn hay nhà riêng đều được.",
+    "Phí mang tới từ 120k"
+  ],
+  "cta": "Comment số nàng chọn",
+  "ctaSub": "Chiếc thắng được xoay thật tuần sau.",
+  "nguon": "Ảnh lookbook: SIXDO"
 }
