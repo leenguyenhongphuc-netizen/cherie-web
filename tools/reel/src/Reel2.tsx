@@ -50,10 +50,10 @@ export type Reel2Props = {
   format: "lat-gia" | "chon-1" | "can-canh";
   dresses: Dress2[];
   hookTop: string; // dòng nhỏ khung đầu, ví dụ "Chiếc đầm này"
-  hookBig: string; // chữ lớn khung đầu, ví dụ "10 triệu"
+  hookBig: string; // chữ lớn khung đầu, ví dụ "10.000.000đ"
   hookSub?: string; // dòng sau cú lật, ví dụ "Nàng mặc 24 giờ"
   chuHook?: "tren" | "duoi"; // đặt chữ hook ở nền phía trên (vai, phông) hay phía dưới; chọn chỗ không đè mặt và chi tiết đầm
-  doan?: string[]; // can-canh: 2–3 đáp án để nàng đoán, ví dụ ["500k?", "950k?", "3 triệu?"]
+  doan?: string[]; // can-canh: 2–3 đáp án để nàng đoán, ví dụ ["500k?", "950k?", "1.500.000đ?"]
   dichVu?: [string, string, string]; // 3 nhịp chữ dịch vụ, bỏ trống thì không có cảnh này
   cta: string;
   ctaSub?: string;
@@ -67,11 +67,12 @@ const CUT = 8; // cắt nhanh
 /* ---------- mảnh ghép ---------- */
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 
-const Photo: React.FC<{ s: Shot; dur: number; mode?: "push" | "drift" | "macro" | "pull"; dir?: 1 | -1 }> = ({ s, dur, mode = "push", dir = 1 }) => {
+const Photo: React.FC<{ s: Shot; dur: number; mode?: "push" | "drift" | "macro" | "pull" | "reveal"; dir?: 1 | -1 }> = ({ s, dur, mode = "push", dir = 1 }) => {
   const f = useCurrentFrame();
   const base = s.scale ?? 1;
   let sc = base, tx = 0;
-  if (mode === "push") sc = base * interpolate(f, [0, 7, dur], [1.16, 1.03, 1.0], { extrapolateRight: "clamp", easing: ease });
+  if (mode === "push") sc = base * interpolate(f, [0, 7, Math.max(8, dur)], [1.16, 1.06, 1.0], { extrapolateRight: "clamp", easing: ease });
+  if (mode === "reveal") { sc = base * interpolate(f, [0, 6, dur], [1.2, 1.1, 1.0], { extrapolateRight: "clamp", easing: Easing.out(Easing.quad) }); tx = interpolate(f, [0, dur], [-18 * dir, 18 * dir], { extrapolateRight: "clamp" }); }
   if (mode === "pull") sc = base * interpolate(f, [0, dur], [1.0, 1.1], { extrapolateRight: "clamp" });
   if (mode === "drift") { sc = base * 1.08; tx = interpolate(f, [0, dur], [-30 * dir, 30 * dir], { extrapolateRight: "clamp" }); }
   if (mode === "macro") { sc = base * interpolate(f, [0, dur], [1.0, 1.12], { extrapolateRight: "clamp" }); tx = interpolate(f, [0, dur], [40 * dir, -40 * dir], { extrapolateRight: "clamp" }); }
@@ -132,7 +133,7 @@ const Wordmark: React.FC<{ color?: string; size?: number }> = ({ color = IVORY, 
 );
 
 /* thẻ tên + giá: viên thuốc Ivory, chữ Noir, viền champagne mảnh */
-const Tag: React.FC<{ d: Dress2; at?: number; dark?: boolean }> = ({ d, at = 0, dark = false }) => {
+const Tag: React.FC<{ d: Dress2; at?: number; dark?: boolean; big?: boolean }> = ({ d, at = 0, dark = false, big = false }) => {
   const f = useCurrentFrame();
   if (f < at) return null;
   const t = f - at;
@@ -143,12 +144,19 @@ const Tag: React.FC<{ d: Dress2; at?: number; dark?: boolean }> = ({ d, at = 0, 
     <div style={{ transform: `translateX(${x}px)`, opacity: o, display: "flex", flexDirection: "column", gap: 14, alignItems: "flex-start" }}>
       {d.loai ? <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 26, letterSpacing: "0.14em", textTransform: "uppercase", color: CHAMP }}>{d.loai}{d.size ? ` · Size ${d.size}` : ""}</div> : null}
       <div style={{ fontFamily: SERIF, fontSize: 92, lineHeight: 1, color: fg, textShadow: dark ? "none" : "0 2px 24px rgba(0,0,0,0.35)" }}>{d.ten}</div>
-      <Slam at={4} from={1.25}>
+      {big ? (
+        <Slam at={5} from={1.5}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
+            <span style={{ fontFamily: SERIF, fontSize: 190, lineHeight: 0.95, color: CHAMP, textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}>{d.gia}</span>
+            <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 32, color: IVORY }}>/ lượt 24 giờ</span>
+          </div>
+        </Slam>
+      ) : <Slam at={4} from={1.25}>
         <div style={{ display: "inline-flex", alignItems: "baseline", gap: 14, background: IVORY, color: NOIR, borderRadius: 999, padding: "14px 34px", border: `1.5px solid ${CHAMP}` }}>
           <span style={{ fontFamily: SERIF, fontSize: 64, lineHeight: 1 }}>{d.gia}</span>
           <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 28 }}>/ lượt 24 giờ</span>
         </div>
-      </Slam>
+      </Slam>}
     </div>
   );
 };
@@ -179,7 +187,7 @@ const montage = (d: Dress2, startShot: number, cuts: number, hold: number, nguon
       <AbsoluteFill>
         {Array.from({ length: cuts }).map((_, k) => (
           <Sequence key={k} from={k * CUT} durationInFrames={k === cuts - 1 ? CUT + hold : CUT}>
-            <Photo s={shot(d, startShot + k)} dur={k === cuts - 1 ? CUT + hold : CUT} mode={k % 2 ? "drift" : "push"} dir={k % 2 ? 1 : -1} />
+            <Photo s={shot(d, startShot + k)} dur={k === cuts - 1 ? CUT + hold : CUT} mode={k === cuts - 1 && hold > 8 ? "reveal" : k % 2 ? "drift" : "push"} dir={k % 2 ? 1 : -1} />
           </Sequence>
         ))}
         <Shade />
@@ -205,11 +213,11 @@ const serviceSeg = (p: Reel2Props): Seg | null => {
     el: (
       <AbsoluteFill>
         <Photo s={bg} dur={dur} mode="pull" />
-        <AbsoluteFill style={{ backgroundColor: "rgba(20,20,20,0.62)" }} />
+        <AbsoluteFill style={{ backgroundColor: "rgba(20,20,20,0.5)" }} />
         <Safe place="center" style={{ right: 80 }}>
           {p.dichVu.map((line, k) => (
             <Slam key={k} at={k * 10} from={1.2} style={{ marginBottom: 22 }}>
-              <div style={{ fontFamily: k === 0 ? SERIF : SANS, fontStyle: k === 0 ? "italic" : "normal", fontWeight: k === 0 ? 400 : k === 2 ? 600 : 500, fontSize: k === 0 ? 92 : 60, lineHeight: 1.12, color: IVORY, ...(k === 2 ? { display: "inline-block", border: `1.5px solid ${CHAMP}`, borderRadius: 999, padding: "12px 30px", marginTop: 8 } : {}) }}>{line}</div>
+              <div style={{ fontFamily: k === 0 ? SERIF : SANS, fontStyle: k === 0 ? "italic" : "normal", fontWeight: k === 0 ? 400 : k === 2 ? 600 : 500, fontSize: k === 0 ? 92 : 60, lineHeight: 1.12, color: IVORY, ...(k === 2 ? { display: "inline-block", background: NUDE, color: NOIR, borderRadius: 999, padding: "14px 34px", marginTop: 8 } : {}) }}>{line}</div>
             </Slam>
           ))}
         </Safe>
@@ -221,16 +229,18 @@ const serviceSeg = (p: Reel2Props): Seg | null => {
 const EndCard: React.FC<{ p: Reel2Props; dur: number }> = ({ p, dur }) => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const n = Math.min(p.dresses.length, 3);
+  const mot = p.format === "can-canh";
+  const n = mot ? 1 : Math.min(p.dresses.length, 3);
   return (
     <AbsoluteFill style={{ backgroundColor: IVORY }}>
+      {p.nguon ? <div style={{ position: "absolute", top: 226, left: 80, fontFamily: SANS, fontSize: 22, color: NOIR, opacity: 0.6 }}>{p.nguon}</div> : null}
       <div style={{ position: "absolute", top: 260, left: 70, right: 70, display: "flex", gap: 20, justifyContent: "center" }}>
         {p.dresses.slice(0, n).map((d, k) => {
           const sp = spring({ frame: f + 12 - k * 2, fps, config: { damping: 15, stiffness: 180 } });
           return (
-            <div key={k} style={{ width: n === 3 ? 300 : 440, height: 700, borderRadius: 40, overflow: "hidden", transform: `translateY(${(1 - sp) * 220}px)`, opacity: sp, position: "relative" }}>
+            <div key={k} style={{ width: mot ? 760 : n === 3 ? 300 : 440, height: 700, borderRadius: 40, overflow: "hidden", transform: `translateY(${(1 - sp) * 220}px)`, opacity: sp, position: "relative" }}>
               <Img src={staticFile(shot(d, 0).src)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: shot(d, 0).pos ?? "50% 30%" }} />
-              <div style={{ position: "absolute", left: 14, bottom: 14, background: IVORY, color: NOIR, borderRadius: 999, padding: "10px 22px", fontFamily: SERIF, fontSize: 44 }}>{p.format === "chon-1" ? `${k + 1} · ${d.gia}` : d.gia}</div>
+              <div style={{ position: "absolute", left: 14, bottom: 14, background: IVORY, color: NOIR, borderRadius: 999, padding: "10px 22px", fontFamily: SERIF, fontSize: mot ? 64 : 44 }}>{p.format === "chon-1" ? `${k + 1} · ${d.gia}` : d.gia}</div>
             </div>
           );
         })}
@@ -243,11 +253,9 @@ const EndCard: React.FC<{ p: Reel2Props; dur: number }> = ({ p, dur }) => {
         </Slam>
         {p.ctaSub ? <Words at={6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: NOIR, justifyContent: "center" }} /> : null}
         <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 30, color: "#7A5F3A", marginTop: 6 }}>cherie.io.vn</div>
-        {p.nguon ? <div style={{ fontFamily: SANS, fontSize: 22, color: NOIR, opacity: 0.6 }}>{p.nguon}</div> : null}
       </div>
       {/* dấu sắc champagne rơi vào chữ É: chữ ký kết video */}
       <AcuteRain f={f} />
-      {f > dur - 4 ? <AbsoluteFill style={{ backgroundColor: NOIR, opacity: interpolate(f, [dur - 4, dur], [0, 1]) }} /> : null}
     </AbsoluteFill>
   );
 };
@@ -406,17 +414,26 @@ const canCanh = (p: Reel2Props): Seg[] => {
       </AbsoluteFill>
     ),
   });
+  /* cảnh lộ: ảnh toàn thân đẩy vào đều tới hết cảnh, cắt sang ảnh thứ hai ở giữa cảnh để không đứng yên, giá thuê chữ lớn, câu cảm giác của mẫu đầu */
+  const rv = 3 * B + 6, cut2 = d0.shots.length > 2 ? 26 : rv;
   segs.push({
-    dur: 3 * B + 6,
+    dur: rv,
     el: (
       <AbsoluteFill>
-        <Photo s={shot(d0, 0)} dur={3 * B + 6} mode="push" />
-        <Shade />
+        <Sequence from={0} durationInFrames={cut2}><Photo s={shot(d0, 0)} dur={cut2} mode="reveal" /></Sequence>
+        {cut2 < rv ? <Sequence from={cut2} durationInFrames={rv - cut2}><Photo s={shot(d0, d0.shots.length - 1)} dur={rv - cut2} mode="reveal" dir={-1} /></Sequence> : null}
+        <Shade h={70} o={0.82} />
         <Flash len={5} />
+        {cut2 < rv ? <Flash at={cut2} len={3} /> : null}
         <Corner nguon={p.nguon} />
+        {d0.cau ? (
+          <Safe place="top" style={{ top: 360 }}>
+            <Slam at={cut2 < rv ? cut2 + 1 : 22} from={1.2}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: IVORY, textShadow: "0 2px 18px rgba(0,0,0,0.55)" }}>{d0.cau}</div></Slam>
+          </Safe>
+        ) : null}
         <Safe>
-          <Tag d={d0} at={3} />
-          {d0.giaTri ? <Words at={14} text={`Giá trị chiếc đầm ${d0.giaTri}.`} style={{ fontFamily: SANS, fontWeight: 500, fontSize: 34, color: IVORY, marginTop: 22 }} /> : null}
+          <Tag d={d0} at={2} big />
+          {d0.giaTri ? <Words at={12} text={`Giá trị chiếc đầm ${d0.giaTri}.`} style={{ fontFamily: SANS, fontWeight: 500, fontSize: 38, color: IVORY, marginTop: 18 }} /> : null}
         </Safe>
       </AbsoluteFill>
     ),
@@ -453,7 +470,7 @@ export const reel2Defaults: Reel2Props = {
   format: "lat-gia",
   dresses: [],
   hookTop: "Chiếc đầm này",
-  hookBig: "10 triệu",
+  hookBig: "10.000.000đ",
   hookSub: "Nàng mặc 24 giờ",
   cta: "Theo dõi để xem chiếc tiếp theo",
   ctaSub: "Mở cửa 12.12 tại Đà Nẵng.",

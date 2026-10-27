@@ -6,7 +6,7 @@ Composition `CherieReel2`, file `src/Reel2.tsx`. Video dọc 1080x1920, 30fps, 8
 Khung đầu tiên đã có hình chuyển động và chữ; cứ 0,3–1,2 giây có một thay đổi (cắt, đẩy vào, chớp flash, chữ đập vào).
 
 Ba định dạng (trường `format`):
-- `lat-gia`: "Chiếc đầm này / 9 triệu" → gạch → "Nàng mặc 24 giờ / 870k", rồi cắt nhanh chi tiết từng mẫu. Xem `vi-du-lat-gia.json`.
+- `lat-gia`: "Giá trị chiếc đầm này / 9.000.000đ" → gạch → "Nàng mặc 24 giờ / 870k", rồi cắt nhanh chi tiết từng mẫu. Xem `vi-du-lat-gia.json`.
 - `chon-1`: 2–3 chiếc cạnh nhau đánh số, từng chiếc cắt nhanh, kết bằng "Nàng chọn số mấy?". Xem `vi-du-chon-1.json`.
 - `can-canh`: cận chi tiết tăng tốc, chớp flash lộ dáng, tên và giá. Xem `vi-du-can-canh.json`.
 
@@ -29,3 +29,11 @@ Agent theo lịch không chạy script này: chỉ đẩy `jobs/<id>.json`, GitH
 Ba ảnh tĩnh `KvPost` (4:5), `KvStory` (9:16), `KvCover` (bìa video 9:16), file `src/KeyVisual.tsx`.
 Props có trường `tenY` thì `render.sh` dựng 3 ảnh thay cho video. Xem `vi-du-key-visual.json`.
 Agent Lập kế hoạch đẩy `jobs/<id kế hoạch viết thường>.json` (ví dụ `kh-m122026.json`); GitHub Actions lưu `media/kv/<id>-post.jpg`, `-story.jpg`, `-cover.jpg`. App Marketing tự hiện 3 ảnh này trong trang proposal của kế hoạch tháng.
+
+## Thay đổi 27/10/2026 (theo nhận xét của Agent Kiểm duyệt ở ND001)
+
+- Cảnh lộ dáng của `can-canh`: ảnh đẩy vào đều tới hết cảnh, có cú cắt thứ hai giữa cảnh (dùng ảnh cuối của mẫu đầu, mẫu cần từ 3 ảnh), giá thuê chữ lớn màu champagne, hiện câu `cau` của mẫu đầu.
+- Ảnh giữ lâu ở cuối mỗi dải cắt không còn đứng yên (đẩy chậm đều).
+- Sticker phí dịch vụ là viên đặc nền Rosé Nude, chữ Noir.
+- Khung kết: bỏ tối dần ở 4 frame cuối, dòng nguồn ảnh lên trên cùng (ngoài vùng giao diện app), `can-canh` dùng 1 ảnh lớn thay cho 3 ảnh để khác các bài khác.
+- Mọi ví dụ ghi giá trị chiếc đầm đủ số (9.000.000đ), theo sổ tay ST025.
