@@ -589,6 +589,9 @@ renderFilters();renderGrid();renderTeaser();
 (function(){const q=Object.assign({},Object.fromEntries(new URLSearchParams(location.search)),(window.CHERIE&&window.CHERIE.q)||{});if(q.bai)view("post",q.bai,{noPush:true});else if(q.v&&VIEWS[q.v])view(q.v,null,{noPush:true})})();
 /* link mở thẳng một chiếc đầm: cherie.io.vn/?sp=<mã mẫu> (dùng cho phòng đầm 3D, tin nhắn, bài đăng). Dữ liệu về muộn thì chờ rồi mở. */
 var spCho=new URLSearchParams(location.search).get("sp")||((window.CHERIE&&window.CHERIE.q)||{}).sp||"";
-function moSpCho(){if(!spCho||!(db.sp||[]).some(x=>x.id===spCho))return;const id=spCho;spCho="";stack=[];go(()=>openSP(id),true)}
+function moSpCho(){if(!spCho||!(db.sp||[]).some(x=>x.id===spCho))return;const id=spCho;spCho="";
+  /* kèm ngày khách đã chọn (?ngay=YYYY-MM-DD): đặt sẵn ngày nhận, trả sau 24 giờ */
+  const ng=new URLSearchParams(location.search).get("ngay")||"";if(/^\d{4}-\d{2}-\d{2}$/.test(ng)&&ng>=TODAY)try{setDates(ng,addD(ng,1))}catch(e){}
+  stack=[];go(()=>openSP(id),true)}
 moSpCho();
 })();
