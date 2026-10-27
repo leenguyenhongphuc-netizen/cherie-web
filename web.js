@@ -567,7 +567,7 @@ function renderHero(){const ok=s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&s.tt!=="Sửa
   const sig=JSON.stringify([picks.map(s=>s.id+(ph(s)||{}).src),bn.map(b=>b.id+b.anh)]);if(sig===heroSig)return;heroSig=sig;
   const fb=picks.length||bn.length?[]:db.sp.filter(ok).slice(0,1);
   const slides=bn.map(b=>`<button type="button" data-bl="${esc(b.link||"")}" aria-label="${esc(b.tieuDe||"Ưu đãi")}"><img src="${esc(b.anh)}" alt="${esc(b.tieuDe||"")}" loading="lazy"></button>`)
-   .concat(picks.map((s,i)=>`<button type="button" data-hsp="${s.id}" aria-label="Xem ${esc(s.ten)}"><img src="${esc(ph(s).src)}" alt="${esc(s.ten)}" ${i===0&&!bn.length?'fetchpriority="high"':'loading="lazy"'}></button>`))
+   .concat(picks.map((s,i)=>`<button type="button" data-hsp="${s.id}" aria-label="Xem ${esc(s.ten)}"><img src="${esc(ph(s).src)}"${/\/original\//.test(ph(s).src)?` srcset="${esc(ph(s).src.replace("/original/","/large/"))} 500w, ${esc(ph(s).src)} 3000w" sizes="(min-width:900px) 400px, 45vw"`:""} alt="${esc(s.ten)}" ${i===0&&!bn.length?'fetchpriority="high"':'loading="lazy"'}></button>`))
    .concat(fb.map(s=>`<button type="button" data-hsp="${s.id}" aria-label="Xem ${esc(s.ten)}">${dressSvg(s,"h0")}</button>`));
   const hs=$("#hs");hs.innerHTML=slides.join("");hs.scrollLeft=0;
   $("#hsDots").innerHTML=slides.length>1?slides.map((_,i)=>`<button type="button" aria-label="Ảnh ${i+1}/${slides.length}" aria-current="${i===0}"></button>`).join(""):"";
