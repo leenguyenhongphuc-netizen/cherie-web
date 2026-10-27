@@ -224,6 +224,7 @@ nav.tabs{max-width:520px;grid-template-columns:repeat(5,1fr)}
 .scene:first-child{border-top:0}
 .scene b{font-weight:600;color:var(--muted);font-size:12px}
 .scene em{font-style:normal;display:block;color:var(--wine);font-weight:600}
+.clipst{display:block;font-size:12px;color:var(--muted);margin-top:4px}.clipr .btns{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
 .agent{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px dashed var(--gold);border-radius:var(--r);background:var(--gold-soft);color:var(--gold);font-size:13px}
 .agent .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 1s infinite alternate}
 @keyframes pulse{from{opacity:.3}to{opacity:1}}
@@ -808,81 +809,51 @@ async function agentProduce(N,fb){
 
 /* ================= NỘI DUNG ================= */
 let ndFilter="Tất cả";
-/* ================= DỰNG VIDEO, ẢNH BẰNG CODE NGAY TRÊN MÁY =================
-   Lấy kịch bản (ban.canh) + ảnh thật của mẫu đầm, vẽ lên canvas 1080 khung hình: phóng chậm ảnh, chữ hiện từng dòng,
-   khung giá cuối. Xem ngay trong app; bấm Tải video để quay lại canvas thành file MP4 (iPhone) hoặc WebM. */
-const RC={bg:"#141414",iv:"#F6F1EA",ch:"#C8A97E",mu:"#A39A8E",SER:'"Playfair Display","Bodoni Moda",Georgia,serif',SAN:'"Be Vietnam Pro",system-ui,sans-serif'};
+/* Ảnh mẫu đầm (ảnh tự chụp trước, ảnh hãng sau). App KHÔNG tự dựng video giả từ ảnh: video chỉ do agent dựng (ảnh mẫu hoặc clip team quay). */
 function anhMau(id){const s=byId("sp",id);if(!s)return[];const L=[];(window.CherieData.anhCua?window.CherieData.anhCua(id,false):[]).forEach(a=>{const u=a.src||a.th;if(u)L.push(u)});[].concat(s.anhBrand||[]).forEach(u=>{if(typeof u==="string"&&/^https?:/.test(u))L.push(u)});return [...new Set(L)]}
-function reelSpec(N){const B=N.ban||{},mau=(N.mau||[]).filter(i=>byId("sp",i));const pics=[];const per=mau.map(anhMau);
-  for(let k=0;k<6;k++)per.forEach(L=>{if(L[k])pics.push(L[k])});
-  const ten=mau.map(i=>byId("sp",i).ten);
-  const canh=(B.canh||[]).filter(c=>c&&(c[2]||c[1]));const sc=(canh.length?canh:[["",B.hook||N.chuDe,B.hook||N.chuDe]]).slice(0,7).map((c,i)=>{
-    const d=(c[1]||"")+" "+(c[2]||"");const hit=mau.findIndex(id=>d.includes(byId("sp",id).ten));
-    const L=hit>=0?per[hit]:null;const img=L&&L.length?L[i%L.length]:pics[i%Math.max(1,pics.length)]||"";
-    return{img,text:String(c[2]||(i===0?B.hook:"")||"").replace(/^["“]|["”]$/g,""),eye:i===0?String(N.angle||"").replace(/^\d+\s*·\s*/,"").toUpperCase():""}});
-  const s0=mau.map(i=>byId("sp",i));const giaMin=Math.min(...s0.map(s=>+s.gia||0).filter(Boolean));
-  const end=s0.length===1?{name:s0[0].ten,price:`Thuê ${k(s0[0].gia)} mỗi lượt 24 giờ`,value:window.CherieData.giaTri(s0[0])?`Giá trị ${money(window.CherieData.giaTri(s0[0]))}`:""}:
-    {name:s0.length?ten.slice(0,3).join(" · "):"Chérie",price:giaMin&&isFinite(giaMin)?`Thuê từ ${k(giaMin)} mỗi lượt 24 giờ`:"Mỗi lần, một chiếc mới",value:"Đà Nẵng · khai trương 12/12"};
-  const doc=/carousel|ảnh/i.test(N.dinhDang||"")&&!/video/i.test(N.dinhDang||"");
-  return{W:1080,H:doc?1350:1920,doc,scenes:sc,end:Object.assign(end,{cta:String(B.cta||"").slice(0,60)})}}
-function loadImg(u,cors){return new Promise(r=>{if(!u)return r(null);const im=new Image();if(cors)im.crossOrigin="anonymous";im.decoding="async";im.onload=()=>r(im);im.onerror=()=>r(null);im.src=u})}
-function ease(t){t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3)}
-function wrapLines(x,txt,maxW){const words=String(txt).split(/\s+/).filter(Boolean),L=[];let line="";words.forEach(w=>{const t=line?line+" "+w:w;if(x.measureText(t).width>maxW&&line){L.push(line);line=w}else line=t});if(line)L.push(line);return L}
-function rr(x,X,Y,W,H,R){x.beginPath();x.moveTo(X+R,Y);x.arcTo(X+W,Y,X+W,Y+H,R);x.arcTo(X+W,Y+H,X,Y+H,R);x.arcTo(X,Y+H,X,Y,R);x.arcTo(X,Y,X+W,Y,R);x.closePath()}
-const SCENE=3200,ENDD=3600,XF=380;
-function reelDur(sp){return sp.scenes.length*SCENE+ENDD}
-function drawCover(x,im,W,H,t){if(!im){x.fillStyle="#2a2522";x.fillRect(0,0,W,H);return}const sc=Math.max(W/im.width,H/im.height)*(1.12-0.1*ease(t));const w=im.width*sc,h=im.height*sc;x.drawImage(im,(W-w)/2,(H-h)/2-30*ease(t),w,h)}
-function drawScene(x,sp,i,t,imgs){const W=sp.W,H=sp.H,S=sp.scenes[i];if(!S)return;drawCover(x,imgs[i],W,H,t/SCENE);
-  const g=x.createLinearGradient(0,H*0.42,0,H);g.addColorStop(0,"rgba(20,20,20,0)");g.addColorStop(0.55,"rgba(20,20,20,.72)");g.addColorStop(1,"rgba(20,20,20,.92)");x.fillStyle=g;x.fillRect(0,0,W,H);
-  const tg=x.createLinearGradient(0,0,0,260);tg.addColorStop(0,"rgba(20,20,20,.55)");tg.addColorStop(1,"rgba(20,20,20,0)");x.fillStyle=tg;x.fillRect(0,0,W,260);
-  x.textAlign="left";x.textBaseline="alphabetic";
-  const big=i===0?92:80;x.font=`500 ${big}px ${RC.SER}`;const lines=wrapLines(x,S.text,W-160);const lh=big*1.16;let y=H-(sp.doc?150:230)-(lines.length-1)*lh;
-  if(S.eye){const a=ease((t-120)/500);x.globalAlpha=a;x.font=`600 30px ${RC.SAN}`;x.fillStyle=RC.ch;x.fillText(spaced(S.eye.slice(0,40)),80,y-lh*0.95);x.globalAlpha=1}
-  x.font=`500 ${big}px ${RC.SER}`;lines.forEach((l,j)=>{const a=ease((t-260-j*140)/650);x.globalAlpha=a;x.fillStyle=RC.iv;x.fillText(l,80,y+j*lh+40*(1-a))});x.globalAlpha=1}
-function spaced(s){return s.split("").join("\u200A")}
-function drawEnd(x,sp,t){const W=sp.W,H=sp.H,E=sp.end,c=W/2;x.fillStyle=RC.bg;x.fillRect(0,0,W,H);x.textAlign="center";
-  const top=sp.doc?250:600;let a=ease(t/600);x.globalAlpha=a;x.fillStyle=RC.iv;x.font=`500 60px ${RC.SER}`;x.fillText(spaced("C H É R I E").replace(/\u200A/g,""),c,top);
-  const cw=W-200,chh=430,cy=top+110;const p=ease((t-250)/700);x.globalAlpha=p;x.save();x.translate(c,cy+chh/2);x.scale(0.94+0.06*p,0.94+0.06*p);x.translate(-c,-(cy+chh/2));
-  rr(x,100,cy,cw,chh,40);x.fillStyle=RC.iv;x.fill();x.fillStyle=RC.bg;x.font=`500 ${E.name.length>22?52:70}px ${RC.SER}`;wrapLines(x,E.name,cw-80).slice(0,2).forEach((l,j)=>x.fillText(l,c,cy+120+j*70));
-  x.font=`600 42px ${RC.SAN}`;x.fillText(E.price,c,cy+chh-150);x.fillStyle="#6B635A";x.font=`400 34px ${RC.SAN}`;x.fillText(E.value,c,cy+chh-90);x.restore();
-  const q=ease((t-800)/700);x.globalAlpha=q;x.fillStyle=RC.ch;x.font=`500 38px ${RC.SAN}`;wrapLines(x,E.cta||"Đà Nẵng · 12/12",W-200).slice(0,2).forEach((l,j)=>x.fillText(l,c,cy+chh+110+j*52));
-  x.fillStyle=RC.iv;x.globalAlpha=q*0.85;x.font=`italic 400 44px ${RC.SER}`;x.fillText("Mỗi lần, một chiếc mới.",c,cy+chh+(sp.doc?260:300));x.globalAlpha=1;x.textAlign="left"}
-function drawFrame(x,sp,ms,imgs){const n=sp.scenes.length,end=n*SCENE;const W=sp.W,H=sp.H;
-  if(ms>=end){drawEnd(x,sp,ms-end)}else{const i=Math.floor(ms/SCENE),t=ms-i*SCENE;drawScene(x,sp,i,t,imgs);
-    const f=(t>SCENE-XF)?(t-(SCENE-XF))/XF:0;if(f>0){x.globalAlpha=f;if(i+1<n)drawScene(x,sp,i+1,0,imgs);else drawEnd(x,sp,0);x.globalAlpha=1}}
-  /* thanh tiến trình kiểu story */const tot=reelDur(sp),segs=n+1;for(let k2=0;k2<segs;k2++){const w=(W-80-(segs-1)*10)/segs,X=40+k2*(w+10);x.fillStyle="rgba(246,241,234,.28)";rr(x,X,28,w,6,3);x.fill();
-    const st=k2*SCENE,du=k2<n?SCENE:ENDD;const f2=Math.max(0,Math.min(1,(ms-st)/du));if(f2>0){x.fillStyle=RC.iv;rr(x,X,28,Math.max(6,w*f2),6,3);x.fill()}}
-  if(ms<end){x.fillStyle=RC.iv;x.globalAlpha=.92;x.textAlign="left";x.font=`500 34px ${RC.SER}`;x.fillText("C H É R I E",40,96);x.globalAlpha=1}}
-async function reelImgs(sp,clean){return Promise.all(sp.scenes.map(async S=>{if(!S.img)return null;if(clean){const a=await loadImg(S.img,true);if(a)return a;try{const r=await window.GASDB.call("anhB64",{url:S.img});return await loadImg(r.src,false)}catch(e){return null}}return loadImg(S.img,false)}))}
-function reelPlayer(root,N){const sp=reelSpec(N);const wrap=root.querySelector("#reel");if(!wrap)return;
-  wrap.innerHTML=`<div class="rp" style="aspect-ratio:${sp.W}/${sp.H}"><canvas width="${sp.W}" height="${sp.H}"></canvas><button type="button" class="rpb" aria-label="Phát hoặc dừng"></button></div>
-   <div class="btns" style="margin-top:8px"><button class="btn primary sm" type="button" id="rDl">Tải video</button><button class="btn sm" type="button" id="rImg">Tải ảnh bìa</button>${sp.doc?`<button class="btn sm" type="button" id="rAll">Tải từng ảnh</button>`:""}</div>
-   <p class="note" id="rNote">${sp.scenes.some(s=>!s.img)?"Một số cảnh chưa có ảnh mẫu: thêm ảnh trong Admin hoặc app Marketing > Ảnh lookbook. ":""}Dựng tự động từ kịch bản và ảnh thật của mẫu đầm${(N.mau||[]).length?"":" (bài chưa gắn mẫu đầm)"}.</p>`;
-  const cv=wrap.querySelector("canvas"),x=cv.getContext("2d");let imgs=[],t0=performance.now(),off=0,play=true,raf=0,dead=false;
-  const tot=reelDur(sp);const tick=now=>{if(dead||!document.body.contains(cv)){dead=true;return}const ms=play?(((now-t0)%tot)+tot)%tot:off;drawFrame(x,sp,ms,imgs);raf=requestAnimationFrame(tick)};
-  (document.fonts&&document.fonts.load?Promise.all([document.fonts.load(`500 80px ${RC.SER}`),document.fonts.load(`600 40px ${RC.SAN}`),document.fonts.load(`italic 400 44px ${RC.SER}`)]).catch(()=>{}):Promise.resolve()).then(()=>reelImgs(sp,false)).then(a=>{imgs=a;t0=performance.now();raf=requestAnimationFrame(tick)});
-  wrap.querySelector(".rpb").onclick=()=>{if(play){off=(performance.now()-t0)%tot;play=false}else{t0=performance.now()-off;play=true}};
-  const note=wrap.querySelector("#rNote");
-  const save=(blob,name)=>{const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},4000)};
-  const cleanCanvas=async()=>{note.textContent="Đang tải ảnh gốc của mẫu để xuất file…";const ci=await reelImgs(sp,true);const c2=document.createElement("canvas");c2.width=sp.W;c2.height=sp.H;return{c2,ci}};
-  wrap.querySelector("#rImg").onclick=async()=>{const {c2,ci}=await cleanCanvas();const x2=c2.getContext("2d");drawFrame(x2,sp,1600,ci);try{c2.toBlob(b=>{save(b,`${N.id}-bia.jpg`);note.textContent="Đã tải ảnh bìa."},"image/jpeg",0.92)}catch(e){note.textContent="Trình duyệt chặn xuất ảnh của hãng. Thử lại sau khi chủ tiệm bấm Tải ảnh mẫu về Drive."}};
-  const all=wrap.querySelector("#rAll");if(all)all.onclick=async()=>{const {c2,ci}=await cleanCanvas();const x2=c2.getContext("2d");for(let i=0;i<=sp.scenes.length;i++){drawFrame(x2,sp,i<sp.scenes.length?i*SCENE+2400:sp.scenes.length*SCENE+2400,ci);await new Promise(r=>c2.toBlob(b=>{save(b,`${N.id}-${i+1}.jpg`);setTimeout(r,500)},"image/jpeg",0.92))}note.textContent="Đã tải các ảnh."};
-  wrap.querySelector("#rDl").onclick=async()=>{const b=wrap.querySelector("#rDl");if(b.disabled)return;b.disabled=true;window.__dangXuat=true;
-    try{if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)throw new Error("Máy này chưa hỗ trợ quay video từ trang web. Mở bằng Safari hoặc Chrome bản mới.");
-      const {c2,ci}=await cleanCanvas();const x2=c2.getContext("2d");drawFrame(x2,sp,0,ci);const st=c2.captureStream(30);
-      const mt=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm"].find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||"";
-      const rec=new MediaRecorder(st,mt?{mimeType:mt,videoBitsPerSecond:8e6}:{});const ch=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
-      const done=new Promise(r=>rec.onstop=r);rec.start(250);const s0=performance.now();
-      await new Promise(r=>{const f=()=>{const ms=performance.now()-s0;if(ms>=tot+200){r();return}drawFrame(x2,sp,Math.min(ms,tot-1),ci);note.textContent=`Đang xuất video… ${Math.round(ms/tot*100)}%`;requestAnimationFrame(f)};f()});
-      rec.stop();await done;const type=rec.mimeType||mt||"video/webm";save(new Blob(ch,{type}),`${N.id}-reel.${/mp4/.test(type)?"mp4":"webm"}`);note.textContent=`Đã xuất video ${Math.round(tot/1000)} giây (${/mp4/.test(type)?"MP4":"WebM"}). Trên iPhone: chọn Lưu video trong bảng chia sẻ.`}
-    catch(e){note.textContent=String(e&&e.message||e).includes("insecure")?"Ảnh của hãng chặn xuất file. Chủ tiệm bấm Tải ảnh mẫu về Drive ở trang nhân sự rồi thử lại.":(e.message||String(e))}finally{b.disabled=false;window.__dangXuat=false}};
-}
-/* Cách làm từng nội dung: "AI dựng" (agent dựng hình, video từ ảnh mẫu đầm) hoặc "Tự quay" (team quay dựng, agent dựng storyboard để duyệt) */
+
+/* ================= CLIP TEAM QUAY THEO KỊCH BẢN =================
+   Bài "Tự quay": mỗi cảnh trong kịch bản có nút quay hoặc chọn clip. Clip chia mảnh ~3MB gửi lên Drive (thư mục "Clip quay"),
+   đủ clip thì bài chuyển "Chờ dựng" để Agent Dựng video dựng đúng theo kịch bản. */
+const CLIP_MANH=3*1024*1024;
+function meTen(){try{return (JSON.parse(localStorage.getItem("cherie-gas-me")||"{}")||{}).ten||""}catch(e){return ""}}
+function clipCanh(N){return (N.ban&&N.ban.canh||[]).filter(c=>c&&(c[1]||c[2]))}
+function clipOf(N,i){return (N.clip||{})[i]}
+function clipDu(N){const c=clipCanh(N);return c.length>0&&c.every((_,i)=>{const x=clipOf(N,i);return x&&(x.khong||(x.parts||[]).length)})}
+function clipSo(N){return clipCanh(N).filter((_,i)=>{const x=clipOf(N,i);return x&&(x.khong||(x.parts||[]).length)}).length}
+function b64Of(blob){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]||"");r.onerror=()=>no(r.error||new Error("Không đọc được clip"));r.readAsDataURL(blob)})}
+function thoiLuong(file){return new Promise(ok=>{try{const v=document.createElement("video");v.preload="metadata";v.muted=true;const u=URL.createObjectURL(file);v.onloadedmetadata=()=>{const d=v.duration;URL.revokeObjectURL(u);ok(isFinite(d)?Math.round(d*10)/10:0)};v.onerror=()=>{URL.revokeObjectURL(u);ok(0)};v.src=u}catch(e){ok(0)}})}
+async function guiClip(N,i,file,onp){if(!window.GASDB)throw new Error("Chưa kết nối máy chủ, mở lại app rồi thử.");
+  const n=Math.max(1,Math.ceil(file.size/CLIP_MANH)),ids=[];
+  for(let k=0;k<n;k++){const b64=await b64Of(file.slice(k*CLIP_MANH,(k+1)*CLIP_MANH));let lan=0;
+    for(;;){try{const r=await window.GASDB.call("luuClip",{data:b64,ten:`${N.id}-canh${i+1}-manh${k+1}-${n}`});if(!r||!r.id)throw new Error((r&&r.err)||"máy chủ không trả mã");ids.push(r.id);break}
+      catch(e){if(++lan>=4)throw e;await new Promise(z=>setTimeout(z,2500*lan))}}
+    onp&&onp((k+1)/n)}
+  return ids}
+function clipPanel(N){const C=clipCanh(N);if(!C.length)return "";const so=clipSo(N);
+  return `<section id="clipBox"><h2>Quay theo kịch bản <span class="score ${so===C.length?"ok":"no"}">${so}/${C.length} cảnh</span></h2>
+   <p class="note" style="margin:0 0 8px">Quay dọc, 1080p 30 khung hình, tắt HDR (Cài đặt › Camera › Quay video). Mỗi cảnh quay dư 1–2 giây trước và sau. Đủ clip, trợ lý tự dựng video đúng kịch bản, chữ trên hình do trợ lý thêm.</p>
+   <div class="box">${C.map((c,i)=>{const x=clipOf(N,i)||{};const co=x.khong||(x.parts||[]).length;
+     return `<div class="scene clipr" data-ci="${i}"><b>${esc(c[0]||"")}</b><span>${esc(c[1]||"")}${c[2]?`<em>Chữ trên hình: “${esc(c[2])}”</em>`:""}
+      <span class="clipst" data-st="${i}">${x.khong?"Cảnh chữ, không cần quay":co?`Đã có clip${x.dur?` · ${String(x.dur).replace(".",",")} giây`:""} · ${esc(x.nv||"")}`:"Chưa quay"}</span>
+      <span class="btns" style="margin-top:6px"><label class="btn sm${co?"":" primary"}" style="position:relative;overflow:hidden">${co&&!x.khong?"Quay lại":"Quay hoặc chọn clip"}<input type="file" accept="video/*" data-clip="${i}" style="position:absolute;inset:0;opacity:0"></label>${co?"":`<button class="link tap" type="button" data-khong="${i}">Cảnh này chỉ có chữ</button>`}</span></span></div>`}).join("")}</div>
+   ${so===C.length?`<p class="note" style="margin-top:8px"><b>Đủ clip.</b> Trợ lý dựng video ở lượt tới, xong sẽ hiện ở đây để bạn duyệt.</p>`:""}</section>`}
+function bindClip(root,N){root.querySelectorAll("[data-khong]").forEach(b=>b.onclick=()=>{const i=+b.dataset.khong;N.clip=N.clip||{};N.clip[i]={khong:true,luc:nowIso(),nv:meTen()||""};clipXong(N);save();openND(N.id)});
+  root.querySelectorAll("input[data-clip]").forEach(inp=>inp.onchange=async()=>{const f=inp.files&&inp.files[0];if(!f)return;const i=+inp.dataset.clip,st=root.querySelector(`[data-st="${i}"]`);
+    if(f.size>400*1024*1024){st.textContent="Clip quá lớn (trên 400MB). Quay ngắn hơn hoặc để 1080p rồi thử lại.";return}
+    window.__dangXuat=true;inp.disabled=true;
+    try{const dur=await thoiLuong(f);st.textContent="Đang gửi 0%… giữ app mở";const ids=await guiClip(N,i,f,p=>st.textContent=`Đang gửi ${Math.round(p*100)}%… giữ app mở`);
+      N.clip=N.clip||{};N.clip[i]={parts:ids,ten:f.name,size:f.size,mime:f.type||"video/mp4",dur,luc:nowIso(),nv:meTen()||""};
+      (N.lichSu=N.lichSu||[]).push([nowIso(),meTen()||"Team quay",`Gửi clip cảnh ${i+1}`]);clipXong(N);save();toast(`Đã gửi clip cảnh ${i+1}`);openND(N.id)}
+    catch(e){st.textContent="Chưa gửi được: "+(e&&e.message||e)+". Bấm chọn lại clip để gửi lại."}
+    finally{window.__dangXuat=false;inp.disabled=false}})}
+function clipXong(N){if(!clipDu(N))return;N.clipDu=Date.now();if(!["Đã duyệt","Đã đăng","Đã bỏ"].includes(N.tt)){N.tt="Chờ dựng";(N.lichSu=N.lichSu||[]).push([nowIso(),"App","Đủ clip, chuyển Agent Dựng video"])}}
+/* Cách làm từng nội dung: "AI dựng" (agent dựng hình, video từ ảnh mẫu đầm) hoặc "Tự quay" (team quay từng cảnh, gửi clip trong app, agent dựng video theo kịch bản) */
 function cachLam(x){return x.cachLam||"AI dựng"}
 const TRUONG={bigIdea:"Ý tưởng lớn",thongDiep:"Thông điệp",keyVisual:"Hình chủ đạo",khuyenMai:"Khuyến mãi",mucTieuKinhDoanh:"Mục tiêu",nganSach:"Ngân sách",ruiRo:"Rủi ro",anhMau:"Ảnh mẫu",tuan:"Nhịp tuần",kpi:"Chỉ số",thu4:"bài thứ 4",viecNoiBo:"việc nội bộ",dinhDangVideo:"định dạng video",chuLuc:"chủ lực",hook:"câu mở đầu",Hook:"Câu mở đầu",KPI:"chỉ số",caption:"lời đăng",CTA:"lời mời"};
 function chuDe(t){return dinhDangTxt(String(t||"").replace(/\b(bigIdea|thongDiep|keyVisual|khuyenMai|mucTieuKinhDoanh|nganSach|ruiRo|anhMau|tuan|kpi|thu4|viecNoiBo|dinhDangVideo|chuLuc|hook|Hook|KPI|caption|CTA)\b/g,m=>TRUONG[m]))}
 const DD_TXT={"lat-gia":"lật giá","chon-1":"chọn 1","can-canh":"cận cảnh","tu-quay":"tự quay"};function dinhDangTxt(t){return String(t||"").replace(/\b(lat-gia|chon-1|can-canh|tu-quay)\b/g,m=>DD_TXT[m])}
-function canVideo(N){return cachLam(N)==="AI dựng"&&/tiktok|reels|shorts|video/i.test((N.kenh||"")+" "+(N.dinhDang||""))}
+function canVideo(N){return /tiktok|reels|shorts|video/i.test((N.kenh||"")+" "+(N.dinhDang||""))}
 function coVideo(N){return !!(N.video&&/^https:\/\//.test(N.video.url||""))}
 function vidHtml(N){const V=N.video;if(!V||!/^https:\/\//.test(V.url||""))return "";
   const q=V.qa||{};
@@ -963,8 +934,8 @@ function openND(id){nextSheet=()=>openND(id);const N=(db.noidung||[]).find(x=>x.
   const dai=tenNgan(N.chuDe)!==String(N.chuDe||"").trim();
   const vq=coVideo(N)&&N.video.qa&&N.video.qa.diem!=null?N.video.qa.diem:null,diem=vq!=null?vq:Q?Q.diem:null;
   const mauTen=(N.mau||[]).map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", ");
-  const media=coVideo(N)?vidHtml(N):canVideo(N)?`<div class="banner info"><b>Video đang được dựng.</b> Khi video đạt 9/10, video hiện ở đây và bạn duyệt được.${N.loiVideo?" Lần dựng trước lỗi: "+esc(N.loiVideo):""}</div>`:B?`<section><h2>${tuQuay?"Phác thảo để team quay":"Bản xem trước"}</h2><p class="note" style="margin:0 0 8px">Phác thảo nhanh từ ảnh mẫu để hình dung, không phải video đăng.</p><div id="reel"></div></section>`:`<div class="banner info">Bài đang được viết.</div>`;
-  const kichBan=B&&(B.canh||[]).length?`<section><h2>${tuQuay?"Kịch bản cho team quay":"Kịch bản"}</h2><div class="box">${(B.canh||[]).map(c=>`<div class="scene"><b>${esc(c[0])}</b><span>${esc(c[1])}${c[2]?`<em>${esc(c[2])}</em>`:""}</span></div>`).join("")}</div></section>`:"";
+  const media=(coVideo(N)?vidHtml(N):"")+(tuQuay&&B?clipPanel(N):"")+(coVideo(N)?"":!B?`<div class="banner info">Bài đang được viết.</div>`:tuQuay&&!clipDu(N)?"":canVideo(N)?`<div class="banner info"><b>Video đang được dựng.</b> Khi video đạt 9/10, video hiện ở đây và bạn duyệt được.${N.loiVideo?" Lần dựng trước lỗi: "+esc(N.loiVideo):""}</div>`:"");
+  const kichBan=B&&(B.canh||[]).length?`<section><h2>Kịch bản</h2><div class="box">${(B.canh||[]).map(c=>`<div class="scene"><b>${esc(c[0])}</b><span>${esc(c[1])}${c[2]?`<em>Chữ trên hình: “${esc(c[2])}”</em>`:`<em style="color:var(--muted);font-weight:500">Không chữ</em>`}${c[3]?`<small class="note" style="display:block">${esc(c[3])}</small>`:""}</span></div>`).join("")}</div></section>`:"";
   const brief=B&&(B.quay||B.anh)?`<section><h2>Ghi chú quay và ảnh</h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:8px">${B.quay?`<span><b>Quay:</b> ${esc(B.quay)}</span>`:""}${B.anh?`<span><b>Gợi ý ảnh tham khảo:</b> ${esc(B.anh)}</span>`:""}</div></section>`:"";
   sheet(tenNgan(N.chuDe),`${agentBox(N.id)}
    ${gopYHtml(N,"nd",(N.lichSu||[]).filter(l=>/^Agent Sản xuất/.test(l[1])&&(!N.phanHoiLuc||msOf(l[0])>N.phanHoiLuc)).map(l=>l[2]).slice(-3))}
@@ -972,19 +943,19 @@ function openND(id){nextSheet=()=>openND(id);const N=(db.noidung||[]).find(x=>x.
    ${assetHtml(N)}
    <p class="ndsum">${diem!=null?`<span class="score ${diem>=9?"ok":"no"}">${f(diem)}/10</span> `:""}${esc(N.kenh)} · ${N.dang?"đăng "+dm(N.dang):"quay "+dm(N.ngay)}${mauTen?" · "+mauTen:""}${N.chuaDat?` · <b style="color:var(--warn)">chưa đạt 9/10 sau 3 vòng sửa</b>`:""}</p>
    ${B?`<section><h2>Câu mở đầu và lời đăng</h2><div class="box" id="cap" style="font-size:13.5px;line-height:1.55">${B.hook?`<p style="margin:0 0 8px;font-weight:600">${esc(B.hook)}</p>`:""}${esc(B.caption)}${(B.hashtag||[]).length?`<br><span class="note">${B.hashtag.map(h=>"#"+esc(h)).join(" ")}</span>`:""}${B.cta?`<br><span class="note">Lời mời: ${esc(B.cta)}</span>`:""}</div><div class="btns" style="margin-top:8px"><button class="btn sm" type="button" id="cpCap">Chép lời đăng</button></div></section>`:""}
-   ${tuQuay?kichBan+brief:""}
-   <details class="mota ndmore"><summary>Xem chi tiết: điểm từng tiêu chí, ${tuQuay?"":"kịch bản, "}lịch sử</summary>
+   ${tuQuay?brief:""}
+   <details class="mota ndmore"><summary>Xem chi tiết: điểm từng tiêu chí, kịch bản, lịch sử</summary>
     ${dai?`<p>${esc(N.chuDe)}</p>`:""}
     <div class="flow" aria-label="Tiến trình">${steps.map((s,i)=>`<span class="${i<cur?"done":i===cur?"on":""}">${s}</span>`).join("")}</div>
     ${Q?`<section><h2>Điểm chấm <span class="score ${Q.diem>=9?"ok":"no"}">${f(Q.diem)}/10</span></h2><div class="box"><div class="crit">${(Q.tieuChi||[]).map(c=>`<span>${esc(c[0])}</span><b>${c[1]}</b><span class="bar2"><i class="${c[1]<9?"low":""}" style="width:${c[1]*10}%"></i></span>${c[2]?`<span class="gc">${esc(c[2])}</span>`:""}`).join("")}</div>${(Q.canSua||[]).length?`<p class="note" style="margin-top:10px"><b>Còn cần sửa:</b> ${(Q.canSua||[]).map(esc).join(" · ")}</p>`:""}</div></section>`:""}
-    ${tuQuay?"":kichBan+brief}
+    ${tuQuay?kichBan:kichBan+brief}
     <dl class="kv box"><dt>Kênh</dt><dd>${esc(N.kenh)} · ${esc(dinhDangTxt(N.dinhDang))}</dd><dt>Góc nội dung</dt><dd>${esc(N.angle||"")}</dd><dt>Quay</dt><dd>${dm(N.ngay)}</dd>${N.dang?`<dt>Đăng dự kiến</dt><dd>${dm(N.dang)}</dd>`:""}<dt>Mẫu đầm</dt><dd>${mauTen||"Không"}</dd>${N.link?`<dt>Đã đăng</dt><dd>${esc(N.link)}</dd>`:""}</dl>
-    <div class="box" style="display:flex;flex-direction:column;gap:8px"><span class="note"><b>Cách làm</b> · AI dựng: trợ lý dựng hình, video từ ảnh mẫu. Tự quay: team quay, trợ lý viết kịch bản.</span><div class="seg2">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-cl="${v}" aria-pressed="${cachLam(N)===v}">${v}</button>`).join("")}</div></div>
+    <div class="box" style="display:flex;flex-direction:column;gap:8px"><span class="note"><b>Cách làm</b> · AI dựng: trợ lý dựng hình, video từ ảnh mẫu. Tự quay: team quay từng cảnh theo kịch bản và gửi clip ngay ở bài này, trợ lý dựng video.</span><div class="seg2">${["AI dựng","Tự quay"].map(v=>`<button type="button" class="chip" data-cl="${v}" aria-pressed="${cachLam(N)===v}">${v}</button>`).join("")}</div></div>
     <section><h2>Lịch sử</h2><div class="box log">${(N.lichSu||[]).map(l=>`<div>${when(l[0])} · <b>${esc(l[1])}</b> · ${esc(l[2])}</div>`).join("")||"Chưa có."}</div></section>
    </details>
    <div id="actions" style="display:flex;flex-direction:column;gap:10px"></div>
    <div class="ndbar" id="ndbar" hidden></div>`,root=>{
-    bind(root);if(N.ban&&!coVideo(N)&&!canVideo(N))reelPlayer(root,N);root.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>{const sy=(layer.querySelector(".sheet")||{}).scrollTop||0;if(cachLam(N)===b.dataset.cl)return;if(((N.asset||[]).length||coVideo(N))&&b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Bấm lần nữa: bỏ bản đã dựng";toast("Đổi cách làm sẽ bỏ hình, video đã dựng của bài này");return}N.cachLam=b.dataset.cl;N.asset=[];delete N.moda;(N.lichSu=N.lichSu||[]).push([nowIso(),"Chủ tiệm","Đổi cách làm: "+b.dataset.cl]);save();render();openND(id);{const n=layer.querySelector(".sheet");if(n)n.scrollTop=sy}toast(`Đã chọn ${b.dataset.cl}. Bài sẽ được làm lại ở lượt tới`)});
+    bind(root);if(tuQuay)bindClip(root,N);root.querySelectorAll("[data-cl]").forEach(b=>b.onclick=()=>{const sy=(layer.querySelector(".sheet")||{}).scrollTop||0;if(cachLam(N)===b.dataset.cl)return;if(((N.asset||[]).length||coVideo(N))&&b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Bấm lần nữa: bỏ bản đã dựng";toast("Đổi cách làm sẽ bỏ hình, video đã dựng của bài này");return}N.cachLam=b.dataset.cl;N.asset=[];delete N.moda;(N.lichSu=N.lichSu||[]).push([nowIso(),"Chủ tiệm","Đổi cách làm: "+b.dataset.cl]);save();render();openND(id);{const n=layer.querySelector(".sheet");if(n)n.scrollTop=sy}toast(`Đã chọn ${b.dataset.cl}. Bài sẽ được làm lại ở lượt tới`)});
     const cp=root.querySelector("#cpCap");if(cp)cp.onclick=()=>copy(B.caption+(B.hashtag?"\n"+B.hashtag.map(h=>"#"+h).join(" "):""),root.querySelector("#cap"));
     const A=root.querySelector("#actions"),bar=root.querySelector("#ndbar");if(running[N.id])return;
     const log=(ai,viec)=>N.lichSu=[...(N.lichSu||[]),[nowIso(),ai,viec]];
