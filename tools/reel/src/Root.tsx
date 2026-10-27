@@ -3,6 +3,7 @@ import { Composition, Still } from "remotion";
 import { KvPost, KvStory, KvCover, kvDefaults } from "./KeyVisual";
 import { Reel, durationOf, reelDefaults, ReelProps } from "./Reel";
 import { Reel2, duration2, reel2Defaults, Reel2Props } from "./Reel2";
+import { Clip, durationClip, clipDefaults, ClipProps } from "./Clip";
 
 export const RemotionRoot: React.FC = () => (
   <>
@@ -25,6 +26,16 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={reel2Defaults as unknown as Record<string, unknown>}
       calculateMetadata={({ props }) => ({ durationInFrames: duration2(props as unknown as Reel2Props) })}
+    />
+    <Composition
+      id="CherieClip"
+      component={Clip as unknown as React.FC<Record<string, unknown>>}
+      durationInFrames={300}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={clipDefaults as unknown as Record<string, unknown>}
+      calculateMetadata={({ props }) => ({ durationInFrames: durationClip(props as unknown as ClipProps) })}
     />
     <Still id="KvPost" component={KvPost as unknown as React.FC<Record<string, unknown>>} width={1080} height={1350} defaultProps={kvDefaults as unknown as Record<string, unknown>} />
     <Still id="KvStory" component={KvStory as unknown as React.FC<Record<string, unknown>>} width={1080} height={1920} defaultProps={kvDefaults as unknown as Record<string, unknown>} />

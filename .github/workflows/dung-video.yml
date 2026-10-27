@@ -34,8 +34,14 @@ jobs:
           set -u
           shopt -s nullglob
           mkdir -p ../../media/reel
+          git fetch -q origin main
+          mkdir -p /tmp/xong
           for f in jobs/*.json; do
             id=$(basename "$f" .json)
+            # job đã được lượt chạy trước xử lý (không còn trên main) thì bỏ qua; còn thì lấy bản mới nhất trên main
+            if ! git cat-file -e "origin/main:tools/reel/$f" 2>/dev/null; then echo "bỏ qua $id: đã dựng ở lượt trước"; continue; fi
+            git show "origin/main:tools/reel/$f" > "$f"
+            sha1sum "$f" | cut -d' ' -f1 > "/tmp/xong/$id.sha"
             echo "::group::$id"
             if timeout 1500 bash render.sh "$f" "$id" > "out-$id.txt" 2>&1 && [ -f "out/$id-post.jpg" ]; then
               # key visual tháng: 3 ảnh tĩnh
@@ -44,7 +50,7 @@ jobs:
               echo "{\"id\":\"$id\",\"ok\":true,\"kv\":true,\"luc\":\"$(TZ=Asia/Ho_Chi_Minh date +%Y-%m-%dT%H:%M)\"}" > "../../media/kv/$id.json"
             elif [ -f "out/$id-khong-nhac.mp4" ]; then
               for v in khong-nhac co-nhac; do
-                a="-an"; [ "$v" = co-nhac ] && a="-c:a aac -b:a 160k"
+                a="-an"; [ -n "$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "out/$id-$v.mp4" | head -1)" ] && a="-c:a aac -b:a 160k"
                 ffmpeg -v error -y -i "out/$id-$v.mp4" -c:v libx264 -crf 26 -preset slow -movflags +faststart $a "../../media/reel/$id-$v.mp4"
               done
               cp "out/$id-khung.jpg" "../../media/reel/$id-khung.jpg"
@@ -53,15 +59,28 @@ jobs:
               tail -40 "out-$id.txt"
               tail -c 3000 "out-$id.txt" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>console.log(JSON.stringify({id:process.argv[1],ok:false,loi:s.slice(-1500)})))" "$id" > "../../media/reel/$id.json"
             fi
-            git rm -q "$f"
             echo "::endgroup::"
           done
       - name: Lưu video lên main
         run: |
           git config user.name "Chérie Video Bot"
           git config user.email "hello@cherie.io.vn"
-          git add media/reel media/kv 2>/dev/null || git add media/reel
-          git diff --cached --quiet && exit 0
-          git commit -q -m "Video tự dựng: $(ls media/reel/*.json -t | head -5 | xargs -n1 basename | tr '\n' ' ')"
-          for i in 1 2 3; do git pull -q --rebase origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
+          # giữ kết quả ra chỗ khác, rồi ghi đè lên bản main mới nhất: không bao giờ kẹt vì xung đột file video
+          mkdir -p /tmp/kq/reel /tmp/kq/kv
+          for h in /tmp/xong/*.sha; do [ -e "$h" ] || continue; id=$(basename "$h" .sha)
+            cp media/reel/"$id"[.-]* /tmp/kq/reel/ 2>/dev/null || true; cp media/kv/"$id"[.-]* /tmp/kq/kv/ 2>/dev/null || true; done
+          for i in 1 2 3 4 5; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            mkdir -p media/reel media/kv
+            cp -r /tmp/kq/reel/. media/reel/ 2>/dev/null || true
+            cp -r /tmp/kq/kv/. media/kv/ 2>/dev/null || true
+            # xoá job đã dựng, trừ khi agent vừa đẩy bản mới hơn trong lúc dựng (để lượt sau dựng tiếp)
+            for h in /tmp/xong/*.sha; do [ -e "$h" ] || continue; id=$(basename "$h" .sha); f="tools/reel/jobs/$id.json"
+              [ -f "$f" ] && [ "$(sha1sum "$f" | cut -d' ' -f1)" = "$(cat "$h")" ] && git rm -q "$f"; done
+            git add media/reel media/kv 2>/dev/null || true
+            git diff --cached --quiet && exit 0
+            git commit -q -m "Video tự dựng: $(ls /tmp/xong/*.sha 2>/dev/null | xargs -n1 basename 2>/dev/null | sed 's/.sha//' | tr '\n' ' ')"
+            git push -q origin HEAD:main && exit 0
+            sleep 7
+          done
           exit 1
