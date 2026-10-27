@@ -37,3 +37,13 @@ Agent Lập kế hoạch đẩy `jobs/<id kế hoạch viết thường>.json` (
 - Sticker phí dịch vụ là viên đặc nền Rosé Nude, chữ Noir.
 - Khung kết: bỏ tối dần ở 4 frame cuối, dòng nguồn ảnh lên trên cùng (ngoài vùng giao diện app), `can-canh` dùng 1 ảnh lớn thay cho 3 ảnh để khác các bài khác.
 - Mọi ví dụ ghi giá trị chiếc đầm đủ số (9.000.000đ), theo sổ tay ST025.
+
+## Biến thể khuôn v2 (27/10/2026, để mỗi bài một vẻ, xem sổ tay ST028)
+
+Trường thêm trong props v2 (đều tuỳ chọn):
+- `flash`: false để bỏ chớp trắng giữa các cảnh (cắt thẳng, ảnh vẫn đẩy vào).
+- `ket`: "ba" (3 ảnh), "mot" (1 ảnh lớn), "chu" (chỉ chữ trên nền Noir). Mặc định can-canh "mot", còn lại "ba".
+- `dichVuKieu`: "chu" (chữ đè ảnh tối, mặc định) hoặc "the" (thẻ Ivory bo 40px trên ảnh sáng, không đè thân váy).
+- `nhan`: nhãn riêng của bài viết hoa, ví dụ "LẦN ĐẦU HÉ TỦ", hiện dưới logo suốt video.
+- Mỗi mẫu: `soCat` (2–5 cú cắt, dùng để đủ độ dài mà không cần cảnh dịch vụ), `cauViTri` "tren" hoặc "duoi" (chỗ câu cảm giác).
+Hai bài cùng kênh trong 7 ngày không dùng cùng bộ (format, flash, ket, dichVuKieu).
