@@ -819,8 +819,21 @@ const CLIP_MANH=3*1024*1024;
 function meTen(){try{return (JSON.parse(localStorage.getItem("cherie-gas-me")||"{}")||{}).ten||""}catch(e){return ""}}
 function clipCanh(N){return (N.ban&&N.ban.canh||[]).filter(c=>c&&(c[1]||c[2]))}
 function clipOf(N,i){return (N.clip||{})[i]}
-function clipDu(N){const c=clipCanh(N);return c.length>0&&c.every((_,i)=>{const x=clipOf(N,i);return x&&(x.khong||(x.parts||[]).length)})}
-function clipSo(N){return clipCanh(N).filter((_,i)=>{const x=clipOf(N,i);return x&&(x.khong||(x.parts||[]).length)}).length}
+function canhKet(c){return /^\s*(thẻ kết|khung kết|cảnh kết|end card)/i.test(String(c&&c[1]||""))}
+function canhCo(N,i){const c=clipCanh(N)[i];if(canhKet(c))return true;const x=clipOf(N,i);return !!(x&&(x.khong||(x.parts||[]).length))}
+function clipDu(N){const c=clipCanh(N);return c.length>0&&c.every((_,i)=>canhCo(N,i))}
+function clipSo(N){return clipCanh(N).filter((_,i)=>canhCo(N,i)).length}
+/* các bước của bài tự quay, để team và chủ tiệm biết bài đang ở đâu */
+function tqBuoc(N){const t=N.tt||"";if(["Đã duyệt","Đã đăng"].includes(t))return 5;if(t==="Chờ duyệt cuối")return 4;
+  if(t==="Agent đang chạy"&&coVideo(N))return 3;if(t==="Chờ dựng"&&N.guiDung)return 2;if(t==="Agent đang chạy"&&N.guiDung)return 2;
+  if(t==="Chờ quay"||(N.qa&&!["Chờ sản xuất","Cần sửa (AI)","Cần sửa (chủ)","Agent đang chạy","Chờ dựng"].includes(t)))return 1;return 0}
+/* tiến trình bài AI dựng: hiện ngay đầu bài, kèm việc trợ lý làm gần nhất */
+function aiBuoc(N){const t=N.tt||"";if(["Đã duyệt","Đã đăng"].includes(t))return 4;if(t==="Chờ duyệt cuối")return 3;if(t==="Agent đang chạy")return 2;if(t==="Chờ dựng")return 1;return 0}
+function ndViecCuoi(N){const L=(N.lichSu||[]).filter(l=>/^Agent|^Claude|^App/.test(l[1]||""));const l=L[L.length-1];return l?`${when(l[0])} · ${esc(String(l[1]).replace(/^Agent /,"Trợ lý "))}: ${esc(String(l[2]).slice(0,140))}${String(l[2]).length>140?"…":""}`:""}
+function ndFlowBox(N,tuQuay){const flow=tuQuay?tqFlow(N):`<div class="flow" aria-label="Tiến trình">${["Trợ lý viết","Trợ lý dựng video","Chấm 9/10","Chờ bạn duyệt","Đã duyệt"].map((x,i)=>`<span class="${i<aiBuoc(N)?"done":i===aiBuoc(N)?"on":""}">${x}</span>`).join("")}</div>`;
+  const v=ndViecCuoi(N);return `<section class="ndflow">${flow}${(N.vong||0)>0&&!["Đã duyệt","Đã đăng"].includes(N.tt)?`<p class="note" style="margin:6px 0 0">Vòng chấm thứ ${N.vong}${N.qa&&N.qa.diem!=null?`, lần gần nhất ${String(N.qa.diem).replace(".",",")}/10`:""}. Chưa đạt 9/10 thì trợ lý tự sửa và chấm lại mỗi giờ.</p>`:""}${v?`<p class="note" style="margin:4px 0 0">Gần nhất: ${v}</p>`:""}</section>`}
+function tqFlow(N){const B=["Trợ lý viết, chấm kịch bản","Team quay từng cảnh","Trợ lý dựng video","Chấm 9/10","Chờ bạn duyệt"],cur=tqBuoc(N);
+  return `<div class="flow" aria-label="Tiến trình bài tự quay">${B.map((s,i)=>`<span class="${i<cur?"done":i===cur?"on":""}">${s}</span>`).join("")}</div>`}
 function b64Of(blob){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]||"");r.onerror=()=>no(r.error||new Error("Không đọc được clip"));r.readAsDataURL(blob)})}
 function thoiLuong(file){return new Promise(ok=>{try{const v=document.createElement("video");v.preload="metadata";v.muted=true;const u=URL.createObjectURL(file);v.onloadedmetadata=()=>{const d=v.duration;URL.revokeObjectURL(u);ok(isFinite(d)?Math.round(d*10)/10:0)};v.onerror=()=>{URL.revokeObjectURL(u);ok(0)};v.src=u}catch(e){ok(0)}})}
 async function guiClip(N,i,file,onp){if(!window.GASDB)throw new Error("Chưa kết nối máy chủ, mở lại app rồi thử.");
@@ -832,13 +845,19 @@ async function guiClip(N,i,file,onp){if(!window.GASDB)throw new Error("Chưa k�
   return ids}
 function clipPanel(N){const C=clipCanh(N);if(!C.length)return "";const so=clipSo(N);
   return `<section id="clipBox"><h2>Quay theo kịch bản <span class="score ${so===C.length?"ok":"no"}">${so}/${C.length} cảnh</span></h2>
+   ${(N.canQuayLai||[]).length?`<div class="banner warn"><b>Trợ lý cần quay lại:</b> ${(N.canQuayLai||[]).map(q=>`cảnh ${esc(String(q.canh))}: ${esc(q.lyDo||"")}`).join("; ")}</div>`:""}
    <p class="note" style="margin:0 0 8px">Quay dọc, 1080p 30 khung hình, tắt HDR (Cài đặt › Camera › Quay video). Mỗi cảnh quay dư 1–2 giây trước và sau. Đủ clip, trợ lý tự dựng video đúng kịch bản, chữ trên hình do trợ lý thêm.</p>
    <div class="box">${C.map((c,i)=>{const x=clipOf(N,i)||{};const co=x.khong||(x.parts||[]).length;
+     if(canhKet(c))return `<div class="scene clipr" data-ci="${i}"><b>${esc(c[0]||"")}</b><span>Khung kết${c[2]?`<em>Chữ trên hình: “${esc(c[2])}”</em>`:""}<span class="clipst">Trợ lý tự làm khung kết, không cần quay</span></span></div>`;
      return `<div class="scene clipr" data-ci="${i}"><b>${esc(c[0]||"")}</b><span>${esc(c[1]||"")}${c[2]?`<em>Chữ trên hình: “${esc(c[2])}”</em>`:""}
       <span class="clipst" data-st="${i}">${x.khong?"Cảnh chữ, không cần quay":co?`Đã có clip${x.dur?` · ${String(x.dur).replace(".",",")} giây`:""} · ${esc(x.nv||"")}`:"Chưa quay"}</span>
       <span class="btns" style="margin-top:6px"><label class="btn sm${co?"":" primary"}" style="position:relative;overflow:hidden">${co&&!x.khong?"Quay lại":"Quay hoặc chọn clip"}<input type="file" accept="video/*" data-clip="${i}" style="position:absolute;inset:0;opacity:0"></label>${co?"":`<button class="link tap" type="button" data-khong="${i}">Cảnh này chỉ có chữ</button>`}</span></span></div>`}).join("")}</div>
-   ${so===C.length?`<p class="note" style="margin-top:8px"><b>Đủ clip.</b> Trợ lý dựng video ở lượt tới, xong sẽ hiện ở đây để bạn duyệt.</p>`:""}</section>`}
-function bindClip(root,N){root.querySelectorAll("[data-khong]").forEach(b=>b.onclick=()=>{const i=+b.dataset.khong;N.clip=N.clip||{};N.clip[i]={khong:true,luc:nowIso(),nv:meTen()||""};clipXong(N);save();openND(N.id)});
+   ${so<C.length?`<p class="note" style="margin-top:8px">Còn ${C.length-so} cảnh chưa có clip. Đủ cảnh thì nút gửi trợ lý dựng sẽ hiện ở đây.</p>`
+     :N.guiDung&&N.tt==="Chờ dựng"?`<div class="banner info" style="margin-top:8px"><b>Đã gửi trợ lý dựng</b> lúc ${when(N.guiDungLuc||"")}. Trợ lý dựng ở lượt kế tiếp (phút 41 mỗi giờ), rồi chấm 9/10; đạt thì video hiện ở đây để bạn duyệt.</div>`
+     :N.guiDung&&!coVideo(N)?`<div class="banner info" style="margin-top:8px"><b>Trợ lý đang dựng và chấm.</b> Video đạt 9/10 sẽ hiện ở đây.</div>`
+     :`<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px"><button class="btn primary" type="button" id="guiDung" style="width:100%">${coVideo(N)?"Gửi trợ lý dựng lại với clip mới":"Đủ clip · Gửi trợ lý dựng video"}</button><span class="note">Bấm khi đã xem lại các clip. Trợ lý dựng đúng kịch bản, chấm 9/10, đạt thì gửi bạn duyệt.</span></div>`}</section>`}
+function bindClip(root,N){const g=root.querySelector("#guiDung");if(g)g.onclick=()=>{if(!clipDu(N))return;N.clipDu=N.clipDu||Date.now();N.guiDung=Date.now();N.guiDungLuc=nowIso();N.tt="Chờ dựng";delete N.canQuayLai;(N.lichSu=N.lichSu||[]).push([nowIso(),meTen()||"Team quay","Đủ clip, gửi trợ lý dựng video"]);save();toast("Đã gửi trợ lý dựng video");openND(N.id)};
+root.querySelectorAll("[data-khong]").forEach(b=>b.onclick=()=>{const i=+b.dataset.khong;N.clip=N.clip||{};N.clip[i]={khong:true,luc:nowIso(),nv:meTen()||""};clipXong(N);save();openND(N.id)});
   root.querySelectorAll("input[data-clip]").forEach(inp=>inp.onchange=async()=>{const f=inp.files&&inp.files[0];if(!f)return;const i=+inp.dataset.clip,st=root.querySelector(`[data-st="${i}"]`);
     if(f.size>400*1024*1024){st.textContent="Clip quá lớn (trên 400MB). Quay ngắn hơn hoặc để 1080p rồi thử lại.";return}
     window.__dangXuat=true;inp.disabled=true;
@@ -847,7 +866,8 @@ function bindClip(root,N){root.querySelectorAll("[data-khong]").forEach(b=>b.onc
       (N.lichSu=N.lichSu||[]).push([nowIso(),meTen()||"Team quay",`Gửi clip cảnh ${i+1}`]);clipXong(N);save();toast(`Đã gửi clip cảnh ${i+1}`);openND(N.id)}
     catch(e){st.textContent="Chưa gửi được: "+(e&&e.message||e)+". Bấm chọn lại clip để gửi lại."}
     finally{window.__dangXuat=false;inp.disabled=false}})}
-function clipXong(N){if(!clipDu(N))return;N.clipDu=Date.now();if(!["Đã duyệt","Đã đăng","Đã bỏ"].includes(N.tt)){N.tt="Chờ dựng";(N.lichSu=N.lichSu||[]).push([nowIso(),"App","Đủ clip, chuyển Agent Dựng video"])}}
+/* đủ clip chỉ đánh dấu; việc gửi trợ lý dựng do team bấm xác nhận. Gửi lại clip mới thì phải bấm gửi lại. */
+function clipXong(N){delete N.guiDung;if(clipDu(N))N.clipDu=Date.now();else delete N.clipDu}
 /* Cách làm từng nội dung: "AI dựng" (agent dựng hình, video từ ảnh mẫu đầm) hoặc "Tự quay" (team quay từng cảnh, gửi clip trong app, agent dựng video theo kịch bản) */
 function cachLam(x){return x.cachLam||"AI dựng"}
 const TRUONG={bigIdea:"Ý tưởng lớn",thongDiep:"Thông điệp",keyVisual:"Hình chủ đạo",khuyenMai:"Khuyến mãi",mucTieuKinhDoanh:"Mục tiêu",nganSach:"Ngân sách",ruiRo:"Rủi ro",anhMau:"Ảnh mẫu",tuan:"Nhịp tuần",kpi:"Chỉ số",thu4:"bài thứ 4",viecNoiBo:"việc nội bộ",dinhDangVideo:"định dạng video",chuLuc:"chủ lực",hook:"câu mở đầu",Hook:"Câu mở đầu",KPI:"chỉ số",caption:"lời đăng",CTA:"lời mời"};
@@ -934,10 +954,11 @@ function openND(id){nextSheet=()=>openND(id);const N=(db.noidung||[]).find(x=>x.
   const dai=tenNgan(N.chuDe)!==String(N.chuDe||"").trim();
   const vq=coVideo(N)&&N.video.qa&&N.video.qa.diem!=null?N.video.qa.diem:null,diem=vq!=null?vq:Q?Q.diem:null;
   const mauTen=(N.mau||[]).map(i=>esc((byId("sp",i)||{ten:i}).ten)).join(", ");
-  const media=(coVideo(N)?vidHtml(N):"")+(tuQuay&&B?clipPanel(N):"")+(coVideo(N)?"":!B?`<div class="banner info">Bài đang được viết.</div>`:tuQuay&&!clipDu(N)?"":canVideo(N)?`<div class="banner info"><b>Video đang được dựng.</b> Khi video đạt 9/10, video hiện ở đây và bạn duyệt được.${N.loiVideo?" Lần dựng trước lỗi: "+esc(N.loiVideo):""}</div>`:"");
+  const media=(coVideo(N)?vidHtml(N):"")+(tuQuay&&B?clipPanel(N):"")+(coVideo(N)?"":!B?`<div class="banner info">Bài đang được viết.</div>`:tuQuay?"":canVideo(N)?`<div class="banner info"><b>Video đang được dựng.</b> Khi video đạt 9/10, video hiện ở đây và bạn duyệt được.${N.loiVideo?" Lần dựng trước lỗi: "+esc(N.loiVideo):""}</div>`:"");
   const kichBan=B&&(B.canh||[]).length?`<section><h2>Kịch bản</h2><div class="box">${(B.canh||[]).map(c=>`<div class="scene"><b>${esc(c[0])}</b><span>${esc(c[1])}${c[2]?`<em>Chữ trên hình: “${esc(c[2])}”</em>`:`<em style="color:var(--muted);font-weight:500">Không chữ</em>`}${c[3]?`<small class="note" style="display:block">${esc(c[3])}</small>`:""}</span></div>`).join("")}</div></section>`:"";
   const brief=B&&(B.quay||B.anh)?`<section><h2>Ghi chú quay và ảnh</h2><div class="box" style="font-size:13px;display:flex;flex-direction:column;gap:8px">${B.quay?`<span><b>Quay:</b> ${esc(B.quay)}</span>`:""}${B.anh?`<span><b>Gợi ý ảnh tham khảo:</b> ${esc(B.anh)}</span>`:""}</div></section>`:"";
   sheet(tenNgan(N.chuDe),`${agentBox(N.id)}
+   ${N.tt!=="Đã bỏ"?ndFlowBox(N,tuQuay):""}
    ${gopYHtml(N,"nd",(N.lichSu||[]).filter(l=>/^Agent Sản xuất/.test(l[1])&&(!N.phanHoiLuc||msOf(l[0])>N.phanHoiLuc)).map(l=>l[2]).slice(-3))}
    ${media}
    ${assetHtml(N)}
