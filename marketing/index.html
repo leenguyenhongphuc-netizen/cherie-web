@@ -451,7 +451,7 @@ details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=55830c7d"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=6e8cdb61"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -546,7 +546,7 @@ function renderHN(){
   if(duyet.length)C.push({n:duyet.length,t:duyet.length>1?"Bài chờ bạn duyệt":"Bài chờ bạn duyệt",s:`${ten(duyet[0])}${duyet.length>1?` và ${duyet.length-1} bài nữa`:""}`,b:"Duyệt",p:1,go:()=>openND(duyet[0].id)});
   if(kh.length)C.push({n:kh.length,t:kh.length>1?"Kế hoạch chờ duyệt":`${kh[0].loai==="Tháng"?"Kế hoạch tháng":"Kế hoạch tuần"} chờ duyệt`,s:esc(kh[0].ky||"")+(kh[0].review&&kh[0].review.diem!=null?` · ${String(kh[0].review.diem).replace(".",",")}/10`:""),b:"Xem",p:!duyet.length,go:()=>openPlan(kh[0].id)});
   if(moi.length+ycMoi.length)C.push({n:moi.length+ycMoi.length,hot:tre>0,t:"Khách chờ phản hồi",s:tre?`${tre} khách đã chờ quá 30 phút`:"Nhắn trong 30 phút",b:"Nhắn",go:()=>{tab="online";render();window.scrollTo(0,0)}});
-  if(donCho.length)C.push({n:donCho.length,t:"Đơn online chờ quầy nhận",s:donCho.slice(0,2).map(d=>`${esc((byId("kh",d.dat)||{ten:d.dat}).ten)}, nhận ${dm(d.nhan)}`).join("; "),b:"Xem",go:()=>donCho.length===1?openDonView(donCho[0].id):(tab="online",render())});
+  /* đơn chờ quầy nhận là việc của Quầy: chỉ báo để biết, không tính vào việc chờ bạn */
   if(dang.length)C.push({n:dang.length,t:"Bài đến ngày đăng",s:`${ten(dang[0])} · ${dm(dang[0].dang||dang[0].ngay)}`,b:"Đăng",go:()=>openND(dang[0].id)});
   if(quay.length)C.push({n:quay.length,t:"Lịch tự quay 3 ngày tới",s:`${ten(quay[0])} · ${dm(quay[0].ngay)}`,b:"Xem",go:()=>openND(quay[0].id)});
   if(blog.length)C.push({n:blog.length,t:"Bài blog nháp",s:"Điểm dưới 8, chờ bạn xem",b:"Xem",go:openBlog});
@@ -557,8 +557,10 @@ function renderHN(){
   view.innerHTML=`<div class="hn-top"><h1>${_t}, ${_d.getDate()} tháng ${_d.getMonth()+1}</h1><p class="sub">${C.length?`${C.length} việc đang chờ bạn`:"Không có việc nào đang chờ bạn"}</p></div>
   ${C.length?`<div class="hnl">${C.map((c,i)=>`<div class="hn${c.hot?" hot":""}"><div class="hn-n">${c.n}</div><div class="hn-m"><b>${c.t}</b><span>${c.s}</span></div><button class="btn${c.p?" primary":""}" type="button" data-hn="${i}">${c.b}</button></div>`).join("")}</div>`:`<div class="hn-done"><b>Hôm nay xong rồi.</b><span>Bài mới, kế hoạch mới và khách mới sẽ hiện ở đây.</span></div>`}
   ${choVideo?`<p class="note">${choVideo} bài đang chờ dựng video, xong sẽ tự hiện ở đây.</p>`:""}
+  ${donCho.length?`<p class="note">Để biết: ${donCho.length} đơn online đang chờ Quầy nhận (${donCho.slice(0,2).map(d=>`${esc((byId("kh",d.dat)||{ten:d.dat}).ten)}, nhận ${dm(d.nhan)}`).join("; ")}). Quầy làm, bạn không cần làm gì. <button class="lnk" type="button" id="hnDon">Xem đơn</button></p>`:""}
   ${kpi.length?`<section><h2>Mục tiêu ${esc(thang.ky||"tháng")}${big?` · ${esc(big[1])}`:""}</h2><div class="hn-kpi">${kpi.map(x=>`<div><b>${esc(x.chiSo||"")}</b><span>${esc(x.mucTieu||"")}</span></div>`).join("")}</div><button class="link" type="button" id="hnPlan" style="margin-top:8px">Xem kế hoạch tháng</button></section>`:""}`;
   view.querySelectorAll("[data-hn]").forEach(b=>b.onclick=()=>C[+b.dataset.hn].go());
+  {const h=view.querySelector("#hnDon");if(h)h.onclick=()=>{if(donCho.length===1)openDonView(donCho[0].id);else{tab="online";render();window.scrollTo(0,0)}}}
   const hp=view.querySelector("#hnPlan");if(hp)hp.onclick=()=>openPlan(thang.id);
 }
 

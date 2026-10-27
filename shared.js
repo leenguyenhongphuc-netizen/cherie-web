@@ -616,7 +616,7 @@ function hdQuetAnh(file){return new Promise((ok,no)=>{const r=new FileReader();r
       const res=Q(d.data,c.width,c.height,{inversionAttempts:"attemptBoth"});if(res&&res.data){const info=hdDocQR(res.data);if(info)return ok(info)}}
     ok(null)}).catch(()=>ok(null))};im.src=r.result};r.readAsDataURL(file)})}
 /* ảnh riêng tư (CCCD, chữ ký): bản Google lưu trên Drive riêng, chỉ nhân sự được phép xem */
-function anhRieng(v){if(!v)return Promise.resolve("");if(/^data:/.test(v))return Promise.resolve(v);
+function anhRieng(v){if(!v)return Promise.resolve("");if(/^data:/.test(v))return Promise.resolve(v);if(/^q:/.test(v))return (typeof ttCache!=="undefined"&&ttCache[v])||Promise.resolve("");
   const m=/^drive:(.+)$/.exec(v);if(m&&window.GASDB)return window.GASDB.call("anhRieng",{id:m[1]}).then(r=>r.src||"").catch(()=>"");return Promise.resolve("")}
 function hdDieuKhoan(o){/* o: {so, tao, ben, sdt, items:[{id,ten,size,giaTri,gia}], nhan, tra, luot, phiGiao, yenTam, coc, hinhThuc, nv} */
   const tienThue=o.items.reduce((a,x)=>a+(+x.gia||0),0)*(o.luot||1),giamY=o.kmAp==="yt"?(+o.giam||0):0,giam=o.kmAp==="yt"?0:(+o.giam||0),yt0=o.yenTam?(o.phiYenTam!=null?+o.phiYenTam:o.items.reduce((a,x)=>a+Math.max(YEN_TAM.toiThieu,Math.ceil((+x.giaTri||0)*YEN_TAM.tyLe/10000)*10000),0)):0;const yt=Math.max(0,yt0-giamY);
@@ -744,10 +744,13 @@ function lapHopDong(opts){try{const me=window.GASDB&&window.GASDB.me&&window.GAS
       pn.querySelector("#b3").onclick=()=>{st.buoc=3;draw()};
       pn.querySelector("#ok3").onclick=()=>{if(moved<8){pn.querySelector("#e3").textContent="Khách chưa ký.";return}
         const ky=c.toDataURL("image/png"),luc=hdNow(),sdt=String(st.sdt).replace(/\D/g,"");
+        /* ảnh giấy tờ và chữ ký đi qua hàng đợi ảnh: gửi riêng từng ảnh lên Drive, hợp đồng chỉ giữ mã nên lưu nhẹ, mạng yếu không mất */
+        ttqKhoiDong();const qv=(f,v)=>{if(!v||!/^data:/.test(v))return v;const x={don:so,phase:"hd",sp:opts.kh.id,o:f,anh:v,nv:opts.nv||""};ttqThem(x);return "q:"+x.k};
+        const aT=qv("truoc",st.truoc),aS=qv("sau",st.sau),aK=qv("chuKy",ky);
         const hd={id:so,don:opts.don||"",kh:opts.kh.id,tao,kyLuc:luc,nv:opts.nv||"",nvMa:opts.nvMa||"",ben:Object.assign({},st.ben),sdt,items:opts.items,nhan:opts.nhan,tra:opts.tra,luot:opts.luot||1,phiGiao:opts.phiGiao||0,giam:+opts.giam||0,kmAp:opts.kmAp||"",kmTen:opts.kmTen||"",yenTam:!!opts.yenTam,phiYenTam:opts.phiYenTam!=null?+opts.phiYenTam:undefined,coc:+opts.coc||0,hinhThuc:opts.hinhThuc||"",hoan:st.hoan,
-          loai:st.loai,truoc:st.truoc,sau:st.sau,chuKy:ky,dongY:{dieuKhoan:true,duLieu:true,luc},luuDen:"",tt:"Đã ký",phienBan:1};
+          loai:st.loai,truoc:aT,sau:aS,chuKy:aK,dongY:{dieuKhoan:true,duLieu:true,luc},luuDen:"",tt:"Đã ký",phienBan:1};
         db.hd=db.hd||[];db.hd.push(hd);
-        db.cccd=db.cccd||[];const cur=db.cccd.find(z=>z.id===opts.kh.id);const rec={id:opts.kh.id,so:st.ben.so,ten:st.ben.ten,ngaySinh:st.ben.ngaySinh,gioiTinh:st.ben.gioiTinh,diaChi:st.ben.diaChi,ngayCap:st.ben.ngayCap,loai:st.loai,truoc:st.truoc,sau:st.sau,cap:luc.slice(0,10),hd:so};
+        db.cccd=db.cccd||[];const cur=db.cccd.find(z=>z.id===opts.kh.id);const rec={id:opts.kh.id,so:st.ben.so,ten:st.ben.ten,ngaySinh:st.ben.ngaySinh,gioiTinh:st.ben.gioiTinh,diaChi:st.ben.diaChi,ngayCap:st.ben.ngayCap,loai:st.loai,truoc:aT,sau:aS,cap:luc.slice(0,10),hd:so};
         if(cur)Object.assign(cur,rec);else db.cccd.push(rec);
         {const dn=opts.don&&(db.don||[]).find(x=>x.id===opts.don);if(dn)hoanLuu(dn,st.hoan);else{const k=(db.kh||[]).find(x=>x.id===opts.kh.id);if(k&&st.hoan.cach!=="Tiền mặt"){k.nganHang=st.hoan.nh;k.stk=st.hoan.stk;k.chuTk=st.hoan.chu}}}
         try{window.CherieData.save()}catch(e){}close();if(opts.onDone)opts.onDone(hd)};
@@ -787,7 +790,8 @@ function ttqNap(){return ttqDb().then(d=>new Promise(ok=>{const r=d.transaction(
 function ttqBao(){TTQ.nghe.forEach(f=>{try{f()}catch(e){}})}
 function ttqCho(don,phase,sp,o){return TTQ.ds.find(x=>x.don===don&&x.phase===phase&&x.sp===sp&&x.o===o)}
 function ttqDat(m,o,v){if(o[0]==="a"){m.anh=m.anh||[];m.anh[+o.slice(1)]=v}else{m.them=m.them||[];m.them[+o.slice(1)]=v}}
-function ttqGhi(x,v){let b=bbOf(x.don,x.phase);if(!b){b={id:bbId(x.don,x.phase),don:x.don,phase:x.phase,mon:{},tao:new Date().toISOString().slice(0,16)};db.bb.push(b)}
+function ttqGhi(x,v){if(x.phase==="hd"){const q="q:"+x.k;[...(db.hd||[]),...(db.cccd||[])].forEach(r=>["truoc","sau","chuKy"].forEach(f=>{if(r[f]===q)r[f]=v}));try{CherieData.save()}catch(e){}return}
+  let b=bbOf(x.don,x.phase);if(!b){b={id:bbId(x.don,x.phase),don:x.don,phase:x.phase,mon:{},tao:new Date().toISOString().slice(0,16)};db.bb.push(b)}
   const m=b.mon[x.sp]=b.mon[x.sp]||{anh:[],them:[]};ttqDat(m,x.o,v);m.luc=new Date().toISOString().slice(0,16);if(x.nv)m.nv=x.nv;try{CherieData.save()}catch(e){}}
 function ttqThem(x){x.k=ttqKey(x);TTQ.ds=TTQ.ds.filter(y=>y.k!==x.k);TTQ.ds.push(x);ttCache["q:"+x.k]=Promise.resolve(x.anh);ttqLuu(x);ttqBao();ttqChay()}
 function ttqChay(){if(TTQ.chay)return;const x=TTQ.ds[0];if(!x)return;TTQ.chay=true;
@@ -800,6 +804,8 @@ function ttqChay(){if(TTQ.chay)return;const x=TTQ.ds[0];if(!x)return;TTQ.chay=tr
     e=>{if(e&&/Không rõ yêu cầu/.test(e.message||"")){TTQ.cu=true;TTQ.chay=false;ttqChay();return}thuLai(e)})}
 let ttqDaNap=false;function ttqKhoiDong(){if(ttqDaNap)return;ttqDaNap=true;ttqNap().then(ds=>{ds.forEach(x=>{if(!TTQ.ds.some(y=>y.k===x.k)){TTQ.ds.push(x);ttCache["q:"+x.k]=Promise.resolve(x.anh)}});ttqBao();ttqChay()})}
 try{window.addEventListener("online",()=>ttqChay())}catch(e){}
+/* mở app là gửi tiếp ảnh còn nằm trong máy (ảnh tình trạng, giấy tờ, chữ ký), không cần mở lại màn chụp */
+try{setTimeout(()=>{if(window.GASDB)ttqKhoiDong()},2500)}catch(e){}
 function ttSo(don,phase,sp){const m=ttAnh(don,phase,sp);return TT_GOC.filter((_,i)=>(m.anh&&m.anh[i])||ttqCho(don,phase,sp,"a"+i)).length}
 function ttDu(don,phase,sp){return ttSo(don,phase,sp)===TT_GOC.length}
 function ttSrc(v){if(!v)return Promise.resolve("");if(/^(data:|https:)/.test(v))return Promise.resolve(v);if(/^q:/.test(v))return ttCache[v]||Promise.resolve("");if(!ttCache[v])ttCache[v]=anhRieng(v).then(x=>{if(!x)delete ttCache[v];return x});return ttCache[v]}
