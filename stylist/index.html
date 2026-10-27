@@ -247,7 +247,7 @@ details.more .list{border:0;border-top:1px solid var(--line);border-radius:0}
   </div>
 </div>
 
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=21e46119"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=55830c7d"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -312,10 +312,7 @@ function toast(msg){const t=document.createElement("div");t.className="toast";t.
 function availability(spId,nhan,tra){
   const s=byId("sp",spId);
   if(s.tt!=="Sẵn sàng")return `Không ở tiệm: ${s.tt.toLowerCase()}`;
-  const a=dayNum(nhan),b=dayNum(tra);
-  for(const d of db.don){if(d.tt==="Hủy"||d.tt==="Đã trả")continue;if(!lines(d).some(l=>l.sp===spId))continue;
-    if(dayNum(d.nhan)<=b+s.giat&&dayNum(d.tra)+s.giat>=a)return `Kín lịch: đơn ${d.id} ${dm(d.nhan)}–${dm(d.tra)}`;}
-  return "";
+  return window.CherieData.kinLich(spId,nhan,tra);
 }
 
 let tab="today",openTrip=null;
@@ -406,7 +403,7 @@ function bindSig(d){
   let drawing=false,moved=false;const p=e=>{const r=c.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
   c.addEventListener("pointerdown",e=>{drawing=true;moved=false;c.setPointerCapture(e.pointerId);const[a,b]=p(e);x.beginPath();x.moveTo(a,b)});
   c.addEventListener("pointermove",e=>{if(!drawing)return;const[a,b]=p(e);x.lineTo(a,b);x.stroke();moved=true});
-  c.addEventListener("pointerup",()=>{if(!drawing)return;drawing=false;if(moved){d.signImg=c.toDataURL();const first=!d.sign;d.sign=true;save();if(first)render()}});
+  c.addEventListener("pointerup",()=>{if(!drawing)return;drawing=false;if(moved){d.signImg=c.toDataURL();const first=!d.sign;d.sign=true;{const CD=window.CherieData;if(view.querySelector('[data-hoanf="st"]'))d.hoanNhap=CD.hoanDoc(view,"st")}save();if(first){const y=window.scrollY;render();window.scrollTo(0,y)}}});
   view.querySelector("#sigClear").onclick=()=>{d.sign=false;d.signImg="";save();render()};
 }
 
@@ -462,7 +459,7 @@ function thuStep(t,c,step,out){const d=t.d;
   }
   else if(step===2){
     d.kq=d.kq||{};d.photo=d.photo||{};d.coc=d.coc||{hinhThuc:"Chuyển khoản",nhan:false};
-    const ids=d.pick,rent=ids.filter(i=>d.kq[i]==="thue");const cocDx=rent.reduce((a,i)=>a+byId("sp",i).coc,0);
+    const ids=d.pick,rent=ids.filter(i=>d.kq[i]==="thue");const cocDx=window.CherieData.cocDeXuat(t.kh,rent);
     const allKq=ids.every(i=>d.kq[i]);const photosOk=rent.every(i=>d.photo[i]);
     const hdOk=!!d.hdId&&(d.hdItems||"")===rent.join(",");
     const P=payThu(t,rent,cocDx),daTra=!!(d.pay&&(d.pay.thanhToan||[]).length),conThu=rent.length?window.CherieData.canThu(P.don,P.ls).tong:0;
@@ -486,7 +483,7 @@ function thuStep(t,c,step,out){const d=t.d;
         const ytT=view.querySelector("#ytT");if(ytT)ytT.onchange=()=>{d.yt=ytT.checked;if(d.hdId)d.hdItems="";save();render()};
         const so=view.querySelector("#cocSo");if(so)so.onchange=()=>{d.coc.so=+so.value||0;if(d.hdId)d.hdItems="";save();render()};
         const ht=view.querySelector("#cocHt");if(ht)ht.onchange=()=>{d.coc.hinhThuc=ht.value;save()};
-        const thT=view.querySelector("#thuT");if(thT)thT.onclick=()=>{const Q=payThu(t,rent,cocDx);window.CherieData.thuTien({don:Q.don,ls:Q.ls,anhDon:t.id,nv:STYLIST,onDone:()=>{d.coc.nhan=!window.CherieData.canThu(Q.don,Q.ls).tong;save();render()}})};
+        const thT=view.querySelector("#thuT");if(thT)thT.onclick=()=>{const Q=payThu(t,rent,cocDx);window.CherieData.thuTien({don:Q.don,ls:Q.ls,anhDon:t.id,hdOk:true,nv:STYLIST,onDone:()=>{d.coc.nhan=!window.CherieData.canThu(Q.don,Q.ls).tong;save();render()}})};
         const ht2=view.querySelector("#hdT");if(ht2)ht2.onclick=()=>{const k=kh(t.kh)||{};const CD=window.CherieData;const tra=t.dungTra||CD.hanTra(db.clock,1);
           CD.lapHopDong({don:"",kh:{id:t.kh,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(rent),nhan:db.clock,tra,luot:CD.soLuot(db.clock,tra),phiGiao:0,...(()=>{const K=kmThu(t,rent);return K.g?{giam:K.g,kmAp:K.ap,kmTen:K.m.ten}:{}})(),yenTam:!!d.yt,phiYenTam:d.yt?CD.phiYenTamDs(rent.map(i=>byId("sp",i))):0,coc:d.coc.so!=null?d.coc.so:cocDx,hinhThuc:d.coc.hinhThuc,nv:STYLIST,
             onDone:h=>{d.hdId=h.id;d.hdItems=rent.join(",");d.sign=true;save();render();toast("Đã lưu hợp đồng "+h.id)}})};
@@ -528,7 +525,7 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
     out({body:`<section><h2>Quét xuất kho</h2>${scanBox(ids,done,`Quét đủ ${ids.length} món của đơn ${don.id}`)}${boBox(ids,done,"Bỏ món khỏi đơn: tiền thuê, gói và cọc tự tính lại theo các món còn lại. Quầy thấy ghi chú để báo khách.")}</section>`,
       foot:nextBtn(all,"Rời tiệm, đi giao","Quét đủ các món để đi"),
       bind:()=>{bindScan(ids,done,id=>{done[id]=db.clock;scan(id,"Xuất kho",t.id,SHOP,"Đang mang đi");done[id]=db.clock});
-        bindBo(id=>{if(ids.length<=1)return toast("Đơn chỉ có 1 món. Báo quầy đổi món hoặc huỷ chuyến.");const s=byId("sp",id)||{};db.ct=db.ct.filter(c=>!(c.don===don.id&&c.sp===id));
+        bindBo(id=>{if(ids.length<=1)return toast("Đơn chỉ có 1 món. Báo quầy đổi món hoặc huỷ chuyến.");if(don.hd||(don.thanhToan||[]).length||don.daThu)return toast("Đơn đã ký hợp đồng hoặc đã thu tiền. Báo quầy đổi món để tính lại tiền và ký lại hợp đồng.");const s=byId("sp",id)||{};db.ct=db.ct.filter(c=>!(c.don===don.id&&c.sp===id));
           if(don.coc&&s.coc)don.coc=Math.max(0,don.coc-s.coc);if(don.yenTam&&don.phiYenTam!=null)don.phiYenTam=window.CherieData.phiYenTamDs(lines(don).map(l=>byId("sp",l.sp)));
           don.note=(don.note?don.note+" · ":"")+`Stylist ${STYLIST} bỏ ${s.ten||id} (${id}) lúc xuất kho: không tìm thấy`;(d.bo=d.bo||[]).push(id);save();render();toast("Đã bỏ món khỏi đơn, quầy sẽ thấy ghi chú")});goNext(t)}});
   } else {
@@ -545,7 +542,7 @@ function giaoStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
       bind:()=>{bindCheckin(t);const tg=view.querySelector("#ttG");if(tg)tg.onclick=()=>CDx.chupTinhTrang({don:don.id,phase:"giao",nv:STYLIST,items:ids.map(i=>({id:i,ten:byId("sp",i).ten})),onDone:render});
         const co=view.querySelector("#cocOk");if(co)co.onchange=()=>{d.cocOk=co.checked;save();render()};
         const ts2=view.querySelector("#thuS");if(ts2)ts2.onclick=()=>CDx.thuTien({don,nv:STYLIST,onDone:()=>{save();render()}});
-        const hg=view.querySelector("#hdG");if(hg)hg.onclick=()=>{const k=kh(don.dat)||{};const CD=window.CherieData;CD.lapHopDong({don:don.id,kh:{id:don.dat,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(ids,i=>{const l=lines(don).find(x=>x.sp===i);return l?(+l.ct.gia||0):0}),
+        const hg=view.querySelector("#hdG");if(hg)hg.onclick=()=>{const k=kh(don.dat)||{};const CD=window.CherieData;if(CD.nhanThucTe(don,db.clock)){save();toast("Khách nhận khác giờ hẹn: hạn trả dời theo 24 giờ từ lúc nhận")}CD.lapHopDong({don:don.id,kh:{id:don.dat,ten:k.ten||"",sdt:k.sdt||""},items:hdItems(ids,i=>{const l=lines(don).find(x=>x.sp===i);return l?(+l.ct.gia||0):0}),
           nhan:db.clock,tra:don.tra,luot:don.luot||CD.soLuot(db.clock,don.tra),phiGiao:don.phiGiao||0,giam:don.giam||0,kmAp:don.kmAp||"",kmTen:don.kmTen||"",yenTam:!!don.yenTam,phiYenTam:don.yenTam?window.CherieData.ytCuaDon(don,lines(don)):0,coc:don.coc,hinhThuc:don.hinhThuc||"",nv:STYLIST,onDone:h=>{don.hd=h.id;d.sign=true;save();render();toast("Đã lưu hợp đồng "+h.id)}})};
         const hx=view.querySelector("#hdGX");if(hx)hx.onclick=()=>window.CherieData.xemHopDong(don.hd);
         const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{ids.forEach(i=>scan(i,"Giao khách",t.id,t.noi,"Đang thuê"));don.tt="Đang thuê";t.tt="Hoàn tất";t.step=TYPES.giao.steps.length;d.end=db.clock;save();render();toast(`Đã giao đơn ${don.id}`)}}});
@@ -597,7 +594,7 @@ function nhanStep(t,c,step,out){const d=t.d,don=byId("don",t.don),ids=lines(don)
     const hu=ids.reduce((a,i)=>a+fee(d.lv[i]||"L0",byId("sp",i)),0),tre=lateFee(t,don),hoan=Math.max(0,don.coc-hu-tre),no=Math.max(0,hu+tre-don.coc);
     out({body:`<section><h2>Ký và hoàn tất</h2><dl class="kv box"><dt>Cọc đang giữ</dt><dd>${money(don.coc)}</dd><dt>Phí hư hỏng đề xuất</dt><dd>${money(hu)}</dd><dt>Phí trễ</dt><dd>${money(tre)}</dd>${no?`<dt><b>Khách còn nợ</b></dt><dd><b style="color:var(--neg,#b42318)">${money(no)}</b></dd>`:`<dt><b>Hoàn dự kiến</b></dt><dd><b>${money(hoan)}</b></dd>`}</dl>
       ${no?`<div class="banner bad">Phí vượt cọc ${money(no)}. Báo khách: quầy sẽ liên hệ thu phần còn lại sau khi kiểm đồ. Stylist không thu tiền tại chỗ.</div>`:""}
-      ${(()=>{const CD=window.CherieData,h=CD.hoanCuaDon(don);return no?"":CD.hoanThieu(h)?`<div class="box" style="display:flex;flex-direction:column;gap:8px"><p class="note"><b>Khách chưa có tài khoản nhận lại cọc.</b> Hỏi khách ngay để quầy chuyển liền.</p>${CD.hoanFields(h,"st")}<button class="btn" type="button" id="luuTk">Lưu tài khoản</button></div>`:`<p class="note">Hoàn ${money(hoan)} qua <b>${esc(CD.hoanTxt(h))}</b>. Báo khách: quầy chuyển ngay khi duyệt ảnh, kèm ảnh chụp giao dịch. Stylist không giữ tiền cọc.</p>`})()}</section><section>${sigBox(d,"khách")}</section>`,
+      ${(()=>{const CD=window.CherieData,h=CD.hoanCuaDon(don);return no?"":CD.hoanThieu(h)?`<div class="box" style="display:flex;flex-direction:column;gap:8px"><p class="note"><b>Khách chưa có tài khoản nhận lại cọc.</b> Hỏi khách ngay để quầy chuyển liền.</p>${CD.hoanFields(Object.assign({},h,d.hoanNhap||{}),"st")}<button class="btn" type="button" id="luuTk">Lưu tài khoản</button></div>`:`<p class="note">Hoàn ${money(hoan)} qua <b>${esc(CD.hoanTxt(h))}</b>. Báo khách: quầy chuyển ngay khi duyệt ảnh, kèm ảnh chụp giao dịch. Stylist không giữ tiền cọc.</p>`})()}</section><section>${sigBox(d,"khách")}</section>`,
       foot:nextBtn(!!d.sign,"Hoàn tất nhận đồ","Khách chưa ký"),
       bind:()=>{bindSig(d);{const CD=window.CherieData;CD.hoanBind(view,"st");const lt=view.querySelector("#luuTk");if(lt)lt.onclick=()=>{const h=CD.hoanDoc(view,"st");if(CD.hoanThieu(h)){toast("Nhập đủ ngân hàng, số tài khoản, tên chủ tài khoản, hoặc chọn tiền mặt");return}CD.hoanLuu(don,h);save();render();toast("Đã lưu tài khoản hoàn cọc")}}const b=view.querySelector("#nextStep");if(b)b.onclick=()=>{don.tt="Đã trả";if((+don.coc||0)>0&&don.ttCoc==="Đang giữ")don.ttCoc="Chờ hoàn";don.traTT=d.checkin||db.clock;don.phi=tre;
           lines(don).forEach(l=>{const lv=d.lv[l.sp]||"L0",bad=lv>"L1";l.ct.hu=bad;l.ct.muc=lv;l.ct.moTa=bad?`${lv} ${d.mat&&d.mat[l.sp]?"Khách làm mất":LEVELS.find(x=>x[0]===lv)[1]}${d.mota[l.sp]?": "+d.mota[l.sp]:""}`:"";if(d.mat&&d.mat[l.sp])l.ct.mat=true;l.ct.phiHu=bad?fee(lv,byId("sp",l.sp)):0});

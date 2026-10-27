@@ -426,15 +426,13 @@ details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-
     </ul>
     <h2>Luồng nội dung</h2>
     <ul>
-      <li>Agent Lập kế hoạch soạn kế hoạch tuần hoặc tháng</li>
-      <li>Agent Đánh giá chấm điểm, góp ý và sửa</li>
+      <li>Trợ lý soạn kế hoạch tuần hoặc tháng</li>
+      <li>Trợ lý thứ hai chấm điểm, góp ý và sửa</li>
       <li>Chủ tiệm duyệt kế hoạch hoặc phản hồi để lập lại</li>
-      <li>Agent Sản xuất viết kịch bản, caption, brief ảnh</li>
-      <li>Agent Kiểm duyệt chấm 10 tiêu chí theo brand guideline, dưới 9/10 tự trả về sửa tối đa 2 vòng</li>
+      <li>Trợ lý viết kịch bản, caption, ghi chú chụp ảnh</li>
+      <li>Trợ lý kiểm duyệt chấm theo bộ nhận diện Chérie, dưới 9/10 tự trả về sửa</li>
       <li>Chủ tiệm duyệt cuối, góp ý sửa, hoặc làm lại từ đầu</li>
     </ul>
-    <h2>Trên AppSheet</h2>
-    <p>Bảng Lead, YeuCauWeb, KeHoachMKT, NoiDung trong cùng file Sheets. Agent chạy theo lịch, ghi kết quả vào Sheet; chủ tiệm duyệt bằng nút trong app.</p>
   </aside>
 
   <div class="app">
@@ -453,7 +451,7 @@ details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=21e46119"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=55830c7d"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -462,7 +460,7 @@ const TODAY=window.CherieData.today();
 const DIPS=["Cưới","YEP","Sự kiện","Tiệc","Chụp ảnh du lịch","Lễ/Tết","Gala công ty","Khác"];
 const KENH=["Zalo","Website","Facebook","Instagram","TikTok"];
 const SWATCH={"Đỏ rượu":"#6E1630","Champagne":"#D9C3A0","Đen":"#1E1A1C","Hồng pastel":"#EBC3CF","Bạc":"#B9BCC2","Trắng":"#F1EEE9","Xanh navy":"#1F2E4F","Đỏ":"#B3202A","Xanh ngọc":"#2F7E73","Xanh lục":"#1F5A43","Ngà":"#EDE3CF","Xanh biển":"#3E7CA6","Tím nhạt":"#B9A3CF"};
-const CRIT=["Giọng thương hiệu","Hook 3 giây","Đúng kế hoạch và giai đoạn","Giá và thông tin rõ","Màu và bố cục","Ảnh và video","Không vi phạm","Lời kêu gọi","Mẫu có thật và trống lịch","Chính tả và độ dài"];
+const CRIT=["Giọng thương hiệu","Câu mở đầu 3 giây","Đúng kế hoạch và giai đoạn","Giá và thông tin rõ","Màu và bố cục","Ảnh và video","Không vi phạm","Lời kêu gọi","Mẫu có thật và trống lịch","Chính tả và độ dài"];
 const PIPE=["Chờ sản xuất","Agent đang chạy","Cần sửa (AI)","Chờ duyệt cuối","Cần sửa (chủ)","Đã duyệt","Đã đăng"];
 const BRAND=`THƯƠNG HIỆU CHÉRIE (bắt buộc)
 - Chérie là dịch vụ cho thuê đầm ở Đà Nẵng, khai trương 12/12/2026, chỉ phục vụ khách Việt. Không gắn thương hiệu với một dịp mặc cụ thể (dạ tiệc, cưới, du lịch) và không nói thay khách thuê để làm gì. Tagline: "Mỗi lần, một chiếc mới."; stylist mang đồ đến tận nơi (khách sạn hoặc nhà riêng, luôn nói đủ cả hai để khách địa phương thấy được trân trọng), đồ niêm phong như mới, giá công khai, không giữ CCCD bản cứng, cọc hoàn ngay khi trả đồ. Một lượt thuê là 24 giờ kể từ lúc nhận; mốc trả sau 21:00 thì trả trước 10:00 sáng hôm sau; trễ dưới 1 giờ không tính phí, từ giờ thứ hai 20k mỗi giờ, tối đa 24 giờ. Đến tận nơi tính theo vùng, trọn chuyến giao và nhận lại: trung tâm Đà Nẵng 120k, Đà Nẵng mở rộng (Cẩm Lệ, Liên Chiểu, Hoà Xuân, bán đảo Sơn Trà) 180k, Hội An 300k; xa hơn 35 km (Bà Nà, Huế, Tam Kỳ) không đến tận nơi, khách ghé tiệm. Luôn viết "từ 120k", không viết "120k" chung chung. Gói Yên tâm (1% giá trị chiếc đầm, từ 20k mỗi chiếc, khách tự chọn) là cam kết riêng của Chérie, không phải bảo hiểm của công ty bảo hiểm: miễn phí xử lý vết bẩn khó giặt, sút chỉ, tuột khoá, rơi cúc, rách hoặc hỏng cần thợ sửa; nếu mất hoặc hư nặng thì nàng chỉ đền 50% giá trị chiếc đầm thay vì 100%; không gồm tự ý cắt sửa nhuộm và trả trễ. Không bao giờ gọi là "bảo hiểm". Mỗi chiếc đầm có giá trị in trên web (giá gốc cộng 50 đến 100%), được nhắc như một điểm tự hào, không dùng để doạ khách. Gợi ý size: khách nhập số đo trên web, web báo mẫu vừa và mẫu có thể vừa (size M có thể mặc S hoặc L tuỳ độ co giãn của mẫu).
@@ -476,7 +474,7 @@ const BRAND=`THƯƠNG HIỆU CHÉRIE (bắt buộc)
 const RUBRIC=CRIT.map((c,i)=>`${i+1}. ${c}`).join("\n");
 
 const CD=window.CherieData;
-const db=CD.init({onChange:()=>{render();refreshSheet()},onStatus:syncChip});
+const db=CD.init({onChange:()=>{const v=document.getElementById("view");if(CD.dangSua(v))CD.nutCapNhat(v,render);else render();refreshSheet()},onStatus:syncChip});
 function save(){CD.save()}
 
 /* helpers */
@@ -499,8 +497,7 @@ function normPhone(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("84"
 function given(t){return String(t||"").trim().split(/\s+/).pop()||""}
 function lines(d){return db.ct.filter(c=>c.don===d.id)}
 function conflict(spId,nhan,tra){const sp=byId("sp",spId);if(!sp)return"Chưa chọn món";if(sp.tt==="Mất")return"Món đã báo mất";if(sp.tt==="Sửa"||sp.tt==="Ngưng")return`Món đang ${sp.tt.toLowerCase()}`;
-  const a=dayNum(nhan),b=dayNum(tra);for(const c of db.ct){if(c.sp!==spId)continue;const d=byId("don",c.don);if(!d||d.tt==="Hủy"||d.tt==="Đã trả")continue;
-    if(dayNum(d.nhan)<=b+sp.giat&&dayNum(d.tra)+sp.giat>=a)return`Kín lịch ${dm(d.nhan)}–${dm(d.tra)} + ${sp.giat} ngày giặt`}return""}
+  return window.CherieData.kinLich(spId,nhan,tra)}
 function toast(m){const t=document.createElement("div");t.className="toast";t.setAttribute("role","status");t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 function swatch(s){return s&&s.id?window.CherieData.anhThumb(s.id,44,58):`<span class="stripe" style="background:${SWATCH[s&&s.mau]||"#888"}"></span>`}
 function spLine(id){const s=byId("sp",id);return s?`${esc(s.ten)} (${s.id}) · ${k(s.gia)}`:esc(id)}
@@ -515,7 +512,7 @@ function sheetTruoc(title){const o=layer.querySelector(".sheet"),t=o&&o.getAttri
 function sheet(title,html,onMount){sheetTruoc(title);const o=layer.querySelector(".sheet"),same=o&&o.getAttribute("aria-label")===String(title),y=same?o.scrollTop:0;curSheet=nextSheet;nextSheet=null;layer.innerHTML=`<div class="scrim" data-close><div class="sheet${same?" still":""}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="sheet-head gut">${sheetHist.length?'<button class="x" type="button" data-back aria-label="Quay lại" style="font-size:20px">‹</button>':""}<h3 style="flex:1">${esc(title)}</h3><button class="x" type="button" data-close aria-label="Đóng">×</button></div><div class="sheet-body gut">${html}</div></div></div>`;
   layer.querySelector(".scrim").addEventListener("click",e=>{if(e.target.classList.contains("scrim")&&layer.querySelector(".sheet form"))return toast("Đang nhập dở. Bấm × để đóng.");if(e.target.hasAttribute("data-close"))closeSheet()});{const bk=layer.querySelector("[data-back]");if(bk)bk.onclick=()=>{const f=sheetHist.pop();if(f){sheetBack=true;f()}}}const n=layer.querySelector(".sheet");if(same&&n)n.scrollTop=y;if(onMount)onMount(layer.querySelector(".sheet-body"));if(same&&n&&n.scrollTop!==y)n.scrollTop=y}
 function closeSheet(){layer.innerHTML="";curSheet=null;sheetHist=[]}
-function refreshSheet(){if(!curSheet||!layer.innerHTML)return;const a=document.activeElement;if(a&&layer.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;if([...layer.querySelectorAll("textarea")].some(t=>t.value.trim())||[...layer.querySelectorAll("video")].some(v=>!v.paused&&!v.ended)){const bd=layer.querySelector(".sheet-body");if(bd&&!bd.querySelector(".stale")){const b=document.createElement("button");b.type="button";b.className="stale";b.textContent="Có cập nhật mới · Bấm để tải lại";b.onclick=()=>{const t=[...layer.querySelectorAll("textarea")].map(x=>x.value);curSheet();layer.querySelectorAll("textarea").forEach((x,i)=>{if(t[i])x.value=t[i]})};bd.prepend(b)}return}const b0=layer.querySelector(".sheet"),y=b0?b0.scrollTop:0;try{curSheet()}catch(e){closeSheet();return}const b=layer.querySelector(".sheet");if(b&&y)b.scrollTop=y}
+function refreshSheet(){if(!curSheet||!layer.innerHTML)return;const a=document.activeElement;if(a&&layer.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;if(CD.dangSua(layer)){const bd=layer.querySelector(".sheet-body");if(bd&&!bd.querySelector(".stale")){const b=document.createElement("button");b.type="button";b.className="stale";b.textContent="Có cập nhật mới · Bấm để tải lại";b.onclick=()=>{const t=[...layer.querySelectorAll("textarea")].map(x=>x.value);curSheet();layer.querySelectorAll("textarea").forEach((x,i)=>{if(t[i])x.value=t[i]})};bd.prepend(b)}return}const b0=layer.querySelector(".sheet"),y=b0?b0.scrollTop:0;try{curSheet()}catch(e){closeSheet();return}const b=layer.querySelector(".sheet");if(b&&y)b.scrollTop=y}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet()});
 
 let tab="hn";
@@ -639,7 +636,7 @@ function openLead(id){nextSheet=()=>openLead(id);const L=(db.lead||[]).find(x=>x
   const free=[...pick,...seen].filter((s,i,a)=>a.indexOf(s)===i&&!conflict(s.id,n0,t0)).slice(0,2);
   const msg=`Chào ${ten}, Chérie đây ạ. Cảm ơn ${ten} đã ghé tụi mình.${free.length?` ${free.map(s=>`${s.ten} (${k(s.gia)}/lượt)`).join(" và ")} đang còn trống cuối tuần này.`:""} Nàng gửi tụi mình chiều cao, cân nặng và số đo ngực, eo, mông để tụi mình gợi ý size vừa nhất nha.`;
   const dons=db.don.filter(d=>d.lead===L.id||(kh&&d.dat===kh.id&&d.kenh==="Online"));
-  sheet(L.ten||"Lead",`<div class="pills"><span class="pill warn">${esc(L.giaiDoan)}</span><span class="pill line">${esc(L.nguon||"Website")}</span><span class="pill ${L.dongYZalo?"good":"line"}">${L.dongYZalo?"Đồng ý nhận tin":"Chưa đồng ý nhận tin"}</span>${kh?'<span class="pill mem">Có hồ sơ khách</span>':""}</div>
+  sheet(L.ten||"Khách mới",`<div class="pills"><span class="pill warn">${esc(L.giaiDoan)}</span><span class="pill line">${esc(L.nguon||"Website")}</span><span class="pill ${L.dongYZalo?"good":"line"}">${L.dongYZalo?"Đồng ý nhận tin":"Chưa đồng ý nhận tin"}</span>${kh?'<span class="pill mem">Có hồ sơ khách</span>':""}</div>
    <dl class="kv box"><dt>Zalo</dt><dd><span class="mono">${esc(L.sdt)}</span></dd><dt>Lần đầu</dt><dd>${when(L.lanDau)}</dd><dt>Lần gần nhất</dt><dd>${when(L.lanCuoi)}</dd>${L.soLanTruyCap?`<dt>Số lần vào web</dt><dd>${L.soLanTruyCap}</dd>`:""}${L.lienHeLuc?`<dt>Phản hồi lần đầu</dt><dd>${when(L.lienHeLuc)}</dd>`:""}</dl>
    ${pick.length?`<section><h2>Danh sách thử khách chọn</h2><div class="list">${pick.map(s=>`<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id} · ${k(s.gia)}</span></span></div>`).join("")}</div></section>`:""}
    ${seen.length?`<section><h2>Mẫu đã xem trên web</h2><div class="list">${seen.slice(0,5).map(s=>`<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id} · ${k(s.gia)}</span></span></div>`).join("")}</div></section>`:""}
@@ -661,7 +658,7 @@ function openYC(id){nextSheet=()=>openYC(id);const y=(db.yc||[]).find(x=>x.id===
    <dl class="kv box"><dt>Khách</dt><dd>${esc(y.ten)}</dd><dt>Zalo</dt><dd><span class="mono">${esc(y.sdt)}</span></dd><dt>Hẹn</dt><dd>${dm(y.nhan)} lúc ${hm(y.nhan)}</dd><dt>Trả đồ</dt><dd>${dm(y.tra)}</dd><dt>Cách nhận</dt><dd>${esc(y.cach)}</dd>${y.noi?`<dt>Địa điểm</dt><dd>${esc(y.noi)}</dd>`:""}<dt>Gửi lúc</dt><dd>${when(y.tg)}</dd></dl>
    ${y.note?`<p class="note">${esc(y.note)}</p>`:""}
    <section><h2>${(y.sp||[]).length} mẫu khách chọn</h2><div class="list">${(y.sp||[]).map(i=>{const s=byId("sp",i);return s?`<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id} · ${k(s.gia)} · cọc ${k(s.coc)}</span></span></div>`:""}).join("")||'<div class="empty">Khách nhờ stylist chọn giúp.</div>'}</div></section>
-   <div class="kbtn">${y.tt!=="Đã chốt"?'<button class="btn primary" type="button" id="yDon">Tạo đơn từ yêu cầu</button>':""}${y.tt==="Mới"?'<button class="btn" type="button" id="yOk">Đã gọi Zalo</button>':""}${y.tt!=="Đã chốt"?`<button class="btn" type="button" id="yNo"${y.tt==="Mới"?"":' style="grid-column:1/-1"'}>Không chốt</button>`:""}</div>`,root=>{
+   <div class="kbtn">${y.tt!=="Đã chốt"?'<button class="btn primary" type="button" id="yDon">Tạo đơn từ yêu cầu</button>':""}${y.tt==="Mới"?'<button class="btn" type="button" id="yOk">Đã gọi Zalo</button>':""}${y.tt!=="Đã chốt"?`<button class="btn" type="button" id="yNo" data-hoi="Bấm lần nữa: khách không chốt"${y.tt==="Mới"?"":' style="grid-column:1/-1"'}>Không chốt</button>`:""}</div>`,root=>{
     const a=root.querySelector("#yOk");if(a)a.onclick=()=>{y.tt="Đã liên hệ";const L=(db.lead||[]).find(x=>x.id===y.lead);if(L&&L.giaiDoan==="Mới"){L.lienHeLuc=nowIso()}save();render();openYC(id)};
     const b=root.querySelector("#yDon");if(b)b.onclick=()=>openOrder({yc:y.id,lead:y.lead,items:y.sp||[],nhan:y.nhan,tra:y.tra,noi:y.noi,giao:y.cach.startsWith("Stylist"),ten:y.ten,sdt:y.sdt,note:y.note,kenh:"Website"});
     const c=root.querySelector("#yNo");if(c)c.onclick=()=>{y.tt="Hủy";save();render();closeSheet();toast("Đã đóng yêu cầu")};
@@ -683,7 +680,7 @@ function openOrder(pre){
    <label class="f" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="yt" style="width:22px;height:22px;min-width:22px;flex:none;margin:0"> <span><b>Gói Yên tâm (tuỳ chọn, khách muốn thì tick)</b>: 1% giá trị mỗi chiếc, tối thiểu 20.000đ: miễn phí bẩn khó, sút chỉ, rách cần thợ sửa; mất hoặc hư nặng đền 50% giá trị</span></label>
    <label class="f">Chương trình giảm giá<select id="km"></select><span class="note" id="kmNote"></span></label>
    <div class="box" id="tienBox" hidden><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Gói Yên tâm</dt><dd id="ytSum">Không</dd><dt>Giảm giá</dt><dd id="giamTxt">Không</dd></dl><span id="netTxt" hidden></span><span id="coc" hidden></span><div id="tongBox"></div></div>
-   <input type="hidden" id="ttCoc" value="Chờ chuyển khoản"><p class="note">Khách chuyển tiền xong, mở đơn bấm "Ghi nhận khách đã chuyển" và đính kèm ảnh giao dịch để kế toán đối chiếu.</p>
+   <input type="hidden" id="ttCoc" value="Chưa thu"><p class="note">Chưa thu tiền lúc tạo đơn. Khách ký hợp đồng khi nhận đồ (tại Quầy hoặc với stylist), sau đó mới thu bằng mã QR tài khoản tiệm, có ảnh giao dịch.</p>
    <p class="note"><b>Tài khoản nhận lại cọc (bắt buộc).</b> Xin khách khi chốt đơn, để trả đồ xong quầy hoàn liền. Khách cũ đã có thì tự điền.</p>${window.CherieData.hoanFields(null,"cs")}
    <label class="f">Ghi chú cho quầy<input id="note" type="text" value="${esc(st.note)}"></label>
    <div id="err" class="err" hidden></div>
@@ -705,8 +702,8 @@ function openOrder(pre){
     function check(){st.items.forEach((id,i)=>{const m=root.querySelector(`[data-m="${i}"]`);if(!m)return;if(!id){m.innerHTML="";return}const c=conflict(id,$("#nhan").value,$("#tra").value);m.innerHTML=c?`<span class="err">${esc(c)}</span>`:'<span class="ok">Trống lịch</span>'});
       const ss=st.items.map(i=>byId("sp",i)).filter(Boolean);const L=window.CherieData.soLuot($("#nhan").value,$("#tra").value);const CDk=window.CherieData,thue=ss.reduce((a,s)=>a+s.gia,0)*L,giao=st.giao?CDk.phiVung($("#vung").value):0;$("#sum").textContent=money(thue);
       {const ytv=$("#yt").checked?CDk.phiYenTamDs(ss):0;const sel=$("#km");sel.innerHTML=CDk.kmOptions("Online",st.km||"",thue,ytv);st.km=sel.value;const m=(db.km||[]).find(x=>x.id===st.km);st.giam=CDk.kmGiam(m,thue,ytv);st.kmAp=CDk.kmAp(m);
-       $("#kmNote").textContent=m?CDk.kmMoTa(m)+(m.dk?" · "+m.dk:""):CDk.kmChay("Online").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam)+(st.kmAp==="yt"?" phí gói":""):"Không";$("#netTxt").innerHTML="<b>"+money(thue-(st.kmAp==="yt"?0:st.giam)+giao)+"</b>"}$("#coc").textContent=money(ss.reduce((a,s)=>a+s.coc,0));$("#ytSum").textContent=$("#yt").checked?money(CDk.phiYenTamDs(ss)):"Không";
-      $("#tienBox").hidden=!ss.length;$("#tongBox").innerHTML=ss.length?CDk.tongHtml({luot:L,giam:st.giam||0,kmAp:st.kmAp||"",yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?CDk.phiYenTamDs(ss):0,phiGiao:giao,coc:ss.reduce((a,s)=>a+s.coc,0)},ss.map(s=>({gia:s.gia}))):""}
+       $("#kmNote").textContent=m?CDk.kmMoTa(m)+(m.dk?" · "+m.dk:""):CDk.kmChay("Online").length?"":"Hiện không có chương trình nào đang chạy.";$("#giamTxt").textContent=st.giam?"−"+money(st.giam)+(st.kmAp==="yt"?" phí gói":""):"Không";$("#netTxt").innerHTML="<b>"+money(thue-(st.kmAp==="yt"?0:st.giam)+giao)+"</b>"}$("#coc").textContent=money(CDk.cocDeXuat($("#kh").value,ss.map(s=>s.id)));$("#ytSum").textContent=$("#yt").checked?money(CDk.phiYenTamDs(ss)):"Không";
+      $("#tienBox").hidden=!ss.length;$("#tongBox").innerHTML=ss.length?CDk.tongHtml({luot:L,giam:st.giam||0,kmAp:st.kmAp||"",yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?CDk.phiYenTamDs(ss):0,phiGiao:giao,coc:CDk.cocDeXuat($("#kh").value,ss.map(s=>s.id))},ss.map(s=>({gia:s.gia}))):""}
     $("#nhan").onchange=()=>{$("#tra").value=window.CherieData.hanTra($("#nhan").value,1);draw()};$("#tra").onchange=draw;$("#vung").onchange=check;$("#km").onchange=()=>{st.km=$("#km").value;check()};$("#add").onclick=()=>{st.items.push("");st.open=st.items.length-1;draw()};
     root.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{st.giao=b.dataset.g==="1";root.querySelectorAll("[data-g]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));$("#noiBox").hidden=!st.giao;check()});
     draw();window.CherieData.hoanBind(root,"cs");
@@ -723,7 +720,7 @@ function openOrder(pre){
       const kh=byId("kh",khId);const p=normPhone(kh.sdt);
       let Lx=L||(p?(db.lead||[]).find(x=>x.id==="84"+p.slice(1)):null);
       if(!Lx&&p){Lx=upsertLead(p,kh.ten,$("#kenh").value,false)}
-      const coc=items.reduce((a,i)=>a+byId("sp",i).coc,0);const id=nextId("don","D");
+      const coc=window.CherieData.cocDeXuat(khId,items);const id=nextId("don","D");
       db.don.push({id,dat:khId,nhom:"",dip:$("#dip").value,nhan,tra,luot:window.CherieData.soLuot(nhan,tra),traTT:"",tt:"Đã đặt",coc,hinhThuc:"Chuyển khoản",ttCoc:$("#ttCoc").value,phi:0,note:$("#note").value.trim(),kenh:"Online",nguonDon:$("#kenh").value,nvTao:"CS online",taoLuc:nowIso(),giaoTanNoi:st.giao,vung:st.giao?$("#vung").value:"",phiGiao:st.giao?window.CherieData.phiVung($("#vung").value):0,noi:st.giao?$("#noi").value.trim():"",lead:Lx?Lx.id:"",quayDaNhan:false,yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?window.CherieData.phiYenTamDs(st.items.map(i=>byId("sp",i)).filter(Boolean)):0,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",kmAp:st.giam?st.kmAp:"",giam:st.giam||0});
       items.forEach(i=>db.ct.push({id:nextId("ct","CT"),don:id,mac:khId,sp:i,gia:byId("sp",i).gia,hu:false,moTa:"",phiHu:0}));
       if(coTk)window.CherieData.hoanLuu(byId("don",id),hq);
@@ -734,7 +731,7 @@ function openOrder(pre){
 }
 function openDonView(id){nextSheet=()=>openDonView(id);const d=byId("don",id);if(!d){closeSheet();return}const kh=byId("kh",d.dat)||{ten:d.dat,sdt:""};const ls=lines(d);
   sheet(`Đơn ${d.id}`,`<div class="pills"><span class="pill mem">Online · ${esc(d.nguonDon||"")}</span><span class="pill line">${esc(d.tt)}</span><span class="pill ${d.quayDaNhan?"good":"warn"}">${d.quayDaNhan?"Quầy đã nhận":"Chờ quầy nhận"}</span>${d.yenTam?'<span class="pill good">Có Gói Yên tâm</span>':'<span class="pill line">Không Gói Yên tâm</span>'}</div>${window.CherieData.ytBanner(d)}
-   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd><dt>Hoàn cọc qua</dt><dd>${window.CherieData.hoanDong(d)}${d.hoanLuc?` · đã hoàn ${when(d.hoanLuc)}`:""}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl><section><h2>Tiền của đơn</h2>${window.CherieData.bangTien(d,ls)}</section>${d.tt==="Đã đặt"&&window.CherieData.canThu(d,ls).tong?`<button class="btn block primary" type="button" id="daThuCK" style="margin-top:8px">QR chuyển khoản · ghi nhận khách đã chuyển (kèm ảnh)</button>`:""}
+   <dl class="kv box"><dt>Khách</dt><dd>${esc(kh.ten)} · ${esc(kh.sdt)}</dd><dt>Nhận</dt><dd>${when(d.nhan)}</dd><dt>Trả</dt><dd>${when(d.tra)}</dd><dt>Cách nhận</dt><dd>${d.giaoTanNoi?"Stylist giao: "+esc(d.noi):"Tại tiệm"}</dd><dt>Hoàn cọc qua</dt><dd>${window.CherieData.hoanDong(d)}${d.hoanLuc?` · đã hoàn ${when(d.hoanLuc)}`:""}</dd><dt>Tạo bởi</dt><dd>${esc(d.nvTao||"")} · ${when(d.taoLuc)}</dd></dl><section><h2>Tiền của đơn</h2>${window.CherieData.bangTien(d,ls)}</section>${d.tt==="Đã đặt"&&window.CherieData.canThu(d,ls).tong?(d.hd?`<button class="btn block primary" type="button" id="daThuCK" style="margin-top:8px">QR chuyển khoản · ghi nhận khách đã chuyển (kèm ảnh)</button>`:`<p class="note" style="margin-top:8px"><b>Chờ ký hợp đồng ở Quầy hoặc khi stylist giao.</b> Tiền thu sau khi khách ký, bằng mã QR tài khoản tiệm, có ảnh giao dịch.</p>`):""}
    <section><h2>${ls.length} món</h2><div class="list">${ls.map(c=>{const s=byId("sp",c.sp);return `<div class="row">${swatch(s)}<span class="main"><span class="t">${esc(s.ten)} · ${s.size}</span><span class="s">${s.id}</span></span><span class="r">${money(c.gia)}/lượt${c.hu?`<br><span class="pill bad">${c.mat?"Mất":"Hư"} ${money(window.CherieData.huMon(d,c))}</span>`:""}</span></div>`}).join("")}</div>${window.CherieData.quyTacDen(d)}</section>
    ${d.note?`<p class="note">Ghi chú cho quầy: ${esc(d.note)}</p>`:""}
    <p class="note">Quầy chuẩn bị đồ, nhận cọc tại tiệm hoặc cử stylist giao. Trạng thái cập nhật về đây khi quầy thao tác.</p>`,root=>{bind(root);const b=root.querySelector("#daThuCK");if(b)b.onclick=()=>window.CherieData.thuTien({don:d,nv:"CS online",onDone:()=>{save();render();openDonView(id);toast("Đã ghi nhận tiền khách chuyển")}})})}
@@ -746,10 +743,10 @@ const running={};
 function agentBox(id){return running[id]?`<div class="agent" role="status"><span class="dot"></span><span>${esc(running[id])}</span></div>`:""}
 function agentNote(){return sampleChecked&&!sampleFn?`<p class="note">Trợ lý tự lập, viết, dựng và chấm mỗi giờ. Chỉ bản đạt từ 9/10 mới tới bạn, ở mục Hôm nay.</p>`:""}
 async function ask(prompt){if(!sampleFn)throw{code:"unavailable"};return await sampleFn.json(prompt,{modelTier:"default",cache:false})}
-function errMsg(e){const c=e&&e.code;return c==="not_granted"?"Bạn chưa cho phép trang gọi Claude.":c==="rate_limited"?"Đang gọi quá nhanh, thử lại sau ít phút.":"Agent chưa chạy được, thử lại sau."}
+function errMsg(e){const c=e&&e.code;return c==="not_granted"?"Bạn chưa cho phép trang gọi Claude.":c==="rate_limited"?"Đang gọi quá nhanh, thử lại sau ít phút.":"Trợ lý chưa chạy được, thử lại sau."}
 function kho(){return db.sp.filter(s=>s.tt!=="Ngưng"&&s.tt!=="Mất"&&s.tt!=="Sửa").map(s=>`${s.id} | ${s.ten} | ${s.loai} | size ${s.size} | ${s.mau} | ${s.gia}đ/lượt | giá trị ${window.CherieData.giaTri(s)}đ | co giãn: ${s.co||"?"} | cọc ${s.coc}đ (chỉ dùng nội bộ, không ghi vào caption)`).join("\n")}
 async function agentPlan(P){
-  running[P.id]="Agent Lập kế hoạch đang soạn…";render();refreshSheet();
+  running[P.id]="Trợ lý đang soạn kế hoạch…";render();refreshSheet();
   try{
     const out=await ask(`Bạn là Agent Lập kế hoạch marketing của Chérie. Lập kế hoạch ${P.loai.toLowerCase()} ${P.ky} (${P.giaiDoan}).
 ${BRAND}
@@ -760,7 +757,7 @@ Yêu cầu: 3 mục tiêu đo được; ${P.loai==="Tháng"?"10–14":"5–7"} h
 Chỉ trả về JSON: {"mucTieu":["..."],"items":[{"ngay":"YYYY-MM-DD","kenh":"TikTok/Reels","dinhDang":"Video 30 giây","chuDe":"...","angle":"...","mau":["CH-DT-001-M"]}]}`);
     P.mucTieu=(out.mucTieu||[]).slice(0,5);P.items=(out.items||[]).map((x,i)=>({id:"I"+(i+1),ngay:x.ngay,kenh:x.kenh,dinhDang:x.dinhDang,chuDe:x.chuDe,angle:x.angle,mau:(x.mau||[]).filter(m=>byId("sp",m))}));
     P.vong=(P.vong||0)+1;P.tt="Agent đang đánh giá";save();
-    running[P.id]="Agent Đánh giá đang chấm…";render();refreshSheet();
+    running[P.id]="Trợ lý đang chấm kế hoạch…";render();refreshSheet();
     const rv=await ask(`Bạn là Agent Đánh giá kế hoạch marketing của Chérie, khó tính và thực tế. Chấm kế hoạch dưới đây thang 10 theo: mục tiêu rõ và đo được, đúng giai đoạn, đa dạng góc nội dung, khả thi với đội 3 người, đúng brand guideline, dùng đúng mã đầm có trong kho.
 ${BRAND}
 KHO ĐẦM:
@@ -791,9 +788,9 @@ async function agentProduce(N,fb){
   try{
     let note=fb||"";
     for(let v=0;v<3;v++){
-      running[N.id]=`Agent Sản xuất đang viết${v?` lại lần ${v+1}`:""}…`;render();refreshSheet();
+      running[N.id]=`Trợ lý đang viết${v?` lại lần ${v+1}`:""}…`;render();refreshSheet();
       N.ban=await ask(ndPrompt(N,note));log("Agent Sản xuất",v?`Sửa theo kiểm duyệt, bản ${v+1}`:fb?"Sửa theo góp ý chủ tiệm":"Tạo bản 1");save();
-      running[N.id]="Agent Kiểm duyệt đang chấm theo brand guideline…";render();refreshSheet();
+      running[N.id]="Trợ lý đang chấm theo bộ nhận diện Chérie…";render();refreshSheet();
       const q=await ask(qaPrompt(N));const tc=(q.tieuChi||[]).slice(0,10);
       N.qa={diem:avg(tc),ai:"Agent Kiểm duyệt",tieuChi:tc,canSua:q.canSua||[]};N.vong=v+1;
       log("Agent Kiểm duyệt",`${String(N.qa.diem).replace(".",",")}/10 · ${N.qa.diem>=9?"đạt":"trả về sửa"}`);save();
@@ -868,7 +865,7 @@ function reelPlayer(root,N){const sp=reelSpec(N);const wrap=root.querySelector("
   const cleanCanvas=async()=>{note.textContent="Đang tải ảnh gốc của mẫu để xuất file…";const ci=await reelImgs(sp,true);const c2=document.createElement("canvas");c2.width=sp.W;c2.height=sp.H;return{c2,ci}};
   wrap.querySelector("#rImg").onclick=async()=>{const {c2,ci}=await cleanCanvas();const x2=c2.getContext("2d");drawFrame(x2,sp,1600,ci);try{c2.toBlob(b=>{save(b,`${N.id}-bia.jpg`);note.textContent="Đã tải ảnh bìa."},"image/jpeg",0.92)}catch(e){note.textContent="Trình duyệt chặn xuất ảnh của hãng. Thử lại sau khi chủ tiệm bấm Tải ảnh mẫu về Drive."}};
   const all=wrap.querySelector("#rAll");if(all)all.onclick=async()=>{const {c2,ci}=await cleanCanvas();const x2=c2.getContext("2d");for(let i=0;i<=sp.scenes.length;i++){drawFrame(x2,sp,i<sp.scenes.length?i*SCENE+2400:sp.scenes.length*SCENE+2400,ci);await new Promise(r=>c2.toBlob(b=>{save(b,`${N.id}-${i+1}.jpg`);setTimeout(r,500)},"image/jpeg",0.92))}note.textContent="Đã tải các ảnh."};
-  wrap.querySelector("#rDl").onclick=async()=>{const b=wrap.querySelector("#rDl");if(b.disabled)return;b.disabled=true;
+  wrap.querySelector("#rDl").onclick=async()=>{const b=wrap.querySelector("#rDl");if(b.disabled)return;b.disabled=true;window.__dangXuat=true;
     try{if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)throw new Error("Máy này chưa hỗ trợ quay video từ trang web. Mở bằng Safari hoặc Chrome bản mới.");
       const {c2,ci}=await cleanCanvas();const x2=c2.getContext("2d");drawFrame(x2,sp,0,ci);const st=c2.captureStream(30);
       const mt=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm"].find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||"";
@@ -876,7 +873,7 @@ function reelPlayer(root,N){const sp=reelSpec(N);const wrap=root.querySelector("
       const done=new Promise(r=>rec.onstop=r);rec.start(250);const s0=performance.now();
       await new Promise(r=>{const f=()=>{const ms=performance.now()-s0;if(ms>=tot+200){r();return}drawFrame(x2,sp,Math.min(ms,tot-1),ci);note.textContent=`Đang xuất video… ${Math.round(ms/tot*100)}%`;requestAnimationFrame(f)};f()});
       rec.stop();await done;const type=rec.mimeType||mt||"video/webm";save(new Blob(ch,{type}),`${N.id}-reel.${/mp4/.test(type)?"mp4":"webm"}`);note.textContent=`Đã xuất video ${Math.round(tot/1000)} giây (${/mp4/.test(type)?"MP4":"WebM"}). Trên iPhone: chọn Lưu video trong bảng chia sẻ.`}
-    catch(e){note.textContent=String(e&&e.message||e).includes("insecure")?"Ảnh của hãng chặn xuất file. Chủ tiệm bấm Tải ảnh mẫu về Drive ở trang nhân sự rồi thử lại.":(e.message||String(e))}finally{b.disabled=false}};
+    catch(e){note.textContent=String(e&&e.message||e).includes("insecure")?"Ảnh của hãng chặn xuất file. Chủ tiệm bấm Tải ảnh mẫu về Drive ở trang nhân sự rồi thử lại.":(e.message||String(e))}finally{b.disabled=false;window.__dangXuat=false}};
 }
 /* Cách làm từng nội dung: "AI dựng" (agent dựng hình, video từ ảnh mẫu đầm) hoặc "Tự quay" (team quay dựng, agent dựng storyboard để duyệt) */
 function cachLam(x){return x.cachLam||"AI dựng"}
@@ -921,7 +918,7 @@ function renderND(){
   const waiting=all.filter(n=>n.tt==="Chờ sản xuất");
   view.innerHTML=`<div><h1>Nội dung</h1><p class="sub">Trợ lý viết, dựng và chấm. Bạn chỉ duyệt bản đạt 9/10.</p></div>
   <div class="stats"><div class="stat ${all.filter(ndReady).length?"alert":""}"><div class="n">${all.filter(ndReady).length}</div><div class="l">Chờ bạn duyệt</div></div><div class="stat"><div class="n">${cnt("Chờ sản xuất")}</div><div class="l">Chờ sản xuất</div></div><div class="stat"><div class="n">${all.filter(n=>n.tt.startsWith("Cần sửa")).length}</div><div class="l">Cần sửa</div></div><div class="stat"><div class="n">${cnt("Đã duyệt")+cnt("Đã đăng")}</div><div class="l">Đã duyệt</div></div></div>
-  ${waiting.length&&sampleFn?`<button class="btn primary block" type="button" id="runAll">Cho trợ lý làm ${waiting.length} bài đang chờ</button>`:""}
+  ${waiting.length&&sampleFn?`<button class="btn primary block" type="button" id="runAll" data-hoi="Bấm lần nữa để trợ lý làm tất cả">Cho trợ lý làm ${waiting.length} bài đang chờ</button>`:""}
   ${(()=>{const B=db.blog||[],hom=CD.today(),d=B.filter(b=>b.tt==="Đã đăng").length,h=B.filter(b=>b.tt==="Đã đăng"&&(b.tg||"").slice(0,10)===hom).length,n=B.filter(b=>b.tt==="Nháp").length;return `<div class="list qlinks"><button class="row" type="button" id="openAnh"><span class="main"><span class="t">Ảnh lookbook</span><span class="s">Thêm ảnh tự chụp hoặc ảnh khách cho từng mẫu</span></span><span class="r">›</span></button><button class="row" type="button" id="openBlog"><span class="main"><span class="t">Blog website</span><span class="s">${d} bài đã đăng${h?`, ${h} bài hôm nay`:""}${n?`, ${n} nháp chờ bạn`:""}</span></span><span class="r">›</span></button></div>`})()}
   <div class="chips" role="group" aria-label="Lọc">${tabs.map(t=>`<button class="chip" type="button" data-f="${t}" aria-pressed="${t===ndFilter}">${t}</button>`).join("")}</div>
   <div class="list">${list.map(ndRow).join("")||'<div class="empty">Không có nội dung ở trạng thái này. Duyệt kế hoạch để tạo các mục nội dung.</div>'}</div>`;
@@ -1020,7 +1017,7 @@ function openBlog(){const B=(db.blog||[]).slice().sort((a,b)=>a.tg<b.tg?1:-1).sl
 function renderKH(){
   const ps=(db.kehoach||[]).slice().sort((a,b)=>a.tu<b.tu?1:-1);
   view.innerHTML=`<div><h1>Kế hoạch</h1><p class="sub">Trợ lý lập và chấm kế hoạch. Bạn duyệt rồi mới sang làm bài.</p></div>
-  <div class="btns"><button class="btn primary" type="button" id="nW">Kế hoạch tuần tới</button><button class="btn" type="button" id="nM">Kế hoạch tháng ${new Date(new Date().getFullYear(),new Date().getMonth()+1,1).getMonth()+1}</button></div>
+  <div class="btns"><button class="btn primary" type="button" id="nW" data-hoi="Bấm lần nữa để lập kế hoạch tuần">Kế hoạch tuần tới</button><button class="btn" type="button" id="nM" data-hoi="Bấm lần nữa để lập kế hoạch tháng">Kế hoạch tháng ${new Date(new Date().getFullYear(),new Date().getMonth()+1,1).getMonth()+1}</button></div>
   <div class="list">${ps.map(P=>`<button class="row" type="button" data-plan="${P.id}"><span class="stripe ${P.tt==="Chờ chủ duyệt"?"warn":P.tt==="Đã duyệt"?"good":P.tt==="Cần làm lại"?"bad":""}"></span><span class="main"><span class="t">${esc(/^(Tháng|Tuần)/.test(P.ky||"")?P.ky:P.loai+" "+(P.ky||""))}</span><span class="s">${esc(P.giaiDoan)} · ${P.loai==="Tháng"?"Định hướng tháng":(P.items||[]).length+" hạng mục"}</span></span><span class="r">${gopYPill(P,"kh")}${P.review?`<span class="score ${P.review.diem>=9?"ok":"no"}">${String(P.review.diem).replace(".",",")}</span><br>`:""}<span class="note">${esc(running[P.id]?"Trợ lý đang làm":P.tt==="Chờ chủ duyệt"?"Chờ bạn duyệt":P.tt==="Agent đang đánh giá"?"Trợ lý đang chấm":P.tt)}</span></span></button>`).join("")||'<div class="empty">Chưa có kế hoạch.</div>'}</div>
   ${(()=>{const R=(db.sotay||[]).filter(r=>r.tt!=="Đã bỏ"&&r.id!=="META");return `<section style="margin-top:18px"><h2>Quy tắc cho trợ lý</h2><div class="list"><button class="row" type="button" id="stOpen"><span class="stripe good"></span><span class="main"><span class="t">${R.length} quy tắc trợ lý phải theo</span><span class="s">Trợ lý đọc trước mỗi lượt làm. Bạn dạy thêm ở đây; góp ý của bạn cũng tự thành quy tắc mới.</span></span><span class="r"><span class="note">Mở</span></span></button></div></section>`})()}`;
   bind(view);

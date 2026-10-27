@@ -230,7 +230,7 @@ label.f input,label.f select,label.f textarea{padding:9px 10px;border:1px solid 
   </div>
 </div>
 <div id="layer"></div>
-<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=21e46119"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
+<script src="/gasdb.js?v=bd1cb65f"></script><script src="/shared.js?v=55830c7d"></script><script>window.GASDB&&GASDB.afterShared&&GASDB.afterShared()</script>
 <script>
 (function(){
 "use strict";
@@ -251,7 +251,7 @@ const DIPS = ["Cưới","YEP","Sự kiện","Tiệc","Chụp ảnh du lịch","L
 const SWATCH = {"Đỏ rượu":"#6E1630","Champagne":"#D9C3A0","Đen":"#1E1A1C","Hồng pastel":"#EBC3CF","Bạc":"#B9BCC2","Trắng":"#F1EEE9","Xanh navy":"#1F2E4F","Đỏ":"#B3202A","Xanh ngọc":"#2F7E73"};
 
 const CD=window.CherieData;
-const db=CD.init({onChange:()=>{render();refreshSheet()},onStatus:syncChip});
+const db=CD.init({onChange:()=>{const v=document.getElementById("view");if(CD.dangSua(v))CD.nutCapNhat(v,render);else render();refreshSheet()},onStatus:syncChip});
 function save(){CD.save()}
 
 /* ---------- helpers ---------- */
@@ -274,7 +274,7 @@ function nextId(t,p){let m=0;db[t].concat(window.CherieData.idDaXoa(t)).forEach(
 function lines(d){return db.ct.filter(c=>c.don===d.id)}
 function L4txt(s,lv,yt){return lv==="L4"?money(window.CherieData.phiHu("L4",s,yt))+(yt?" (50% giá trị)":" (100% giá trị)"):money(window.CherieData.phiHu(lv,s,yt))}
 function tienGoc(d){return window.CherieData.tienThue(d,lines(d))}
-function tongThue(d){return Math.max(0,tienGoc(d)-(+d.giam||0))}
+function tongThue(d){return Math.max(0,tienGoc(d)-(d.kmAp==="yt"?0:(+d.giam||0)))}/* khuyến mãi giảm Gói Yên tâm không trừ vào tiền thuê */
 function tongHu(d){return window.CherieData.tongHu(d,lines(d))}
 function soNguoiMac(d){return new Set(lines(d).map(c=>c.mac)).size}
 function daTre(d){return !!d.traTT&&(D(d.traTT)-D(d.tra))>36e5}
@@ -296,7 +296,7 @@ function phanKhuc(kid){const x=byId("kh",kid);if(x.ruiRo||soTre(kid)>=2)return"R
 function diem(kid){const s=donOf(kid).filter(d=>d.tt==="Đã trả").reduce((a,d)=>a+tongThue(d),0);return Math.floor(s/20000)+(byId("kh",kid).diemCong||0)}
 function consent(kid,loai){const rows=db.dy.filter(r=>r.kh===kid&&r.loai===loai).sort((a,b)=>a.tg<b.tg?1:-1);return rows.length?rows[0]:null}
 function has(kid,loai){const r=consent(kid,loai);return !!r&&r.tt==="Đồng ý"}
-function cocDeXuat(datId,spIds){const base=spIds.reduce((a,s)=>a+(byId("sp",s)||{coc:0}).coc,0);if(!datId)return base;const pk=phanKhuc(datId),h=hang(datId);return base*(pk==="Rủi ro"?1.5:h==="Muse"?0.5:1)}
+function cocDeXuat(datId,spIds){return window.CherieData.cocDeXuat(datId,spIds)}/* công thức chung trong shared.js */
 function segPill(kid){const p=phanKhuc(kid);const cls={"VIP":"vip","Rủi ro":"risk","Thành viên":"mem","Tiềm năng":"line"}[p]||"";return `<span class="pill ${cls}">${esc(p)}</span>`}
 function ttPill(d){if(quaHan(d))return'<span class="pill bad">Quá hạn</span>';const m={"Đã đặt":"line","Đang thuê":"mem","Đã trả":"good","Hủy":""};return `<span class="pill ${m[d.tt]||""}">${esc(d.tt)}</span>`}
 function spPill(s){const m={"Sẵn sàng":"good","Đang thuê":"mem","Đang giặt":"warn","Sửa":"bad","Ngưng":"line","Mất":"bad","Đang mang đi":"vip","Chờ kiểm tra":"warn"};return `<span class="pill ${m[s.tt]}">${esc(s.tt)}</span>`}
@@ -305,10 +305,7 @@ function spPill(s){const m={"Sẵn sàng":"good","Đang thuê":"mem","Đang gi�
 function conflict(spId,nhan,tra,ignoreDon){
   const sp=byId("sp",spId);if(!sp)return"Chưa chọn món";
   if(sp.tt==="Mất")return"Món đã báo mất";if(sp.tt==="Sửa"||sp.tt==="Ngưng")return`Món đang ${sp.tt.toLowerCase()}`;
-  const a=dayNum(nhan),b=dayNum(tra);
-  for(const c of db.ct){if(c.sp!==spId)continue;const d=byId("don",c.don);if(!d||d.tt==="Hủy"||d.id===ignoreDon)continue;
-    if(dayNum(d.nhan)<=b+sp.giat&&dayNum(d.tra)+sp.giat>=a)return`Kín lịch: đơn ${d.id} ${dm(d.nhan)}–${dm(d.tra)} + ${sp.giat} ngày giặt`;}
-  return"";
+  return window.CherieData.kinLich(spId,nhan,tra,ignoreDon);
 }
 
 /* ---------- UI plumbing ---------- */
@@ -499,7 +496,7 @@ const STYLISTS={get length(){return CD.nhanSu("Stylist").length},map(f){const n=
 const TRIP={thu:"Thử đồ tại khách sạn",giao:"Giao đồ",nhan:"Nhận lại đồ"};
 const LV={L0:"Như mới",L1:"Bẩn nhẹ",L2:"Vết bẩn khó hoặc sút chỉ",L3:"Rách, cần thợ",L4:"Hư nặng hoặc mất"};
 let curSheet=null,nextSheet=null;
-function refreshSheet(){if(!curSheet||!layer.innerHTML)return;const a=document.activeElement;if(a&&layer.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName))return;const y=(layer.querySelector(".sheet-body")||{}).scrollTop;try{curSheet()}catch(e){closeSheet();return}const b=layer.querySelector(".sheet-body");if(b&&y)b.scrollTop=y}
+function refreshSheet(){if(!curSheet||!layer.innerHTML)return;if(window.CherieData.dangSua(layer)){const bd=layer.querySelector(".sheet-body");if(bd)window.CherieData.nutCapNhat(bd,()=>curSheet());return}const y=(layer.querySelector(".sheet-body")||{}).scrollTop;try{curSheet()}catch(e){closeSheet();return}const b=layer.querySelector(".sheet-body");if(b&&y)b.scrollTop=y}
 function tripsOfDon(id){return db.trips.filter(t=>t.don===id||(t.d&&t.d.newDon===id))}
 function openTripOf(id){return db.trips.find(t=>t.don===id&&t.tt!=="Hoàn tất"&&!String(t.tt).startsWith("Lệch"))}
 function tripNote(d){const t=openTripOf(d.id);return t?` · ${t.stylist} ${t.loai==="giao"?"giao":"đi nhận"} ${t.gio}`:""}
@@ -656,7 +653,7 @@ function openDon(id){nextSheet=()=>openDon(id);
     const thuSub=(t=>t.charAt(0).toUpperCase()+t.slice(1))([d.hd?"":"ký HĐ",ct.tong?`thu ${money(ct.tong)}`:"đã thu đủ"].filter(Boolean).join(" → "));
     const bQuay=`<button class="btn ${d.giaoTanNoi?"":"primary"}" type="button" id="aGiao"><b>${d.giaoTanNoi?"Khách ghé lấy":"Giao tại quầy"}</b><small>${thuSub}</small></button>`;
     const bShip=`<button class="btn ${d.giaoTanNoi?"primary":""}" type="button" id="aShip"><b>Stylist giao tận nơi</b><small>${d.giaoTanNoi&&d.noi?esc(d.noi):"Cử người, thu khi giao"}</small></button>`;
-    const bCoc=ct.coc&&d.ttCoc==="Chờ chuyển khoản"?`<button class="btn" type="button" id="aCocIn"><b>Khách đã chuyển cọc</b><small>Ghi nhận kèm ảnh</small></button>`:"";
+    const bCoc="";/* thu tiền chỉ sau khi ký hợp đồng, ngay trong nút giao */
     act=chuaNhan?onBanner:(d.kenh==="Online"?onBanner:"")+(ot&&ot.loai==="giao"?tripBanner+(bCoc?`<div class="acts">${bCoc}</div>`:""):`<div class="acts">${d.giaoTanNoi?bShip+bQuay:bQuay+bShip}${bCoc}</div>`)}
   if(d.tt==="Đang thuê")act=(late?`<p class="note" style="margin:0"><b style="color:var(--neg,#b42318)">Đã trễ ${lateH} giờ so với hẹn trả.</b></p>`:"")+(ot&&ot.loai==="nhan"?tripBanner:`<button class="btn block" type="button" id="aPick">Cử stylist đi nhận lại</button>`)+'<details class="more"'+(late?" open":"")+'><summary>Khách mang trả tại quầy: bấm để nhận trả</summary><div style="padding:0 12px 12px">'+`<section><div class="box" style="display:flex;flex-direction:column;gap:10px">${late?`<div class="banner bad">Trễ ${lateH} giờ so với hẹn ${when(d.tra)}.</div>`:""}
     <p class="note">${d.yenTam?"Đơn CÓ Gói Yên tâm: vết bẩn khó, sút chỉ, rách cần thợ sửa miễn phí; mất hoặc hư nặng đền 50% giá trị.":"Đơn KHÔNG có Gói Yên tâm: phí theo mức tình trạng."} Chụp 4 ảnh lúc nhận cho mỗi món khách mang trả (món báo mất không cần ảnh).</p>
@@ -672,7 +669,7 @@ function openDon(id){nextSheet=()=>openDon(id);
       <span class="note">Đơn ${d.yenTam?"CÓ":"KHÔNG có"} Gói Yên tâm: ${window.CherieData.denGiaiThich(cur==="MAT"?"L4":cur,s,!!d.yenTam)}</span></div>`}).join("")}
     <div class="btns"><button class="btn" type="button" id="ttSk">So ảnh giao · nhận</button><button class="btn primary" type="button" id="aKiem">Kiểm xong, chốt phí</button></div></div></section>`:"";
   if(d.tt==="Đã trả"&&(d.ttCoc==="Đang giữ"||d.ttCoc==="Chờ hoàn"))act=kiem+(waitCk?`<div class="banner warn">Còn ${waitCk} món Chờ kiểm tra. Chốt phí ở trên rồi mới hoàn cọc.</div>`:(conNo(d)?`<div class="banner bad">Phí ${money(d.phi+tongHu(d))} (trễ ${money(d.phi)} + hư, mất ${money(tongHu(d))}) vượt cọc ${money(d.coc)}. Không hoàn cọc. <b>Khách còn nợ ${money(conNo(d))}</b>, quầy liên hệ thu.</div><button class="btn primary block" type="button" id="aCoc">Giữ cọc, ghi khách còn nợ ${money(conNo(d))}</button>`:`<p class="note" style="margin:0">Cách tính số hoàn xem bảng tiền ở trên. Hoàn qua: <b>${esc(CD.hoanTxt(CD.hoanCuaDon(d)))}</b>${CD.hoanThieu(CD.hoanCuaDon(d))?' · <span style="color:var(--neg,#b42318)">chưa đủ tài khoản, nhập ở bước hoàn</span>':""}</p><button class="btn primary block" type="button" id="aCoc">Hoàn cọc ${money(cocHoan(d))} ngay</button>`));
-  if(d.tt==="Đã trả"&&d.ttCoc==="Khách còn nợ")act=`<div class="banner bad">Khách còn nợ ${money(conNo(d))} (phí vượt cọc). Gọi khách thu phần còn lại.</div><button class="btn primary block" type="button" id="aThuNo">Đã thu đủ ${money(conNo(d))}</button>`;
+  if(d.tt==="Đã trả"&&d.ttCoc==="Khách còn nợ")act=`<div class="banner bad">Khách còn nợ ${money(conNo(d))} (phí vượt cọc). Gọi khách thu phần còn lại.</div><button class="btn primary block" type="button" id="aThuNo">Thu ${money(conNo(d))} còn nợ (QR hoặc tiền mặt)</button>`;
   sheet(`Đơn ${d.id}`,`
    <div class="pills">${ttPill(d)}<span class="pill line">${esc(d.dip)}</span>${d.yenTam?'<span class="pill good">Có Yên tâm</span>':'<span class="pill line">Không Yên tâm</span>'}${d.nhom?`<span class="pill mem">${esc(byId("nhom",d.nhom).ten)}</span>`:""}${daTre(d)?'<span class="pill bad">Đã trả trễ</span>':""}</div>
    <button class="row box" type="button" data-kh="${kh.id}" style="border:1px solid var(--line)"><span class="main"><span class="t">${esc(kh.ten)}</span><span class="s">Người đặt · ${esc(kh.sdt||kh.email)}</span></span><span class="r">${segPill(kh.id)}</span></button>
@@ -697,7 +694,7 @@ function openDon(id){nextSheet=()=>openDon(id);
     const giao=()=>ls.every(c=>window.CherieData.ttDu(d.id,"giao",c.sp))?giao0():window.CherieData.chupTinhTrang({don:d.id,phase:"giao",items:ttItems,onDone:giao0});
     /* thứ tự giao tại quầy: 1 ký hợp đồng (kèm tài khoản hoàn cọc) → 2 thu tiền qua QR tiệm, chụp màn hình chuyển thành công → 3 chụp tình trạng → giao */
     const thuRoiGiao=()=>{if(!CD.canThu(d,ls).tong)return giao();CD.thuTien({don:d,nv:nvTen(),onDone:()=>{save();render();if(CD.canThu(d,ls).tong){openDon(id);return toast("Chưa thu đủ, chưa giao được")}giao()}})};
-    const g=root.querySelector("#aGiao");if(g)g.onclick=()=>{if(d.hd)return thuRoiGiao();window.CherieData.lapHopDong(hdOpts(d,()=>thuRoiGiao()))};
+    const g=root.querySelector("#aGiao");if(g)g.onclick=()=>{if(!d.hd&&CD.nhanThucTe(d)){save();toast(`Khách nhận khác giờ hẹn: hạn trả dời thành ${when(d.tra)}`)}if(d.hd)return thuRoiGiao();window.CherieData.lapHopDong(hdOpts(d,()=>thuRoiGiao()))};
     const hl=root.querySelector("#hdLap");if(hl)hl.onclick=()=>window.CherieData.lapHopDong(hdOpts(d));
     const hx=root.querySelector("#hdXem");if(hx)hx.onclick=()=>window.CherieData.xemHopDong(d.hd);
     root.querySelectorAll("[data-lvq]").forEach(sel=>sel.onchange=()=>{TAM(d.id).lv[sel.dataset.lvq]=sel.value;root.querySelector(`[data-mtq="${sel.dataset.lvq}"]`).hidden=sel.value<="L1"&&sel.value!=="MAT"});
@@ -716,7 +713,7 @@ function openDon(id){nextSheet=()=>openDon(id);
       if(mat)c.mat=true;else delete c.mat;c.muc=lv;c.hu=lv>"L1";c.phiHu=c.hu?window.CherieData.phiHu(lv,s,d.yenTam):0;if(c.hu&&!String(c.moTa||"").startsWith(lv)||mat)c.moTa=`${lv} ${mat?"Khách làm mất":L[1]}`;if(!c.hu)c.moTa="";save();openDon(id)});
     const ak=root.querySelector("#aKiem");if(ak)ak.onclick=()=>{ls.forEach(c=>{const s=byId("sp",c.sp);if(s.tt!=="Chờ kiểm tra")return;const lv=c.muc||(c.hu?String(c.moTa||"").slice(0,2):"L0");s.tt=c.mat?"Mất":lv==="L3"||lv==="L4"?"Sửa":"Đang giặt";c.kiemLuc=iso(NOW)});save();render();openDon(id);toast("Đã chốt phí, đồ chuyển sang giặt hoặc sửa");if(d.ttCoc==="Chờ hoàn"&&!conNo(d)&&cocHoan(d)>0)CD.hoanCoc({don:d,nv:nvTen(),onDone:()=>{d.ttCoc=cocHoan(d)===d.coc?"Đã hoàn":"Hoàn một phần";save();render();openDon(id);toast(`Đã hoàn cọc ${money(cocHoan(d))}`)}})};
     const c=root.querySelector("#aCoc");if(c)c.onclick=()=>{const no=conNo(d);if(no){d.ttCoc="Khách còn nợ";d.conNo=no;save();render();openDon(id);return toast(`Đã ghi khách còn nợ ${money(no)}`)}const xong=()=>{d.ttCoc=cocHoan(d)===d.coc?"Đã hoàn":cocHoan(d)?"Hoàn một phần":"Cấn trừ hết cọc";save();render();openDon(id);toast(`Đã hoàn cọc ${money(cocHoan(d))}`)};if(!cocHoan(d)){d.hoanLuc=iso(NOW);d.hoanSo=0;return xong()}CD.hoanCoc({don:d,nv:nvTen(),onDone:xong})};
-    const tn=root.querySelector("#aThuNo");if(tn)tn.onclick=()=>{d.ttCoc="Đã thu đủ";d.thuNoLuc=iso(NOW);save();render();openDon(id);toast("Đã ghi thu đủ phần còn nợ")};
+    const tn=root.querySelector("#aThuNo");if(tn)tn.onclick=()=>CD.thuNo({don:d,so:conNo(d),nv:nvTen(),onDone:()=>{d.ttCoc="Đã thu đủ";d.thuNoLuc=iso(NOW);save();render();openDon(id);toast("Đã ghi thu đủ phần còn nợ, kèm chứng từ")}});
   });
 }
 
@@ -766,7 +763,7 @@ function openDonForm(pre){
     <label class="f">Chương trình giảm giá<select id="km"></select><span class="note" id="kmNote"></span></label>
     <div class="box"><dl class="kv"><dt>Tiền thuê</dt><dd id="sum">0đ</dd><dt>Số lượt</dt><dd id="luotTxt">1</dd><dt>Giảm giá</dt><dd id="giamTxt">Không</dd><dt>Khách trả tiền thuê</dt><dd id="netTxt"><b>0đ</b></dd><dt>Gói Yên tâm</dt><dd id="ytSum">Không</dd><dt>Cọc đề xuất</dt><dd id="cocDx">0đ</dd></dl><div id="tongBox" style="margin-top:10px;padding:12px;border-radius:12px;background:var(--wine-soft,#F3E6E8)"></div><style>#tongBox:empty{display:none}</style></div>
     <div class="two"><label class="f">Tiền cọc (đ)<input type="number" id="coc" min="0" step="50000"></label><label class="f">Khách trả bằng<select id="ht"><option>Chuyển khoản</option><option>Tiền mặt</option></select></label></div>
-    <label class="f" style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="thuNgay" style="width:22px;height:22px;min-width:22px;flex:none;margin:0"> <span>Khách trả tiền ngay bây giờ (lưu đơn xong mở màn thu tiền, có ảnh chuyển khoản)</span></label>
+    <p class="note" style="margin:0">Tiền thu khi giao đồ, sau khi khách ký hợp đồng: bấm "Giao tại quầy" trong đơn.</p>
     <p class="note"><b>Tài khoản nhận lại cọc (bắt buộc).</b> Hỏi khách ngay để trả đồ xong hoàn liền. Khách cũ đã có tài khoản thì tự điền.</p>${CD.hoanFields(null,"q")}
     <div id="formErr" class="err" hidden></div>
     <button class="btn primary" type="submit">Lưu đơn</button></form>`,root=>{
@@ -838,8 +835,7 @@ function openDonForm(pre){
       db.don.push({id,dat,nhom:$("#nhom").value,dip:$("#dip").value,nhan,tra,luot:window.CherieData.soLuot(nhan,tra),traTT:"",tt:"Đã đặt",tao:iso(new Date()),nv:(()=>{try{return JSON.parse(localStorage.getItem("cherie-gas-me")||"{}").ten||""}catch(e){return ""}})(),coc,hinhThuc:$("#ht").value,ttCoc:coc>0?"Chưa thu":"Chưa cọc",phi:0,note:"",yenTam:$("#yt").checked,phiYenTam:$("#yt").checked?window.CherieData.phiYenTamDs(ls.map(l=>byId("sp",l.sp))):0,km:st.giam?st.km:"",kmTen:st.giam?((db.km||[]).find(x=>x.id===st.km)||{}).ten||"":"",kmAp:st.giam?st.kmAp:"",giam:st.giam||0});
       ls.forEach(l=>db.ct.push({id:nextId("ct","CT"),don:id,mac:l.macId,sp:l.sp,gia:byId("sp",l.sp).gia,hu:false,moTa:"",phiHu:0}));
       if(coTk)CD.hoanLuu(byId("don",id),hq);
-      const thuNgay=$("#thuNgay").checked;save();closeSheet();go("don");toast(`Đã lưu đơn ${id} · khách trả khi nhận đồ ${money(CD.tongDon(byId("don",id),lines(byId("don",id))).tong)}`);
-      if(thuNgay)CD.thuTien({don:byId("don",id),nv:nvTen(),onDone:()=>{save();render();toast(`Đã thu tiền đơn ${id}`)}})};
+      save();closeSheet();go("don");toast(`Đã lưu đơn ${id} · khách trả khi nhận đồ ${money(CD.tongDon(byId("don",id),lines(byId("don",id))).tong)}`);};
   });
 }
 
