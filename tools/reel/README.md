@@ -47,3 +47,19 @@ Trường thêm trong props v2 (đều tuỳ chọn):
 - `nhan`: nhãn riêng của bài viết hoa, ví dụ "LẦN ĐẦU HÉ TỦ", hiện dưới logo suốt video.
 - Mỗi mẫu: `soCat` (2–5 cú cắt, dùng để đủ độ dài mà không cần cảnh dịch vụ), `cauViTri` "tren" hoặc "duoi" (chỗ câu cảm giác).
 Hai bài cùng kênh trong 7 ngày không dùng cùng bộ (format, flash, ket, dichVuKieu).
+
+## Biến thể thêm 30/10/2026 (Agent Kiểm lỗi, theo KHUON-ND001 và KHUON-ND003)
+
+Trường mới trong props v2, đều tuỳ chọn; bỏ trống thì video dựng như cũ:
+- `mau`: "kv" dùng bảng màu key visual tháng: khối chữ hook, thẻ tên, câu cảm giác nằm trên thẻ Ivory bo 40px, chữ Noir, giá Ruby, bỏ lớp tối; nhãn bài thành viên Rosé Nude; khung kết `ket: "chu"` thành nền Ivory với mảng Rosé Nude bo 40px. Dùng khi kế hoạch tháng đòi key visual sáng.
+- `theViTri`: "tren" hoặc "duoi" (mặc định) cho thẻ tên và giá ở dải cắt và cảnh lộ dáng của can-canh; mỗi mẫu có thể đè riêng bằng `theViTri` của mẫu. Thẻ ở trên thì câu cảm giác tự xuống dưới. Dùng khi ảnh có phông trống phía trên hoặc thân váy là chi tiết cần thấy.
+- `theKieu`: "gon" cho thẻ 2 dòng thấp (dáng · size, rồi tên và viên giá một hàng), ít đè thân váy hơn thẻ 3 dòng.
+- `theVao`: "dap" cho thẻ có ngay ở khung đầu của mỗi dải và đập vào theo phách, không trượt mờ dần.
+- `hookLon`: "top" (chỉ can-canh) cho dòng hookTop làm chữ lớn nhất, ví dụ hookTop "9.000.000đ", hookBig "Đoán giá thuê?" thành dòng nghiêng nhỏ.
+- `gach`: false (lat-gia) bỏ vạch gạch con số giá trị, để không bị hiểu là giảm giá. Con số giá trị giờ tự thu cỡ cho vừa bề ngang, không tràn mép phải nữa.
+- `chonNen`: số px (chon-1), ví dụ 640: mảng nền trơn phía trên ba dải ảnh (Noir, hoặc Ivory khi `mau: "kv"`), chữ hook và "Nàng chọn số mấy?" nằm trên mảng này, không đè đầu người mẫu; ba dải bo 40px.
+- `soNgay`: true (chon-1) cho số 1-2-3 có ngay ở khung 0,0s.
+- Mỗi mẫu: `nhip` là mảng số frame của từng cú cắt (ví dụ [6,10,5,16]; 30 frame = 1 giây), thay công thức cố định "soCat ảnh 8 frame rồi giữ", để mỗi mẫu một nhịp. Cú cuối dài hơn 16 frame thì có trượt lộ dáng.
+
+Sửa thẳng (mọi video): viên số 1/2/3 của chon-1 hạ xuống y 240 (trước 150, lấn vùng 220px trên); nhãn bài 30px (trước 22px); dòng dáng · size 30px có bóng chữ để đọc được trên đầm sáng.
+Ví dụ: `vi-du-kv-lat-gia.json` (lat-gia, kv, gach false, theKieu gon, theVao dap, nhip) và `vi-du-kv-chon-1.json` (chon-1, kv, chonNen 640, soNgay).

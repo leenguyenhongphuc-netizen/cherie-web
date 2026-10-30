@@ -43,9 +43,10 @@ const IVORY = "#F6F1EA";
 const NOIR = "#141414";
 const CHAMP = "#C8A97E";
 const NUDE = "#E8C7C3";
+const RUBY = "#8E1B2E";
 
 export type Shot = { src: string; pos?: string; scale?: number };
-export type Dress2 = { ten: string; loai?: string; size?: string; gia: string; giaTri?: string; cau?: string; shots: Shot[]; soCat?: number; cauViTri?: "tren" | "duoi" }; // soCat: số cú cắt của mẫu (2–5) để kéo dài video mà không cần cảnh dịch vụ; cauViTri: đặt câu cảm giác trên hay dưới // cau: 1 câu cảm giác ngắn, đập vào giữa dải cắt
+export type Dress2 = { ten: string; loai?: string; size?: string; gia: string; giaTri?: string; cau?: string; shots: Shot[]; soCat?: number; cauViTri?: "tren" | "duoi"; theViTri?: "tren" | "duoi"; nhip?: number[] }; // soCat: số cú cắt của mẫu (2–5) để kéo dài video mà không cần cảnh dịch vụ; cauViTri: đặt câu cảm giác trên hay dưới // cau: 1 câu cảm giác ngắn, đập vào giữa dải cắt // theViTri: thẻ tên và giá của mẫu này ở trên hay dưới (đè chung theViTri) // nhip: số frame của từng cú cắt (ví dụ [6,10,5,14]), thay công thức cố định soCat x 8 frame rồi giữ
 export type Reel2Props = {
   format: "lat-gia" | "chon-1" | "can-canh";
   dresses: Dress2[];
@@ -62,9 +63,26 @@ export type Reel2Props = {
   ket?: "ba" | "mot" | "chu"; // khung kết: 3 ảnh, 1 ảnh lớn, hay chỉ chữ trên nền Noir
   dichVuKieu?: "chu" | "the"; // cảnh dịch vụ: chữ đè ảnh tối, hay thẻ Ivory bo 40px trên ảnh sáng
   nhan?: string; // nhãn riêng của bài, ví dụ "LẦN ĐẦU HÉ TỦ", hiện dưới logo suốt video
+  /* tuỳ chọn thêm 30/10/2026 (Agent Kiểm lỗi, KHUON-ND001, KHUON-ND003); bỏ trống thì giữ cách cũ */
+  mau?: "toi" | "kv"; // "kv": bảng màu key visual tháng — khối chữ trên thẻ Ivory bo 40px, chữ Noir, giá Ruby, không lớp tối
+  theViTri?: "tren" | "duoi"; // chỗ thẻ tên và giá trong dải cắt và cảnh lộ dáng (mặc định dưới)
+  theKieu?: "day" | "gon"; // "gon": thẻ gọn 2 dòng (dáng · size, rồi tên và viên giá một hàng), thấp hơn, ít đè thân váy
+  theVao?: "truot" | "dap"; // "dap": thẻ có ngay ở khung đầu của dải, đập vào theo phách, không hiện mờ dần
+  hookLon?: "big" | "top"; // can-canh: "top" cho dòng hookTop thành chữ lớn nhất (ví dụ con số giá trị), hookBig thành dòng nghiêng nhỏ
+  gach?: boolean; // lat-gia: false = không gạch con số giá trị (tránh hiểu là giảm giá)
+  chonNen?: number; // chon-1: chiều cao (px) mảng nền trơn phía trên ba dải ảnh để đặt chữ hook, ví dụ 640; 0 = ảnh tràn từ trên xuống như cũ
+  soNgay?: boolean; // chon-1: số 1-2-3 có ngay ở khung 0,0s
 };
 /* props của video đang dựng: các mảnh nhỏ đọc tuỳ chọn chung (flash, nhãn) */
 let CUR: Partial<Reel2Props> = {};
+const KV = () => CUR.mau === "kv";
+const FG = () => (KV() ? NOIR : IVORY);
+const GIA = () => (KV() ? RUBY : CHAMP);
+/* cỡ chữ vừa bề ngang 820px (1080 trừ lề trái 80, phải 180) cho chuỗi không ngắt dòng như "9.000.000đ" */
+const fit = (text: string, max: number, k = 0.58) => (/\s/.test(text.trim()) ? max : Math.min(max, Math.floor((KV() ? 750 : 820) / (Math.max(1, text.length) * k))));
+/* khối chữ: chế độ kv đặt trên thẻ Ivory bo 40px; chế độ tối giữ nguyên */
+const Khoi: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) =>
+  KV() ? <div style={{ display: "inline-block", background: IVORY, borderRadius: 40, padding: "26px 34px", ...style }}>{children}</div> : <>{children}</>;
 
 /* ---------- nhịp ---------- */
 const B = 15; // 1 phách
@@ -99,7 +117,7 @@ const Flash: React.FC<{ at?: number; len?: number; color?: string }> = ({ at = 0
 };
 
 /* lớp tối dưới chân hoặc trên đầu để chữ đọc được — đen sâu, không xám */
-const Shade: React.FC<{ side?: "top" | "bottom"; h?: number; o?: number }> = ({ side = "bottom", h = 60, o = 0.72 }) => (
+const Shade: React.FC<{ side?: "top" | "bottom"; h?: number; o?: number }> = ({ side = "bottom", h = 60, o = 0.72 }) => KV() ? null : (
   <AbsoluteFill style={{ background: `linear-gradient(${side === "bottom" ? "to top" : "to bottom"}, rgba(20,20,20,${o}) 0%, rgba(20,20,20,${o * 0.5}) ${h * 0.55}%, rgba(20,20,20,0) ${h}%)` }} />
 );
 
@@ -145,26 +163,47 @@ const Tag: React.FC<{ d: Dress2; at?: number; dark?: boolean; big?: boolean }> =
   const f = useCurrentFrame();
   if (f < at) return null;
   const t = f - at;
-  const x = interpolate(t, [0, 6], [-60, 0], { extrapolateRight: "clamp", easing: ease });
-  const o = interpolate(t, [0, 3], [0, 1], { extrapolateRight: "clamp" });
-  const fg = dark ? NOIR : IVORY;
+  const dap = CUR.theVao === "dap";
+  const x = dap ? 0 : interpolate(t, [0, 6], [-60, 0], { extrapolateRight: "clamp", easing: ease });
+  const o = dap ? 1 : interpolate(t, [0, 3], [0, 1], { extrapolateRight: "clamp" });
+  const sc = dap ? interpolate(t, [0, 5], [1.12, 1], { extrapolateRight: "clamp", easing: ease }) : 1;
+  const kv = KV();
+  const fg = dark || kv ? NOIR : IVORY;
+  const bong = dark || kv ? "none" : "0 2px 24px rgba(0,0,0,0.35)";
+  const gon = CUR.theKieu === "gon" && !big;
+  const dong = d.loai ? <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 30, letterSpacing: "0.12em", textTransform: "uppercase", color: kv ? NOIR : CHAMP, textShadow: kv ? "none" : "0 1px 10px rgba(0,0,0,0.75)" }}>{d.loai}{d.size ? ` · Size ${d.size}` : ""}</div> : null;
+  const vien = (
+    <div style={{ display: "inline-flex", alignItems: "baseline", gap: 14, background: IVORY, color: kv ? RUBY : NOIR, borderRadius: 999, padding: gon ? "10px 28px" : "14px 34px", border: `1.5px solid ${CHAMP}` }}>
+      <span style={{ fontFamily: SERIF, fontSize: gon ? 54 : 64, lineHeight: 1 }}>{d.gia}</span>
+      <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 28, color: NOIR }}>/ lượt 24 giờ</span>
+    </div>
+  );
   return (
-    <div style={{ transform: `translateX(${x}px)`, opacity: o, display: "flex", flexDirection: "column", gap: 14, alignItems: "flex-start" }}>
-      {d.loai ? <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 26, letterSpacing: "0.14em", textTransform: "uppercase", color: CHAMP }}>{d.loai}{d.size ? ` · Size ${d.size}` : ""}</div> : null}
-      <div style={{ fontFamily: SERIF, fontSize: 92, lineHeight: 1, color: fg, textShadow: dark ? "none" : "0 2px 24px rgba(0,0,0,0.35)" }}>{d.ten}</div>
-      {big ? (
-        <Slam at={5} from={1.5}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
-            <span style={{ fontFamily: SERIF, fontSize: 190, lineHeight: 0.95, color: CHAMP, textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}>{d.gia}</span>
-            <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 32, color: IVORY }}>/ lượt 24 giờ</span>
+    <div style={{ transform: `translateX(${x}px) scale(${sc})`, transformOrigin: "left bottom", opacity: o }}>
+      <Khoi>
+        {gon ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-start" }}>
+            {dong}
+            <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+              <div style={{ fontFamily: SERIF, fontSize: 64, lineHeight: 1, color: fg, textShadow: bong }}>{d.ten}</div>
+              {dap ? vien : <Slam at={4} from={1.25}>{vien}</Slam>}
+            </div>
           </div>
-        </Slam>
-      ) : <Slam at={4} from={1.25}>
-        <div style={{ display: "inline-flex", alignItems: "baseline", gap: 14, background: IVORY, color: NOIR, borderRadius: 999, padding: "14px 34px", border: `1.5px solid ${CHAMP}` }}>
-          <span style={{ fontFamily: SERIF, fontSize: 64, lineHeight: 1 }}>{d.gia}</span>
-          <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 28 }}>/ lượt 24 giờ</span>
-        </div>
-      </Slam>}
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "flex-start" }}>
+            {dong}
+            <div style={{ fontFamily: SERIF, fontSize: 92, lineHeight: 1, color: fg, textShadow: bong }}>{d.ten}</div>
+            {big ? (
+              <Slam at={dap ? 0 : 5} from={1.5}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
+                  <span style={{ fontFamily: SERIF, fontSize: 190, lineHeight: 0.95, color: GIA(), textShadow: kv ? "none" : "0 2px 24px rgba(0,0,0,0.45)" }}>{d.gia}</span>
+                  <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 32, color: fg }}>/ lượt 24 giờ</span>
+                </div>
+              </Slam>
+            ) : dap ? vien : <Slam at={4} from={1.25}>{vien}</Slam>}
+          </div>
+        )}
+      </Khoi>
     </div>
   );
 };
@@ -177,7 +216,7 @@ const Safe: React.FC<{ children: React.ReactNode; place?: "top" | "bottom" | "ce
 const Corner: React.FC<{ nguon?: string }> = ({ nguon }) => (
   <div style={{ position: "absolute", top: 250, left: 80, display: "flex", flexDirection: "column", gap: 8 }}>
     <Wordmark size={26} />
-    {CUR.nhan ? <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 22, letterSpacing: "0.16em", color: CHAMP }}>{CUR.nhan}</div> : null}
+    {CUR.nhan ? <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 30, letterSpacing: "0.14em", color: KV() ? NOIR : CHAMP, ...(KV() ? { background: NUDE, borderRadius: 999, padding: "6px 18px", alignSelf: "flex-start" } : { textShadow: "0 1px 10px rgba(0,0,0,0.75)" }) }}>{CUR.nhan}</div> : null}
     {nguon ? <div style={{ fontFamily: SANS, fontSize: 22, color: IVORY, opacity: 0.8 }}>{nguon}</div> : null}
   </div>
 );
@@ -189,24 +228,34 @@ const shot = (d: Dress2, i: number) => d.shots[i % d.shots.length];
 
 /* dải cắt nhanh của một chiếc: n cú cắt, thẻ tên đập vào ở cú thứ nhất, giữ thẻ thêm hold frame */
 const montage = (d: Dress2, startShot: number, cuts: number, hold: number, nguon?: string): Seg => {
-  const dur = cuts * CUT + hold;
+  /* nhip: độ dài riêng từng cú cắt; không có thì công thức cũ (cắt 8 frame, cú cuối giữ thêm hold) */
+  const lens = d.nhip && d.nhip.length >= 2 ? d.nhip.map((x) => Math.max(4, Math.round(x))) : Array.from({ length: cuts }, (_, k) => (k === cuts - 1 ? CUT + hold : CUT));
+  const starts = lens.map((_, k) => lens.slice(0, k).reduce((a, b) => a + b, 0));
+  const dur = lens.reduce((a, b) => a + b, 0);
+  const tren = (d.theViTri ?? CUR.theViTri) === "tren";
+  const topY = CUR.nhan ? 420 : 370;
+  const cauAt = Math.min(dur - 12, (starts[1] ?? CUT) + 2);
   return {
     dur,
     el: (
       <AbsoluteFill>
-        {Array.from({ length: cuts }).map((_, k) => (
-          <Sequence key={k} from={k * CUT} durationInFrames={k === cuts - 1 ? CUT + hold : CUT}>
-            <Photo s={shot(d, startShot + k)} dur={k === cuts - 1 ? CUT + hold : CUT} mode={k === cuts - 1 && hold > 8 ? "reveal" : k % 2 ? "drift" : "push"} dir={k % 2 ? 1 : -1} />
+        {lens.map((len, k) => (
+          <Sequence key={k} from={starts[k]} durationInFrames={len}>
+            <Photo s={shot(d, startShot + k)} dur={len} mode={k === lens.length - 1 && len > 16 ? "reveal" : k % 2 ? "drift" : "push"} dir={k % 2 ? 1 : -1} />
           </Sequence>
         ))}
-        <Shade />
+        <Shade side={tren ? "top" : "bottom"} />
         <Flash len={3} />
         <Corner nguon={nguon} />
-        <Safe><Tag d={d} at={2} /></Safe>
+        <Safe place={tren ? "top" : "bottom"} style={tren ? { top: topY } : undefined}><Tag d={d} at={CUR.theVao === "dap" ? 0 : 2} /></Safe>
         {d.cau ? (
-          <Safe place={d.cauViTri === "duoi" ? "bottom" : "top"} style={d.cauViTri === "duoi" ? { bottom: 700 } : { top: CUR.nhan ? 400 : 360 }}>
-            <Slam at={Math.min(dur - 12, CUT + 2)} from={1.2}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: IVORY, textShadow: "0 2px 18px rgba(0,0,0,0.55)" }}>{d.cau}</div></Slam>
-          </Safe>
+          tren ? (
+            <Safe place="bottom"><Slam at={cauAt} from={1.2}><Khoi><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: FG(), textShadow: KV() ? "none" : "0 2px 18px rgba(0,0,0,0.55)" }}>{d.cau}</div></Khoi></Slam></Safe>
+          ) : (
+            <Safe place={d.cauViTri === "duoi" ? "bottom" : "top"} style={d.cauViTri === "duoi" ? { bottom: (CUR.theKieu === "gon" ? 620 : 700) + (KV() ? 70 : 0) } : { top: CUR.nhan ? 420 : 360 }}>
+              <Slam at={cauAt} from={1.2}><Khoi><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: FG(), textShadow: KV() ? "none" : "0 2px 18px rgba(0,0,0,0.55)" }}>{d.cau}</div></Khoi></Slam>
+            </Safe>
+          )
         ) : null}
       </AbsoluteFill>
     ),
@@ -246,16 +295,21 @@ const serviceSeg = (p: Reel2Props): Seg | null => {
 const EndCard: React.FC<{ p: Reel2Props; dur: number }> = ({ p, dur }) => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  if (p.ket === "chu") return (
-    <AbsoluteFill style={{ backgroundColor: NOIR, alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 30, padding: "0 90px" }}>
-      {p.nguon ? <div style={{ position: "absolute", top: 226, left: 80, fontFamily: SANS, fontSize: 22, color: IVORY, opacity: 0.6 }}>{p.nguon}</div> : null}
-      <Slam at={0}><Wordmark color={IVORY} size={56} /></Slam>
-      <Slam at={0}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 70, color: IVORY, textAlign: "center" }}>Mỗi lần, một chiếc mới.</div></Slam>
-      <Slam at={3} from={1.2}><div style={{ background: IVORY, color: NOIR, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 44 }}>{p.cta}</div></Slam>
-      {p.ctaSub ? <Words at={6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: IVORY, justifyContent: "center" }} /> : null}
+  if (p.ket === "chu") {
+    const kv = p.mau === "kv";
+    const fg = kv ? NOIR : IVORY;
+    return (
+    <AbsoluteFill style={{ backgroundColor: kv ? IVORY : NOIR, alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 30, padding: "0 90px" }}>
+      {kv ? <div style={{ position: "absolute", left: 70, right: 70, top: 560, bottom: 560, borderRadius: 40, background: NUDE, transform: `scale(${interpolate(f, [0, 8], [1.06, 1], { extrapolateRight: "clamp", easing: ease })})` }} /> : null}
+      {p.nguon ? <div style={{ position: "absolute", top: 226, left: 80, fontFamily: SANS, fontSize: 22, color: fg, opacity: 0.6 }}>{p.nguon}</div> : null}
+      <Slam at={0}><Wordmark color={fg} size={56} /></Slam>
+      <Slam at={0}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 70, color: fg, textAlign: "center" }}>Mỗi lần, một chiếc mới.</div></Slam>
+      <Slam at={3} from={1.2}><div style={{ background: kv ? NOIR : IVORY, color: kv ? IVORY : NOIR, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 44 }}>{p.cta}</div></Slam>
+      {p.ctaSub ? <Words at={6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: fg, justifyContent: "center" }} /> : null}
       <AcuteRain f={f} />
     </AbsoluteFill>
-  );
+    );
+  }
   const mot = p.ket ? p.ket === "mot" : p.format === "can-canh";
   const n = mot ? 1 : Math.min(p.dresses.length, 3);
   return (
@@ -309,11 +363,13 @@ const latGia = (p: Reel2Props): Seg[] => {
         <Shade side={p.chuHook === "tren" ? "top" : "bottom"} h={70} o={0.8} />
         <Corner nguon={p.nguon} />
         <Safe place={p.chuHook === "tren" ? "top" : "bottom"}>
-          <Words at={0} gap={1} text={p.hookTop} style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: IVORY, marginBottom: 6 }} />
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: 210, lineHeight: 1, color: IVORY }}>{p.hookBig}</div></Slam>
-            <Strike at={2 * B - 4} />
-          </div>
+          <Khoi>
+            <Words at={0} gap={1} text={p.hookTop} style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: FG(), marginBottom: 6 }} />
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: fit(p.hookBig, 210), lineHeight: 1, whiteSpace: "nowrap", color: KV() ? RUBY : IVORY }}>{p.hookBig}</div></Slam>
+              {p.gach === false ? null : <Strike at={2 * B - 4} />}
+            </div>
+          </Khoi>
         </Safe>
       </AbsoluteFill>
     ),
@@ -328,8 +384,10 @@ const latGia = (p: Reel2Props): Seg[] => {
         <Flash len={4} />
         <Corner nguon={p.nguon} />
         <Safe place={p.chuHook === "tren" ? "top" : "bottom"}>
-          <Words at={1} gap={2} text={p.hookSub ?? "Nàng mặc 24 giờ"} style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: IVORY, marginBottom: 6 }} />
-          <Slam at={7}><div style={{ fontFamily: SERIF, fontSize: 230, lineHeight: 1, color: CHAMP }}>{d0.gia}</div></Slam>
+          <Khoi>
+            <Words at={1} gap={2} text={p.hookSub ?? "Nàng mặc 24 giờ"} style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: FG(), marginBottom: 6 }} />
+            <Slam at={7}><div style={{ fontFamily: SERIF, fontSize: fit(d0.gia, 230), lineHeight: 1, whiteSpace: "nowrap", color: GIA() }}>{d0.gia}</div></Slam>
+          </Khoi>
         </Safe>
       </AbsoluteFill>
     ),
@@ -343,20 +401,22 @@ const Panels: React.FC<{ p: Reel2Props; showPrice?: boolean }> = ({ p, showPrice
   const f = useCurrentFrame();
   const n = Math.min(3, p.dresses.length);
   return (
-    <AbsoluteFill style={{ backgroundColor: NOIR, flexDirection: "row", gap: 6 }}>
+    <AbsoluteFill style={{ backgroundColor: KV() ? IVORY : NOIR }}>
+     <div style={{ position: "absolute", left: 0, right: 0, top: p.chonNen ?? 0, bottom: 0, display: "flex", flexDirection: "row", gap: 6 }}>
       {p.dresses.slice(0, n).map((d, k) => {
         const y = interpolate(f - k * 2, [0, 7], [k === 0 ? 0 : 160, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease });
         return (
-          <div key={k} style={{ flex: 1, position: "relative", overflow: "hidden", transform: `translateY(${y}px)` }}>
+          <div key={k} style={{ flex: 1, position: "relative", overflow: "hidden", borderRadius: (p.chonNen ?? 0) > 0 ? 40 : 0, transform: `translateY(${y}px)` }}>
             <Img src={staticFile(shot(d, 0).src)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: shot(d, 0).pos ?? "50% 30%", transform: `scale(${(shot(d, 0).scale ?? 1) * interpolate(f, [0, 40], [1.0, 1.08], { extrapolateRight: "clamp" })})` }} />
             <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: "45%", background: "linear-gradient(to top, rgba(20,20,20,0.85), rgba(20,20,20,0))" }} />
           </div>
         );
       })}
+     </div>
       <div style={{ position: "absolute", left: 60, right: 180, bottom: 420, display: "flex" }}>
         {p.dresses.slice(0, n).map((d, k) => (
           <div key={k} style={{ flex: 1, textAlign: "center" }}>
-            <Slam at={4 + k * 3} from={1.5} style={{ transformOrigin: "center" }}><div style={{ fontFamily: SERIF, fontSize: 140, lineHeight: 1, color: IVORY }}>{k + 1}</div></Slam>
+            <Slam at={p.soNgay ? 0 : 4 + k * 3} from={1.5} style={{ transformOrigin: "center" }}><div style={{ fontFamily: SERIF, fontSize: 140, lineHeight: 1, color: IVORY }}>{k + 1}</div></Slam>
             {showPrice ? <Slam at={8 + k * 4} style={{ transformOrigin: "center" }}><div style={{ display: "inline-block", background: IVORY, color: NOIR, borderRadius: 999, padding: "6px 18px", fontFamily: SERIF, fontSize: 40, marginTop: 8 }}>{d.gia}</div></Slam> : null}
           </div>
         ))}
@@ -372,10 +432,10 @@ const chon1 = (p: Reel2Props): Seg[] => {
     el: (
       <AbsoluteFill>
         <Panels p={p} />
-        <Shade side="top" h={40} o={0.85} />
-        <Safe place="top" style={{ top: 260 }}>
-          <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: 100, lineHeight: 1.02, whiteSpace: "nowrap", color: IVORY }}>{p.hookBig}</div></Slam>
-          <Words at={0} text={p.hookTop} style={{ fontFamily: SANS, fontWeight: 500, fontSize: 48, color: IVORY, marginTop: 16 }} />
+        {(p.chonNen ?? 0) > 0 ? null : <Shade side="top" h={40} o={0.85} />}
+        <Safe place="top" style={{ top: (p.chonNen ?? 0) > 0 ? 300 : 260 }}>
+          <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: 100, lineHeight: 1.02, whiteSpace: "nowrap", color: FG() }}>{p.hookBig}</div></Slam>
+          <Words at={0} text={p.hookTop} style={{ fontFamily: SANS, fontWeight: 500, fontSize: 48, color: FG(), marginTop: 16 }} />
         </Safe>
       </AbsoluteFill>
     ),
@@ -387,7 +447,7 @@ const chon1 = (p: Reel2Props): Seg[] => {
       el: (
         <AbsoluteFill>
           {m.el}
-          <div style={{ position: "absolute", top: 150, right: 190, width: 120, height: 120, borderRadius: 999, background: IVORY, color: NOIR, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SERIF, fontSize: 72 }}>{k + 1}</div>
+          <div style={{ position: "absolute", top: 240, right: 190, width: 120, height: 120, borderRadius: 999, background: IVORY, color: NOIR, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SERIF, fontSize: 72 }}>{k + 1}</div>
         </AbsoluteFill>
       ),
     });
@@ -397,9 +457,9 @@ const chon1 = (p: Reel2Props): Seg[] => {
     el: (
       <AbsoluteFill>
         <Panels p={p} showPrice />
-        <Shade side="top" h={38} o={0.85} />
-        <Safe place="top" style={{ top: 260 }}>
-          <Slam at={2}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 96, lineHeight: 1.05, color: IVORY }}>{p.hookSub ?? "Nàng chọn số mấy?"}</div></Slam>
+        {(p.chonNen ?? 0) > 0 ? null : <Shade side="top" h={38} o={0.85} />}
+        <Safe place="top" style={{ top: (p.chonNen ?? 0) > 0 ? 300 : 260 }}>
+          <Slam at={2}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 96, lineHeight: 1.05, color: FG() }}>{p.hookSub ?? "Nàng chọn số mấy?"}</div></Slam>
         </Safe>
       </AbsoluteFill>
     ),
@@ -428,8 +488,18 @@ const canCanh = (p: Reel2Props): Seg[] => {
         <Shade side={p.chuHook === "tren" ? "top" : "bottom"} h={65} o={0.78} />
         <Corner nguon={p.nguon} />
         <Safe place={p.chuHook === "tren" ? "top" : "bottom"}>
-          <Words at={0} gap={1} text={p.hookTop} style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: IVORY, marginBottom: 6 }} />
-          <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: 150, lineHeight: 1.02, color: IVORY }}>{p.hookBig}</div></Slam>
+         <Khoi>
+          {p.hookLon === "top" ? (
+            <>
+              <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: fit(p.hookTop, 150), lineHeight: 1.02, color: KV() ? RUBY : IVORY }}>{p.hookTop}</div></Slam>
+              <Words at={0} gap={1} text={p.hookBig} style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: FG(), marginTop: 10 }} />
+            </>
+          ) : (
+            <>
+              <Words at={0} gap={1} text={p.hookTop} style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: FG(), marginBottom: 6 }} />
+              <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: 150, lineHeight: 1.02, color: FG() }}>{p.hookBig}</div></Slam>
+            </>
+          )}
           {(p.doan || []).length ? (
             <div style={{ display: "flex", gap: 18, marginTop: 22 }}>
               {(p.doan || []).map((x, k) => (
@@ -437,30 +507,32 @@ const canCanh = (p: Reel2Props): Seg[] => {
               ))}
             </div>
           ) : null}
+         </Khoi>
         </Safe>
       </AbsoluteFill>
     ),
   });
   /* cảnh lộ: ảnh toàn thân đẩy vào đều tới hết cảnh, cắt sang ảnh thứ hai ở giữa cảnh để không đứng yên, giá thuê chữ lớn, câu cảm giác của mẫu đầu */
   const rv = 3 * B + 6, cut2 = d0.shots.length > 2 ? 26 : rv;
+  const rvTren = (d0.theViTri ?? p.theViTri) === "tren";
   segs.push({
     dur: rv,
     el: (
       <AbsoluteFill>
         <Sequence from={0} durationInFrames={cut2}><Photo s={shot(d0, 0)} dur={cut2} mode="reveal" /></Sequence>
         {cut2 < rv ? <Sequence from={cut2} durationInFrames={rv - cut2}><Photo s={shot(d0, d0.shots.length - 1)} dur={rv - cut2} mode="reveal" dir={-1} /></Sequence> : null}
-        <Shade h={70} o={0.82} />
+        <Shade side={rvTren ? "top" : "bottom"} h={70} o={0.82} />
         <Flash len={5} />
         {cut2 < rv ? <Flash at={cut2} len={3} /> : null}
         <Corner nguon={p.nguon} />
         {d0.cau ? (
-          <Safe place="top" style={{ top: 360 }}>
-            <Slam at={cut2 < rv ? cut2 + 1 : 22} from={1.2}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: IVORY, textShadow: "0 2px 18px rgba(0,0,0,0.55)" }}>{d0.cau}</div></Slam>
+          <Safe place={rvTren ? "bottom" : "top"} style={rvTren ? undefined : { top: CUR.nhan ? 420 : 360 }}>
+            <Slam at={cut2 < rv ? cut2 + 1 : 22} from={1.2}><Khoi><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: FG(), textShadow: KV() ? "none" : "0 2px 18px rgba(0,0,0,0.55)" }}>{d0.cau}</div></Khoi></Slam>
           </Safe>
         ) : null}
-        <Safe>
-          <Tag d={d0} at={2} big />
-          {d0.giaTri ? <Words at={12} text={`Giá trị chiếc đầm ${d0.giaTri}.`} style={{ fontFamily: SANS, fontWeight: 500, fontSize: 38, color: IVORY, marginTop: 18 }} /> : null}
+        <Safe place={rvTren ? "top" : "bottom"} style={rvTren ? { top: CUR.nhan ? 420 : 370 } : undefined}>
+          <Tag d={d0} at={CUR.theVao === "dap" ? 0 : 2} big />
+          {d0.giaTri ? <Words at={12} text={`Giá trị chiếc đầm ${d0.giaTri}.`} style={{ fontFamily: SANS, fontWeight: 500, fontSize: 38, color: IVORY, marginTop: 18, textShadow: "0 1px 10px rgba(0,0,0,0.75)" }} /> : null}
         </Safe>
       </AbsoluteFill>
     ),
