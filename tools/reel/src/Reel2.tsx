@@ -28,22 +28,24 @@ if (typeof document !== "undefined" && !document.getElementById("cherie-fonts"))
   st.textContent = FONT_CSS.split("FONTDIR").join(staticFile("fonts"));
   document.head.appendChild(st);
   Promise.all([
-    document.fonts.load('400 40px "Playfair Display"', "Chiếc đầm"),
-    document.fonts.load('500 40px "Playfair Display"', "CHÉRIE"),
-    document.fonts.load('italic 400 40px "Playfair Display"', "Nàng mặc"),
+    document.fonts.load('400 40px "Bodoni Moda"', "Chiếc đầm"),
+    document.fonts.load('600 40px "Bodoni Moda"', "CHÉRIE"),
+    document.fonts.load('italic 400 40px "Bodoni Moda"', "Nàng mặc"),
     document.fonts.load('400 40px "Be Vietnam Pro"', "Thuê lượt"),
     document.fonts.load('500 40px "Be Vietnam Pro"', "Khai trương"),
     document.fonts.load('600 40px "Be Vietnam Pro"', "Theo dõi"),
   ]).then(() => continueRender(h), () => continueRender(h));
 }
 
-const SERIF = '"Playfair Display", Georgia, serif';
+const SERIF = '"Bodoni Moda", Didot, Georgia, serif';
 const SANS = '"Be Vietnam Pro", system-ui, sans-serif';
-const IVORY = "#F6F1EA";
-const NOIR = "#141414";
-const CHAMP = "#C8A97E";
-const NUDE = "#E8C7C3";
-const RUBY = "#8E1B2E";
+const IVORY = "#F5F3F2"; /* nền bg bộ nhận diện 30/10/2026 */
+const NOIR = "#1B1618"; /* mực ink */
+const CHAMP = "#D2B27F"; /* vàng đồng trên nền tối, ảnh (gold-on-wine) */
+const GOLD = "#8C6B3A"; /* vàng đồng gốc: chỉ nét mảnh trên nền sáng */
+const GOLD_ON_DARK = "#D2B27F";
+const NUDE = "#F4E6EB"; /* vang nhạt wine-soft */
+const RUBY = "#7A1F3D"; /* vang wine, màu Thuê đầm */
 
 export type Shot = { src: string; pos?: string; scale?: number };
 export type Dress2 = { ten: string; loai?: string; size?: string; gia: string; giaTri?: string; cau?: string; shots: Shot[]; soCat?: number; cauViTri?: "tren" | "duoi"; theViTri?: "tren" | "duoi"; nhip?: number[] }; // soCat: số cú cắt của mẫu (2–5) để kéo dài video mà không cần cảnh dịch vụ; cauViTri: đặt câu cảm giác trên hay dưới // cau: 1 câu cảm giác ngắn, đập vào giữa dải cắt // theViTri: thẻ tên và giá của mẫu này ở trên hay dưới (đè chung theViTri) // nhip: số frame của từng cú cắt (ví dụ [6,10,5,14]), thay công thức cố định soCat x 8 frame rồi giữ
@@ -154,9 +156,18 @@ const Strike: React.FC<{ at: number; color?: string }> = ({ at, color = CHAMP })
   return <div style={{ position: "absolute", left: "-2%", top: "54%", height: 10, width: `${w}%`, background: color, borderRadius: 999, transform: "rotate(-4deg)" }} />;
 };
 
-const Wordmark: React.FC<{ color?: string; size?: number }> = ({ color = IVORY, size = 30 }) => (
-  <div style={{ fontFamily: SERIF, fontWeight: 500, fontSize: size, letterSpacing: "0.42em", paddingLeft: "0.42em", color }}>CHÉRIE</div>
-);
+const Wordmark: React.FC<{ color?: string; size?: number; seg?: boolean }> = ({ color = IVORY, size = 30, seg = true }) => {
+  /* logo ghép tên theo bộ nhận diện 30/10/2026: CHÉRIE (Bodoni Moda 600, giãn 0.32em) · gạch vàng đồng · THUÊ ĐẦM (Be Vietnam Pro 600, giãn 0.18em).
+     Nền sáng: CHÉRIE màu mực, tên mảng màu vang, gạch #8C6B3A. Nền tối hoặc ảnh: bản 1 màu, gạch #D2B27F. Cỡ từ 48 dùng bản dọc (khung kết). */
+  const sang = color === NOIR;
+  const doc = size >= 48;
+  const segEl = <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: Math.max(14, Math.round(size * (doc ? 0.4 : 0.48))), letterSpacing: "0.18em", paddingLeft: "0.18em", color: sang ? RUBY : color }}>THUÊ ĐẦM</div>;
+  const gach = <div style={doc ? { width: size * 1.6, height: 2, background: sang ? GOLD : GOLD_ON_DARK } : { width: 2, height: size * 0.72, background: sang ? GOLD : GOLD_ON_DARK }} />;
+  return <div style={{ display: "flex", flexDirection: doc ? "column" : "row", alignItems: "center", gap: doc ? size * 0.24 : size * 0.45 }}>
+    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: size, lineHeight: 1, letterSpacing: "0.32em", paddingLeft: doc ? "0.32em" : 0, color }}>CHÉRIE</div>
+    {seg ? gach : null}{seg ? segEl : null}
+  </div>;
+};
 
 /* thẻ tên + giá: viên thuốc Ivory, chữ Noir, viền champagne mảnh */
 const Tag: React.FC<{ d: Dress2; at?: number; dark?: boolean; big?: boolean }> = ({ d, at = 0, dark = false, big = false }) => {

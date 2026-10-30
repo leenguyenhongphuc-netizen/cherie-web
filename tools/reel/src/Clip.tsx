@@ -7,12 +7,14 @@
 import React from "react";
 import { AbsoluteFill, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, Easing, spring, useVideoConfig } from "remotion";
 
-const SERIF = '"Playfair Display", Georgia, serif';
+const SERIF = '"Bodoni Moda", Didot, Georgia, serif';
 const SANS = '"Be Vietnam Pro", system-ui, sans-serif';
-const IVORY = "#F6F1EA";
-const NOIR = "#141414";
-const CHAMP = "#C8A97E";
-const RUBY = "#8E1B2E";
+const IVORY = "#F5F3F2"; /* nền bg bộ nhận diện 30/10/2026 */
+const NOIR = "#1B1618"; /* mực ink */
+const CHAMP = "#D2B27F"; /* vàng đồng trên nền tối, ảnh (gold-on-wine) */
+const GOLD = "#8C6B3A"; /* vàng đồng gốc: chỉ nét mảnh trên nền sáng */
+const GOLD_ON_DARK = "#D2B27F";
+const RUBY = "#7A1F3D"; /* vang wine, màu Thuê đầm */
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 const FPS = 30;
 
@@ -125,7 +127,7 @@ const PriceTag: React.FC<{ t: NonNullable<ClipScene["tag"]> }> = ({ t }) => {
 };
 
 const Corner: React.FC = () => (
-  <div style={{ position: "absolute", top: 250, left: 72, fontFamily: SERIF, fontWeight: 500, fontSize: 26, letterSpacing: "0.42em", color: IVORY, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>CHÉRIE</div>
+  <div style={{ position: "absolute", top: 250, left: 72, fontFamily: SERIF, fontWeight: 600, fontSize: 26, letterSpacing: "0.32em", color: IVORY, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>CHÉRIE</div>
 );
 
 const End: React.FC<{ p: ClipProps }> = ({ p }) => {
@@ -135,7 +137,9 @@ const End: React.FC<{ p: ClipProps }> = ({ p }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: IVORY, alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 26, padding: "0 90px" }}>
       {p.nguon ? <div style={{ position: "absolute", top: 230, left: 72, fontFamily: SANS, fontSize: 22, color: NOIR, opacity: 0.6 }}>{p.nguon}</div> : null}
-      <div style={{ transform: `scale(${0.92 + 0.08 * sp})`, fontFamily: SERIF, fontWeight: 500, fontSize: 64, letterSpacing: "0.42em", paddingLeft: "0.42em", color: NOIR }}>CHÉRIE</div>
+      <div style={{ transform: `scale(${0.92 + 0.08 * sp})`, fontFamily: SERIF, fontWeight: 600, fontSize: 64, letterSpacing: "0.32em", paddingLeft: "0.32em", color: NOIR }}>CHÉRIE</div>
+      <div style={{ width: 100, height: 2, background: GOLD, margin: "0 auto" }} />
+      <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 24, letterSpacing: "0.18em", paddingLeft: "0.18em", color: RUBY, textAlign: "center" }}>THUÊ ĐẦM</div>
       <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 64, color: NOIR, textAlign: "center" }}>Mỗi lần, một chiếc mới.</div>
       {p.cta ? <div style={{ background: NOIR, color: IVORY, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 42, opacity: interpolate(f, [3, 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>{p.cta}</div> : null}
       {p.ctaSub ? <div style={{ fontFamily: SANS, fontSize: 34, color: NOIR, textAlign: "center", opacity: interpolate(f, [6, 9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>{p.ctaSub}</div> : null}
