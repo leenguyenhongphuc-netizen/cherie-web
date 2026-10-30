@@ -63,3 +63,12 @@ Trường mới trong props v2, đều tuỳ chọn; bỏ trống thì video d�
 
 Sửa thẳng (mọi video): viên số 1/2/3 của chon-1 hạ xuống y 240 (trước 150, lấn vùng 220px trên); nhãn bài 30px (trước 22px); dòng dáng · size 30px có bóng chữ để đọc được trên đầm sáng.
 Ví dụ: `vi-du-kv-lat-gia.json` (lat-gia, kv, gach false, theKieu gon, theVao dap, nhip) và `vi-du-kv-chon-1.json` (chon-1, kv, chonNen 640, soNgay).
+
+## Biến thể thêm 30/10/2026 buổi tối (Agent Kiểm lỗi, theo KHUON-ND003)
+
+Đều tuỳ chọn, bỏ trống thì dựng như cũ:
+- `cauTren`: true (chon-1) đưa mọi câu cảm giác lên phông phía trên, thẻ tên ở dưới, không còn hai thẻ chồng nhau ở vùng dưới. Dùng khi ảnh có phông trống phía trên.
+- `giaSo`: true (chon-1) viên giá ở khung chọn có tiền tố "1 ·", "2 ·", "3 ·".
+- `ketVao`: "dap" cho khung kết: nút và chữ phụ hiện ngay frame 0, không trễ vài phách.
+- `ketVach`: false bỏ các vạch champagne trang trí rải khắp khung kết.
+Sửa thẳng: chữ `hookBig` của chon-1 tự thu cỡ để không vượt lề phải 180px (trước đây cố định 100px).

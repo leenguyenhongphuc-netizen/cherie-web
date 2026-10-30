@@ -74,6 +74,11 @@ export type Reel2Props = {
   gach?: boolean; // lat-gia: false = không gạch con số giá trị (tránh hiểu là giảm giá)
   chonNen?: number; // chon-1: chiều cao (px) mảng nền trơn phía trên ba dải ảnh để đặt chữ hook, ví dụ 640; 0 = ảnh tràn từ trên xuống như cũ
   soNgay?: boolean; // chon-1: số 1-2-3 có ngay ở khung 0,0s
+  /* tuỳ chọn thêm 30/10/2026 (KHUON-ND003) */
+  giaSo?: boolean; // chon-1: viên giá ở khung chọn có tiền tố "1 ·", "2 ·", "3 ·"
+  ketVao?: "dap"; // khung kết: mọi nút và dòng chữ đập vào ngay frame 0, không trễ
+  ketVach?: boolean; // false = bỏ các vạch champagne trang trí rải khắp khung kết
+  cauTren?: boolean; // chon-1: mọi câu cảm giác lên phông phía trên (thẻ tên ở dưới), đỡ chồng hai thẻ ở vùng dưới
 };
 /* props của video đang dựng: các mảnh nhỏ đọc tuỳ chọn chung (flash, nhãn) */
 let CUR: Partial<Reel2Props> = {};
@@ -263,7 +268,7 @@ const montage = (d: Dress2, startShot: number, cuts: number, hold: number, nguon
           tren ? (
             <Safe place="bottom"><Slam at={cauAt} from={1.2}><Khoi><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: FG(), textShadow: KV() ? "none" : "0 2px 18px rgba(0,0,0,0.55)" }}>{d.cau}</div></Khoi></Slam></Safe>
           ) : (
-            <Safe place={d.cauViTri === "duoi" ? "bottom" : "top"} style={d.cauViTri === "duoi" ? { bottom: (CUR.theKieu === "gon" ? 620 : 700) + (KV() ? 70 : 0) } : { top: CUR.nhan ? 420 : 360 }}>
+            <Safe place={d.cauViTri === "duoi" && !CUR.cauTren ? "bottom" : "top"} style={d.cauViTri === "duoi" && !CUR.cauTren ? { bottom: (CUR.theKieu === "gon" ? 620 : 700) + (KV() ? 70 : 0) } : { top: CUR.nhan ? 420 : 360 }}>
               <Slam at={cauAt} from={1.2}><Khoi><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 58, lineHeight: 1.15, color: FG(), textShadow: KV() ? "none" : "0 2px 18px rgba(0,0,0,0.55)" }}>{d.cau}</div></Khoi></Slam>
             </Safe>
           )
@@ -315,9 +320,9 @@ const EndCard: React.FC<{ p: Reel2Props; dur: number }> = ({ p, dur }) => {
       {p.nguon ? <div style={{ position: "absolute", top: 226, left: 80, fontFamily: SANS, fontSize: 22, color: fg, opacity: 0.6 }}>{p.nguon}</div> : null}
       <Slam at={0}><Wordmark color={fg} size={56} /></Slam>
       <Slam at={0}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 70, color: fg, textAlign: "center" }}>Mỗi lần, một chiếc mới.</div></Slam>
-      <Slam at={3} from={1.2}><div style={{ background: kv ? RUBY : IVORY, color: kv ? "#FFFFFF" : NOIR, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 44 }}>{p.cta}</div></Slam>
-      {p.ctaSub ? <Words at={6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: fg, justifyContent: "center" }} /> : null}
-      <AcuteRain f={f} />
+      <Slam at={p.ketVao === "dap" ? 0 : 3} from={1.2}><div style={{ background: kv ? RUBY : IVORY, color: kv ? "#FFFFFF" : NOIR, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 44 }}>{p.cta}</div></Slam>
+      {p.ctaSub ? <Words at={p.ketVao === "dap" ? 1 : 6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: fg, justifyContent: "center" }} /> : null}
+      {p.ketVach === false ? null : <AcuteRain f={f} />}
     </AbsoluteFill>
     );
   }
@@ -340,14 +345,14 @@ const EndCard: React.FC<{ p: Reel2Props; dur: number }> = ({ p, dur }) => {
       <div style={{ position: "absolute", top: 1030, left: 80, right: 80, display: "flex", flexDirection: "column", alignItems: "center", gap: 26 }}>
         <Slam at={0}><Wordmark color={NOIR} size={52} /></Slam>
         <Slam at={0}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: NOIR }}>Mỗi lần, một chiếc mới.</div></Slam>
-        <Slam at={3} from={1.2}>
+        <Slam at={p.ketVao === "dap" ? 0 : 3} from={1.2}>
           <div style={{ background: NOIR, color: IVORY, borderRadius: 999, padding: "28px 56px", fontFamily: SANS, fontWeight: 600, fontSize: 46 }}>{p.cta}</div>
         </Slam>
-        {p.ctaSub ? <Words at={6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: NOIR, justifyContent: "center" }} /> : null}
+        {p.ctaSub ? <Words at={p.ketVao === "dap" ? 1 : 6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: NOIR, justifyContent: "center" }} /> : null}
         <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 30, color: "#7A5F3A", marginTop: 6 }}>cherie.io.vn</div>
       </div>
       {/* dấu sắc champagne rơi vào chữ É: chữ ký kết video */}
-      <AcuteRain f={f} />
+      {p.ketVach === false ? null : <AcuteRain f={f} />}
     </AbsoluteFill>
   );
 };
@@ -428,7 +433,7 @@ const Panels: React.FC<{ p: Reel2Props; showPrice?: boolean }> = ({ p, showPrice
         {p.dresses.slice(0, n).map((d, k) => (
           <div key={k} style={{ flex: 1, textAlign: "center" }}>
             <Slam at={p.soNgay ? 0 : 4 + k * 3} from={1.5} style={{ transformOrigin: "center" }}><div style={{ fontFamily: SERIF, fontSize: 140, lineHeight: 1, color: IVORY }}>{k + 1}</div></Slam>
-            {showPrice ? <Slam at={8 + k * 4} style={{ transformOrigin: "center" }}><div style={{ display: "inline-block", background: IVORY, color: NOIR, borderRadius: 999, padding: "6px 18px", fontFamily: SERIF, fontSize: 40, marginTop: 8 }}>{d.gia}</div></Slam> : null}
+            {showPrice ? <Slam at={8 + k * 4} style={{ transformOrigin: "center" }}><div style={{ display: "inline-block", background: IVORY, color: NOIR, borderRadius: 999, padding: "6px 18px", fontFamily: SERIF, fontSize: 40, marginTop: 8 }}>{p.giaSo ? `${k + 1} · ${d.gia}` : d.gia}</div></Slam> : null}
           </div>
         ))}
       </div>
@@ -445,7 +450,7 @@ const chon1 = (p: Reel2Props): Seg[] => {
         <Panels p={p} />
         {(p.chonNen ?? 0) > 0 ? null : <Shade side="top" h={40} o={0.85} />}
         <Safe place="top" style={{ top: (p.chonNen ?? 0) > 0 ? 300 : 260 }}>
-          <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: 100, lineHeight: 1.02, whiteSpace: "nowrap", color: FG() }}>{p.hookBig}</div></Slam>
+          <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: Math.min(100, Math.floor(820 / (Math.max(1, (p.hookBig || "").length) * 0.52))), lineHeight: 1.02, whiteSpace: "nowrap", color: FG() }}>{p.hookBig}</div></Slam>
           <Words at={0} text={p.hookTop} style={{ fontFamily: SANS, fontWeight: 500, fontSize: 48, color: FG(), marginTop: 16 }} />
         </Safe>
       </AbsoluteFill>
