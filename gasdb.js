@@ -7,7 +7,7 @@ var C=window.CHERIE||{page:"web",pub:true,url:""};
 var KEY="cherie-gas-token",ME="cherie-gas-me";
 var token="",me=null;try{token=localStorage.getItem(KEY)||"";me=JSON.parse(localStorage.getItem(ME)||"null")}catch(e){}
 /* báo lỗi ngay trên màn hình để dễ xử lý */
-window.addEventListener("error",function(ev){try{var d=document.createElement("div");d.style.cssText="position:fixed;left:8px;right:8px;top:8px;z-index:100000;background:#8E1B2E;color:#fff;padding:10px 12px;border-radius:12px;font:13px/1.4 system-ui";d.textContent="Lỗi: "+(ev.message||"")+" "+(ev.lineno?"(dòng "+ev.lineno+")":"");document.body.appendChild(d)}catch(e){}});
+window.addEventListener("error",function(ev){try{var d=document.createElement("div");d.style.cssText="position:fixed;left:8px;right:8px;top:8px;z-index:100000;background:#7A1F3D;color:#fff;padding:10px 12px;border-radius:12px;font:13px/1.4 system-ui";d.textContent="Lỗi: "+(ev.message||"")+" "+(ev.lineno?"(dòng "+ev.lineno+")":"");document.body.appendChild(d)}catch(e){}});
 function call(fn,args){return new Promise(function(ok,no){var done=false,tm=setTimeout(function(){if(done)return;done=true;var x=new Error("Máy chủ Google phản hồi quá 40 giây. Bấm Thử lại.");x.code="unavailable";no(x)},40000);
   if((!window.google||!google.script||!google.script.run)&&C.api&&C.pub){
     /* website ở tên miền riêng: gọi cổng JSON công khai của Apps Script */
@@ -51,11 +51,11 @@ function logout(){saveAuth("",null);try{localStorage.removeItem("cherie-home")}c
 var revoked=false;function onRevoked(){if(revoked||C.pub)return;revoked=true;saveAuth("",null);gate().then(function(){location.reload()})}
 
 /* ---------- màn đăng nhập ---------- */
-var CSS="#gasGate{position:fixed;inset:0;z-index:99999;background:#F6F1EA;color:#141414;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-left,0px));font:15px/1.5 'Be Vietnam Pro',system-ui,sans-serif}"+
-"#gasGate .bx{width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px}#gasGate .mk{font-family:'Playfair Display',Georgia,serif;font-size:26px;letter-spacing:.32em}"+
-"#gasGate h1{font-family:'Playfair Display',Georgia,serif;font-weight:500;font-size:26px;margin:0}#gasGate p{margin:0;color:#6B635A;font-size:14px}"+
-"#gasGate label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#6B635A}#gasGate input,#gasGate select{font:inherit;font-size:17px;padding:12px 14px;border:1px solid #E2D6C6;border-radius:14px;background:#FBF8F3;color:#141414}"+
-"#gasGate button{font:inherit;font-weight:600;padding:14px;border:0;border-radius:999px;background:#8E1B2E;color:#F6F1EA;cursor:pointer}#gasGate button[disabled]{opacity:.6}#gasGate .er{color:#8E1B2E;font-size:14px;min-height:1em}#gasGate a{color:#7A5F3A}";
+var CSS="#gasGate{position:fixed;inset:0;z-index:99999;background:#F5F3F2;color:#1B1618;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-left,0px));font:15px/1.5 'Be Vietnam Pro',system-ui,sans-serif}"+
+"#gasGate .bx{width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px}#gasGate .mk{font-family:'Bodoni Moda',Didot,Georgia,serif;font-size:26px;letter-spacing:.32em}"+
+"#gasGate h1{font-family:'Bodoni Moda',Didot,Georgia,serif;font-weight:500;font-size:26px;margin:0}#gasGate p{margin:0;color:#6C6266;font-size:14px}"+
+"#gasGate label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#6C6266}#gasGate input,#gasGate select{font:inherit;font-size:17px;padding:12px 14px;border:1px solid #E4DDDA;border-radius:14px;background:#FFFFFF;color:#1B1618}"+
+"#gasGate button{font:inherit;font-weight:600;padding:14px;border:0;border-radius:999px;background:#7A1F3D;color:#F5F3F2;cursor:pointer}#gasGate button[disabled]{opacity:.6}#gasGate .er{color:#7A1F3D;font-size:14px;min-height:1em}#gasGate a{color:#8C6B3A}";
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function box(html){var g=document.getElementById("gasGate");if(!g){var st=document.createElement("style");st.textContent=CSS;document.head.appendChild(st);g=document.createElement("div");g.id="gasGate";document.body.appendChild(g)}g.innerHTML='<div class="bx"><div class="mk">CH&Eacute;RIE</div>'+html+'</div>';return g}
 function closeGate(){var g=document.getElementById("gasGate");if(g)g.remove()}
@@ -128,5 +128,5 @@ window.GASDB={call:call,who:who,baoLoi:baoLoi,me:function(){return me},logout:lo
     if(!C.pub){var n=CD.nenAnh;CD.nenAnh=function(f,max,q){return n(f,max||1400,q||0.82)}}}};
 /* nút nhỏ góc dưới: tài khoản và đăng xuất, chỉ ở trang nhân sự */
 if(!C.pub&&C.page!=="home")document.addEventListener("DOMContentLoaded",function(){var a=document.createElement("a");a.href=C.paths?C.paths.home:C.url+"?p=home";a.target="_top";a.textContent="☰";a.title="Trang nhân sự";var slot=document.getElementById("homeSlot");if(slot){slot.href=a.href;slot.target="_top";return}
-  a.style.cssText="position:fixed;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:9999;width:38px;height:38px;border-radius:50%;background:#141414;color:#F6F1EA;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:16px;opacity:.75";document.body.appendChild(a)});
+  a.style.cssText="position:fixed;left:max(10px,env(safe-area-inset-left,0px));bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:9999;width:38px;height:38px;border-radius:50%;background:#1B1618;color:#F5F3F2;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:16px;opacity:.75";document.body.appendChild(a)});
 })();
