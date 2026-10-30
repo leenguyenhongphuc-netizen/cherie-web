@@ -139,7 +139,7 @@ const End: React.FC<{ p: ClipProps }> = ({ p }) => {
       {p.nguon ? <div style={{ position: "absolute", top: 230, left: 72, fontFamily: SANS, fontSize: 22, color: NOIR, opacity: 0.6 }}>{p.nguon}</div> : null}
       <div style={{ transform: `scale(${0.92 + 0.08 * sp})`, fontFamily: SERIF, fontWeight: 600, fontSize: 64, letterSpacing: "0.32em", paddingLeft: "0.32em", color: NOIR }}>CHÉRIE</div>
       <div style={{ width: 100, height: 2, background: GOLD, margin: "0 auto" }} />
-      <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 24, letterSpacing: "0.18em", paddingLeft: "0.18em", color: RUBY, textAlign: "center" }}>THUÊ ĐẦM</div>
+      <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 24, letterSpacing: "0.18em", paddingLeft: "0.18em", color: RUBY, textAlign: "center" }}>CLOSET</div>
       <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 64, color: NOIR, textAlign: "center" }}>Mỗi lần, một chiếc mới.</div>
       {p.cta ? <div style={{ background: RUBY, color: "#FFFFFF", borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 42, opacity: interpolate(f, [3, 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>{p.cta}</div> : null}
       {p.ctaSub ? <div style={{ fontFamily: SANS, fontSize: 34, color: NOIR, textAlign: "center", opacity: interpolate(f, [6, 9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>{p.ctaSub}</div> : null}

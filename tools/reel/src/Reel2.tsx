@@ -157,11 +157,11 @@ const Strike: React.FC<{ at: number; color?: string }> = ({ at, color = CHAMP })
 };
 
 const Wordmark: React.FC<{ color?: string; size?: number; seg?: boolean }> = ({ color = IVORY, size = 30, seg = true }) => {
-  /* logo ghép tên theo bộ nhận diện 30/10/2026: CHÉRIE (Bodoni Moda 600, giãn 0.32em) · gạch vàng đồng · THUÊ ĐẦM (Be Vietnam Pro 600, giãn 0.18em).
+  /* logo ghép tên theo bộ nhận diện 30/10/2026: CHÉRIE (Bodoni Moda 600, giãn 0.32em) · gạch vàng đồng · CLOSET (Be Vietnam Pro 600, giãn 0.18em).
      Nền sáng: CHÉRIE màu mực, tên mảng màu vang, gạch #8C6B3A. Nền tối hoặc ảnh: bản 1 màu, gạch #D2B27F. Cỡ từ 48 dùng bản dọc (khung kết). */
   const sang = color === NOIR;
   const doc = size >= 48;
-  const segEl = <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: Math.max(14, Math.round(size * (doc ? 0.4 : 0.48))), letterSpacing: "0.18em", paddingLeft: "0.18em", color: sang ? RUBY : color }}>THUÊ ĐẦM</div>;
+  const segEl = <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: Math.max(14, Math.round(size * (doc ? 0.4 : 0.48))), letterSpacing: "0.18em", paddingLeft: "0.18em", color: sang ? RUBY : color }}>CLOSET</div>;
   const gach = <div style={doc ? { width: size * 1.6, height: 2, background: sang ? GOLD : GOLD_ON_DARK } : { width: 2, height: size * 0.72, background: sang ? GOLD : GOLD_ON_DARK }} />;
   return <div style={{ display: "flex", flexDirection: doc ? "column" : "row", alignItems: "center", gap: doc ? size * 0.24 : size * 0.45 }}>
     <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: size, lineHeight: 1, letterSpacing: "0.32em", paddingLeft: doc ? "0.32em" : 0, color }}>CHÉRIE</div>
