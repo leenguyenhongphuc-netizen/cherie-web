@@ -315,7 +315,7 @@ const EndCard: React.FC<{ p: Reel2Props; dur: number }> = ({ p, dur }) => {
       {p.nguon ? <div style={{ position: "absolute", top: 226, left: 80, fontFamily: SANS, fontSize: 22, color: fg, opacity: 0.6 }}>{p.nguon}</div> : null}
       <Slam at={0}><Wordmark color={fg} size={56} /></Slam>
       <Slam at={0}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 70, color: fg, textAlign: "center" }}>Mỗi lần, một chiếc mới.</div></Slam>
-      <Slam at={3} from={1.2}><div style={{ background: kv ? NOIR : IVORY, color: kv ? IVORY : NOIR, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 44 }}>{p.cta}</div></Slam>
+      <Slam at={3} from={1.2}><div style={{ background: kv ? RUBY : IVORY, color: kv ? "#FFFFFF" : NOIR, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 44 }}>{p.cta}</div></Slam>
       {p.ctaSub ? <Words at={6} text={p.ctaSub} style={{ fontFamily: SANS, fontSize: 36, color: fg, justifyContent: "center" }} /> : null}
       <AcuteRain f={f} />
     </AbsoluteFill>

@@ -141,7 +141,7 @@ const End: React.FC<{ p: ClipProps }> = ({ p }) => {
       <div style={{ width: 100, height: 2, background: GOLD, margin: "0 auto" }} />
       <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 24, letterSpacing: "0.18em", paddingLeft: "0.18em", color: RUBY, textAlign: "center" }}>THUÊ ĐẦM</div>
       <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 64, color: NOIR, textAlign: "center" }}>Mỗi lần, một chiếc mới.</div>
-      {p.cta ? <div style={{ background: NOIR, color: IVORY, borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 42, opacity: interpolate(f, [3, 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>{p.cta}</div> : null}
+      {p.cta ? <div style={{ background: RUBY, color: "#FFFFFF", borderRadius: 999, padding: "26px 52px", fontFamily: SANS, fontWeight: 600, fontSize: 42, opacity: interpolate(f, [3, 6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>{p.cta}</div> : null}
       {p.ctaSub ? <div style={{ fontFamily: SANS, fontSize: 34, color: NOIR, textAlign: "center", opacity: interpolate(f, [6, 9], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>{p.ctaSub}</div> : null}
       <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 30, color: "#7A5F3A" }}>cherie.io.vn</div>
     </AbsoluteFill>
