@@ -72,3 +72,11 @@ Ví dụ: `vi-du-kv-lat-gia.json` (lat-gia, kv, gach false, theKieu gon, theVao 
 - `ketVao`: "dap" cho khung kết: nút và chữ phụ hiện ngay frame 0, không trễ vài phách.
 - `ketVach`: false bỏ các vạch champagne trang trí rải khắp khung kết.
 Sửa thẳng: chữ `hookBig` của chon-1 tự thu cỡ để không vượt lề phải 180px (trước đây cố định 100px).
+
+## Biến thể thêm 31/10/2026 (Agent Kiểm lỗi, theo KHUON-ND003 vòng 8)
+
+Đều tuỳ chọn, bỏ trống thì dựng như cũ:
+- `chonLogo`: true (chon-1 có `chonNen`) cho logo CHÉRIE và nhãn bài hiện ở cảnh mở và cảnh chọn; chữ hook hạ xuống y 390 nên dùng `chonNen` từ 640.
+- `soVien`: true (chon-1) số 1-2-3 ở cảnh mở và cảnh chọn thành viên tròn Be Vietnam Pro đậm, đặt cao hơn thân váy, không còn là chữ Bodoni to dễ đọc nhầm thành chữ I.
+- `hookCo`: số px (chon-1) cỡ chữ tối đa của hookBig, mặc định 100; ví dụ 120. Vẫn tự thu nhỏ nếu vượt lề phải 180px.
+Sửa thẳng (mọi video): dòng "/ lượt 24 giờ" trong viên giá 34px (trước 28px); khối logo, câu kết và cherie.io.vn ở khung kết nâng lên 40px để dòng cherie.io.vn nằm trên vùng an toàn dưới 400px.

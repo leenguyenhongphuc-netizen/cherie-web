@@ -78,6 +78,10 @@ export type Reel2Props = {
   giaSo?: boolean; // chon-1: viên giá ở khung chọn có tiền tố "1 ·", "2 ·", "3 ·"
   ketVao?: "dap"; // khung kết: mọi nút và dòng chữ đập vào ngay frame 0, không trễ
   ketVach?: boolean; // false = bỏ các vạch champagne trang trí rải khắp khung kết
+  /* tuỳ chọn thêm 31/10/2026 (KHUON-ND003 vòng 8) */
+  chonLogo?: boolean; // chon-1 + chonNen: logo CHÉRIE và nhãn bài hiện ở cảnh mở và cảnh chọn (trước đây chỉ có ở các dải giữa)
+  soVien?: boolean; // chon-1: số 1-2-3 ở cảnh mở và cảnh chọn là viên tròn chữ Be Vietnam Pro đậm, đặt cao hơn thân váy, không còn là chữ Bodoni to dễ đọc nhầm là chữ I
+  hookCo?: number; // chon-1: cỡ chữ tối đa của hookBig (mặc định 100); tự thu nhỏ nếu vượt lề phải 180px
   cauTren?: boolean; // chon-1: mọi câu cảm giác lên phông phía trên (thẻ tên ở dưới), đỡ chồng hai thẻ ở vùng dưới
 };
 /* props của video đang dựng: các mảnh nhỏ đọc tuỳ chọn chung (flash, nhãn) */
@@ -191,7 +195,7 @@ const Tag: React.FC<{ d: Dress2; at?: number; dark?: boolean; big?: boolean }> =
   const vien = (
     <div style={{ display: "inline-flex", alignItems: "baseline", gap: 14, background: IVORY, color: kv ? RUBY : NOIR, borderRadius: 999, padding: gon ? "10px 28px" : "14px 34px", border: `1.5px solid ${CHAMP}` }}>
       <span style={{ fontFamily: SERIF, fontSize: gon ? 54 : 64, lineHeight: 1 }}>{d.gia}</span>
-      <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 28, color: NOIR }}>/ lượt 24 giờ</span>
+      <span style={{ fontFamily: SANS, fontWeight: 500, fontSize: 34, color: NOIR }}>/ lượt 24 giờ</span>
     </div>
   );
   return (
@@ -229,9 +233,9 @@ const Safe: React.FC<{ children: React.ReactNode; place?: "top" | "bottom" | "ce
   <div style={{ position: "absolute", left: 80, right: 180, ...(place === "top" ? { top: 340 } : place === "bottom" ? { bottom: 420 } : { top: 0, bottom: 0, display: "flex", flexDirection: "column", justifyContent: "center" }), ...style }}>{children}</div>
 );
 
-const Corner: React.FC<{ nguon?: string }> = ({ nguon }) => (
+const Corner: React.FC<{ nguon?: string; sang?: boolean }> = ({ nguon, sang }) => (
   <div style={{ position: "absolute", top: 250, left: 80, display: "flex", flexDirection: "column", gap: 8 }}>
-    <Wordmark size={26} />
+    <Wordmark size={26} color={sang ? NOIR : IVORY} />
     {CUR.nhan ? <div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 30, letterSpacing: "0.14em", color: KV() ? NOIR : CHAMP, ...(KV() ? { background: NUDE, borderRadius: 999, padding: "6px 18px", alignSelf: "flex-start" } : { textShadow: "0 1px 10px rgba(0,0,0,0.75)" }) }}>{CUR.nhan}</div> : null}
     {nguon ? <div style={{ fontFamily: SANS, fontSize: 22, color: IVORY, opacity: 0.8 }}>{nguon}</div> : null}
   </div>
@@ -342,7 +346,7 @@ const EndCard: React.FC<{ p: Reel2Props; dur: number }> = ({ p, dur }) => {
           );
         })}
       </div>
-      <div style={{ position: "absolute", top: 1030, left: 80, right: 80, display: "flex", flexDirection: "column", alignItems: "center", gap: 26 }}>
+      <div style={{ position: "absolute", top: 990, left: 80, right: 80, display: "flex", flexDirection: "column", alignItems: "center", gap: 26 }}>
         <Slam at={0}><Wordmark color={NOIR} size={52} /></Slam>
         <Slam at={0}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 72, color: NOIR }}>Mỗi lần, một chiếc mới.</div></Slam>
         <Slam at={p.ketVao === "dap" ? 0 : 3} from={1.2}>
@@ -432,7 +436,7 @@ const Panels: React.FC<{ p: Reel2Props; showPrice?: boolean }> = ({ p, showPrice
       <div style={{ position: "absolute", left: 60, right: 180, bottom: 420, display: "flex" }}>
         {p.dresses.slice(0, n).map((d, k) => (
           <div key={k} style={{ flex: 1, textAlign: "center" }}>
-            <Slam at={p.soNgay ? 0 : 4 + k * 3} from={1.5} style={{ transformOrigin: "center" }}><div style={{ fontFamily: SERIF, fontSize: 140, lineHeight: 1, color: IVORY }}>{k + 1}</div></Slam>
+            <Slam at={p.soNgay ? 0 : 4 + k * 3} from={1.5} style={{ transformOrigin: "center" }}>{p.soVien ? <div style={{ display: "inline-flex", width: 110, height: 110, borderRadius: 999, background: IVORY, color: NOIR, alignItems: "center", justifyContent: "center", fontFamily: SANS, fontWeight: 700, fontSize: 60, marginBottom: 120 }}>{k + 1}</div> : <div style={{ fontFamily: SERIF, fontSize: 140, lineHeight: 1, color: IVORY }}>{k + 1}</div>}</Slam>
             {showPrice ? <Slam at={8 + k * 4} style={{ transformOrigin: "center" }}><div style={{ display: "inline-block", background: IVORY, color: NOIR, borderRadius: 999, padding: "6px 18px", fontFamily: SERIF, fontSize: 40, marginTop: 8 }}>{p.giaSo ? `${k + 1} · ${d.gia}` : d.gia}</div></Slam> : null}
           </div>
         ))}
@@ -449,8 +453,9 @@ const chon1 = (p: Reel2Props): Seg[] => {
       <AbsoluteFill>
         <Panels p={p} />
         {(p.chonNen ?? 0) > 0 ? null : <Shade side="top" h={40} o={0.85} />}
-        <Safe place="top" style={{ top: (p.chonNen ?? 0) > 0 ? 300 : 260 }}>
-          <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: Math.min(100, Math.floor(820 / (Math.max(1, (p.hookBig || "").length) * 0.52))), lineHeight: 1.02, whiteSpace: "nowrap", color: FG() }}>{p.hookBig}</div></Slam>
+        {p.chonLogo && (p.chonNen ?? 0) > 0 ? <Corner sang={KV()} /> : null}
+        <Safe place="top" style={{ top: (p.chonNen ?? 0) > 0 ? (p.chonLogo ? 390 : 300) : 260 }}>
+          <Slam at={0}><div style={{ fontFamily: SERIF, fontSize: Math.min(p.hookCo ?? 100, Math.floor(820 / (Math.max(1, (p.hookBig || "").length) * 0.52))), lineHeight: 1.02, whiteSpace: "nowrap", color: FG() }}>{p.hookBig}</div></Slam>
           <Words at={0} text={p.hookTop} style={{ fontFamily: SANS, fontWeight: 500, fontSize: 48, color: FG(), marginTop: 16 }} />
         </Safe>
       </AbsoluteFill>
@@ -474,7 +479,8 @@ const chon1 = (p: Reel2Props): Seg[] => {
       <AbsoluteFill>
         <Panels p={p} showPrice />
         {(p.chonNen ?? 0) > 0 ? null : <Shade side="top" h={38} o={0.85} />}
-        <Safe place="top" style={{ top: (p.chonNen ?? 0) > 0 ? 300 : 260 }}>
+        {p.chonLogo && (p.chonNen ?? 0) > 0 ? <Corner sang={KV()} /> : null}
+        <Safe place="top" style={{ top: (p.chonNen ?? 0) > 0 ? (p.chonLogo ? 390 : 300) : 260 }}>
           <Slam at={2}><div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 96, lineHeight: 1.05, color: FG() }}>{p.hookSub ?? "Nàng chọn số mấy?"}</div></Slam>
         </Safe>
       </AbsoluteFill>
